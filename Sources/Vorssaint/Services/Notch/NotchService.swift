@@ -633,7 +633,7 @@ final class NotchService: ObservableObject {
 
     func accept(_ pasteboard: NSPasteboard) -> Bool {
         guard canAcceptFileDrop else { return false }
-        let accepted = ShelfService.shared.accept(pasteboard: pasteboard)
+        let accepted = ShelfService.shared.acceptDrop(pasteboard: pasteboard)
         if accepted { heldDrag = false; dragPlaceholder = false; open(.files) }
         return accepted
     }

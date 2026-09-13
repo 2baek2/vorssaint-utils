@@ -52,6 +52,21 @@ def main():
           + declaration(shelf, "    func finishInternalDrag(")
           + declaration(shelf, "    func completeInternalDrag(")
           + "}\n}\n")
+    notch = "Sources/Vorssaint/Services/Notch/NotchService.swift"
+    canvas = "Sources/Vorssaint/Services/Notch/NotchWindowHost.swift"
+    write("ShelfDropRouting.swift", "import AppKit\n\nextension ShelfDropRoutingContract {\n"
+          + declaration(canvas, "struct NotchFileDropActions {")
+          + "final class ShelfService: ShelfState {\nstatic var shared = ShelfService()\n"
+          + declaration(shelf, "    func acceptDrop(pasteboard:")
+          + declaration(shelf, "    func accept(draggingInfo:")
+          + "}\nfinal class Notch: NotchState {\n"
+          + declaration(notch, "    var canAcceptFileDrop:")
+          + declaration(notch, "    func accept(_ pasteboard:")
+          + "}\nfinal class Canvas {\nvar acceptingDrag = false\n"
+          + "var dropActions: NotchFileDropActions?\n"
+          + declaration(canvas, "    func beginDrop(")
+          + declaration(canvas, "    func finishDrop(")
+          + "}\n}\n")
     service = "Sources/Vorssaint/Services/QuickTools/QuickLauncherService.swift"
     view = "Sources/Vorssaint/UI/QuickLauncher/QuickLauncherView.swift"
     panel_layout = (ROOT / "Sources/Vorssaint/UI/MenuPanel/PanelLayout.swift").read_text()
