@@ -7,7 +7,7 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-Dynamic Island puts music and everyday controls on its home surface with configurable focus cycles, alongside a visual settings editor, draggable shortcuts, predictable opening, safe keyboard navigation, responsive downloads, searchable sections, camera and file tools. App Switcher gains smoother opening, display filtering and better focus; other improvements cover shortcuts, attachment delivery, capture previews, menu bar recovery, incoming calls, cleaning and recording synchronization.
+Dynamic Island puts music and everyday controls on its home surface with configurable focus cycles, alongside a visual settings editor, draggable shortcuts, predictable opening, safe keyboard navigation, responsive downloads, searchable sections, camera and file tools. App Switcher gains smoother opening, display filtering and better focus; other improvements cover shortcuts, attachment delivery, capture previews, menu bar recovery, incoming calls, cleaning, uninstall results and recording synchronization.
 
 ### Added
 - Shelf accepts attachments dragged from other apps, preserving complete files and original names. Thanks to @Borisserz.
@@ -21,6 +21,7 @@ Dynamic Island puts music and everyday controls on its home surface with configu
 - The App Switcher opens more smoothly when many windows are open. Thanks to @bebricoOOOOOOf.
 
 ### Fixed
+- Uninstaller reports completed removals accurately, counts recovered space once and keeps real failures visible. Thanks to @Borisserz.
 - Screen recordings keep video, system sound and microphone audio aligned through pauses, with no blank opening. Thanks to @EugeneCarldotme and @fakepooh.
 - Menu bar icon recovery waits for placement, preserves full-size content and avoids overlapping attempts. Thanks to @Borisserz.
 - Panels and App Switcher stay open when typing with the Accessibility Keyboard, including the first use. Thanks to @fermincasagrande.
