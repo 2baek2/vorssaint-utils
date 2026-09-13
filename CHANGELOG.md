@@ -7,9 +7,10 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-App Switcher opens more smoothly, keeps more apps available, filters by display, excludes hidden helper windows and preserves focus; on-screen keyboard input keeps panels open. Brightness, Screenshot and Scratchpad gain shortcuts, Screenshot gains preview focus, menu bar recovery waits for placement, its panel keeps a continuous background, Cleaner protects customizations, Quit on close preserves incoming calls, and screen recordings keep video and audio aligned.
+Dynamic Island puts music and everyday controls on its home surface with configurable focus cycles, alongside a visual settings editor, draggable shortcuts, predictable opening, safe keyboard navigation, responsive downloads, searchable sections, camera and file tools. App Switcher gains smoother opening, display filtering and better focus; other improvements cover shortcuts, capture previews, menu bar recovery, incoming calls, cleaning and recording synchronization.
 
 ### Added
+- Optional Dynamic Island puts playback, sound, brightness, configurable focus cycles and calendar first, with customizable shortcuts, notifications, downloads and file tools.
 - Display brightness gains optional custom shortcuts for the primary display or the display under the pointer. Thanks to @EugeneCarldotme.
 - App Switcher can show only windows on the display under the pointer, staying closed on empty displays. Thanks to @EugeneCarldotme.
 - Scratchpad tabs can be created with Command-T and closed with Command-W, keeping confirmation for notes with text. Thanks to @Borisserz.
