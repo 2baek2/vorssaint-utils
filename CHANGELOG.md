@@ -7,11 +7,11 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-Dynamic Island puts music and everyday controls on its home surface with configurable focus cycles, alongside a visual settings editor, draggable shortcuts, predictable opening, safe keyboard navigation, responsive downloads, searchable sections, camera and file tools. App Switcher gains smoother opening, steadier previews, display filtering and better focus; other improvements cover clipboard reliability, update checks, shortcuts, attachment delivery, capture visibility and previews, power panel readability, menu bar recovery, incoming calls, cleaning safeguards, uninstall results, fan control and recording synchronization.
+Dynamic Island prioritizes music apps and puts everyday controls on its home surface with configurable focus cycles, alongside a visual settings editor, draggable shortcuts, predictable opening, safe keyboard navigation, responsive downloads, searchable sections, camera and file tools. App Switcher gains smoother opening, steadier previews, display filtering and better focus; other improvements cover clipboard reliability, update checks, shortcuts, attachment delivery, capture visibility and previews, power panel readability, menu bar recovery, incoming calls, cleaning safeguards, uninstall results, fan control and recording synchronization.
 
 ### Added
 - Shelf accepts attachments dragged from other apps, preserving complete files and original names. Thanks to @Borisserz.
-- Optional Dynamic Island puts playback, sound, brightness, configurable focus cycles and calendar first, with customizable shortcuts, notifications, downloads and file tools.
+- Optional Dynamic Island prioritizes music apps and brings playback, sound, brightness, focus cycles, calendar, shortcuts, notifications, downloads and file tools together.
 - Display brightness gains optional custom shortcuts for the primary display or the display under the pointer. Thanks to @EugeneCarldotme.
 - App Switcher can show only windows on the display under the pointer, staying closed on empty displays. Thanks to @EugeneCarldotme.
 - Scratchpad tabs can be created with Command-T and closed with Command-W, keeping confirmation for notes with text. Thanks to @Borisserz.

@@ -66,6 +66,12 @@ def main():
           + declaration(updates, "    private func onlineCatalogFindings(").replace("private func", "func", 1).replace("Date()", "self.clock.now()")
           + declaration(updates, "    private func onlineResult(").replace("private func", "func", 1)
           + "}\n}\n")
+    playback_adapter = "Sources/NowPlayingAdapter/NowPlayingSelection.swift"
+    write("NotchPlaybackRouting.swift", "import Foundation\nimport ObjectiveC\nextension NotchPlaybackRoutingContract {\n"
+          + declaration(playback_adapter, "    static func readInfo(")
+          + declaration(playback_adapter, "    static func supportedCommands(")
+          + declaration(playback_adapter, "    static func send(")
+          + declaration(playback_adapter, "    private static func makeTarget(").replace("private static", "static", 1) + "}\n")
     write("NotchActivationButton.swift", "import AppKit\n"
           + declaration("Sources/Vorssaint/Services/Notch/NotchWindowHost.swift", "final class NotchActivationButton:"))
     shelf = "Sources/Vorssaint/Services/Shelf/ShelfService.swift"
