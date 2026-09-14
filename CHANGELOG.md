@@ -7,7 +7,7 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-Dynamic Island puts music and everyday controls on its home surface with configurable focus cycles, alongside a visual settings editor, draggable shortcuts, predictable opening, safe keyboard navigation, responsive downloads, searchable sections, camera and file tools. App Switcher gains smoother opening, steadier previews, display filtering and better focus; other improvements cover update checks, shortcuts, attachment delivery, capture visibility and previews, power panel readability, menu bar recovery, incoming calls, cleaning safeguards, uninstall results and recording synchronization.
+Dynamic Island puts music and everyday controls on its home surface with configurable focus cycles, alongside a visual settings editor, draggable shortcuts, predictable opening, safe keyboard navigation, responsive downloads, searchable sections, camera and file tools. App Switcher gains smoother opening, steadier previews, display filtering and better focus; other improvements cover update checks, shortcuts, attachment delivery, capture visibility and previews, power panel readability, menu bar recovery, incoming calls, cleaning safeguards, uninstall results, fan control and recording synchronization.
 
 ### Added
 - Shelf accepts attachments dragged from other apps, preserving complete files and original names. Thanks to @Borisserz.
@@ -21,6 +21,7 @@ Dynamic Island puts music and everyday controls on its home surface with configu
 - The App Switcher opens more smoothly when many windows are open. Thanks to @bebricoOOOOOOf.
 
 ### Fixed
+- Fan Control keeps trying to take over stopped fans on Macs that lack the firmware unlock key. Thanks to @Yash121l.
 - Power keeps the system reading legible beside its graph while editing the panel. Thanks to @COMEBACKISREAL.
 - Screenshots respect editor and pinned-image visibility when switching capture tools, while recordings keep capture windows hidden. Thanks to @anandghegde.
 - App Updates clears missing-source warnings only when the catalog can verify the app, preserving incomplete checks otherwise. Thanks to @iltonandrew.
