@@ -67,6 +67,27 @@ def main():
           + declaration(canvas, "    func beginDrop(")
           + declaration(canvas, "    func finishDrop(")
           + "}\n}\n")
+    switcher = "Sources/Vorssaint/UI/Switcher/SwitcherView.swift"
+    switcher_service = "Sources/Vorssaint/Services/Switcher/AppSwitcher.swift"
+    write("SwitcherScroll.swift", "import AppKit\nimport SwiftUI\n"
+          + "extension SwitcherScrollContract {\nstruct Strip: View {\n"
+          + "@ObservedObject var switcher: Model\n"
+          + "var iconRowContentWidth: CGFloat { switcher.iconRowLayout.contentWidth(simpleMode: true, windowRow: false) }\n"
+          + "var body: some View {\nif selectedWindow != nil {\nlet appWindows = selectedAppWindows\n"
+          + "if switcher.simple {\nGroup {\n"
+          + declaration(switcher, "                ScrollViewReader { proxy in")
+          + "}\n.frame(width: iconRowContentWidth - 2 * SwitcherIconRowLayout.simpleTitlePanelPadding, "
+          + "height: 25 * SwitcherIconRowLayout.scale)\n} else {\n"
+          + declaration(switcher, "                    ScrollViewReader { proxy in")
+          + "}\n}\n}\n"
+          + declaration(switcher, "    private var selectedWindow:")
+          + declaration(switcher, "    private var selectedAppWindows:")
+          + declaration(switcher, "    private func revealSelection(")
+          + "}\n}\nextension SwitcherScrollContract.Model {\n"
+          + "func search(_ query: String) { searchQuery = query; applySearchFilter(preferredItemID: selectedItemID) }\n"
+          + declaration(switcher_service, "    private var selectedItemID:")
+          + declaration(switcher_service, "    private func applySearchFilter(")
+          + "}\n")
     service = "Sources/Vorssaint/Services/QuickTools/QuickLauncherService.swift"
     view = "Sources/Vorssaint/UI/QuickLauncher/QuickLauncherView.swift"
     panel_layout = (ROOT / "Sources/Vorssaint/UI/MenuPanel/PanelLayout.swift").read_text()
