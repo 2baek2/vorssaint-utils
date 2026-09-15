@@ -629,6 +629,7 @@ struct NotchGeometry: Equatable {
     var compactSideRoom: CGFloat?
     var quickAccessBottomInset: CGFloat = 0
     private var allowsActivityFooter = true
+    private var minimumCompactWidth: CGFloat = 0
 
     init(screen: CGRect, safeAreaTop: CGFloat, cameraWidth: CGFloat, layout: NotchSize = .compact,
          menuBarHeight: CGFloat = 24, compactSideRoom: CGFloat? = nil,
@@ -681,11 +682,17 @@ struct NotchGeometry: Equatable {
     func compactTimerGeometry(showsDownloads: Bool) -> NotchGeometry {
         var compact = self
         let room = compactSideRoom ?? 0
-        compact.compactSideRoom = room.isFinite ? min(showsDownloads ? 64 : 52, max(0, room)) : 0
+        let wing: CGFloat = showsDownloads ? 80 : 72
+        compact.compactSideRoom = room.isFinite && room >= 72 ? min(wing, room) : 0
+        // A wider simulated camera must not consume the timer's text budget.
+        compact.minimumCompactWidth = cameraWidth + wing * 2
+        // Menu changes, including full-screen transitions, must not push the
+        // timer below the camera. Its expanded view remains available by click.
+        compact.allowsActivityFooter = false
         return compact
     }
     var musicStrip: CGSize {
-        let preferred = min(max(layout == .spacious ? 520 : 440, cameraWidth + 88), screen.width - 24)
+        let preferred = min(max(layout == .spacious ? 520 : 440, cameraWidth + 88, minimumCompactWidth), screen.width - 24)
         let measuredRoom = compactSideRoom ?? 0
         let room = measuredRoom.isFinite ? max(0, measuredRoom).rounded(.down) : 0
         let wings = min(max(0, preferred - cameraWidth), room * 2)

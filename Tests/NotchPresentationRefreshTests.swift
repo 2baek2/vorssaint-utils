@@ -187,7 +187,9 @@ enum NotchPresentationRefreshContract {
         physical.expanded = false
         physical.compactActivityIsVisible = true
         physical.refreshPresentation(animated: false)
-        expect(physical.panel?.isVisible == true && physical.compactActivityGeometry.compactActivityUsesFooter,
-               "an active timer on a physical camera keeps its footer without a menu measurement")
+        expect(physical.panel?.isVisible == true && !physical.compactActivityGeometry.compactActivityUsesFooter
+               && physical.compactActivityGeometry.compactActivityWingWidth == 0
+               && physical.windowHost?.targetSize.height == physical.geometry.menuBarHeight,
+               "an active timer on a physical camera retracts its wings and stays at menu-bar height without a menu measurement")
     }
 }
