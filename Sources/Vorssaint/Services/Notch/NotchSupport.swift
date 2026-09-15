@@ -615,6 +615,38 @@ enum NotchSupport {
     }
 }
 
+/// A hidden menu bar retains only a measurement from the same display and mode.
+/// Until that display has a visible bar, use the native fallback rather than
+/// borrowing the application's main-menu height from another display.
+struct NotchMenuBarMeasurements {
+    private struct Reading {
+        let size: CGSize
+        let scale: CGFloat
+        let height: CGFloat
+    }
+    private var readings: [UInt32: Reading] = [:]
+
+    mutating func retainDisplays(_ ids: [UInt32]) {
+        readings = readings.filter { ids.contains($0.key) }
+    }
+
+    mutating func height(displayID: UInt32, frame: CGRect, visibleTop: CGFloat,
+                         scale: CGFloat, statusBarThickness: CGFloat) -> CGFloat {
+        let range: ClosedRange<CGFloat> = 16...64
+        let gap = frame.maxY - visibleTop
+        let canRemember = displayID != 0 && scale.isFinite && scale > 0
+        if let previous = readings[displayID], previous.size != frame.size || previous.scale != scale {
+            readings[displayID] = nil
+        }
+        if gap.isFinite, range.contains(gap) {
+            if canRemember { readings[displayID] = Reading(size: frame.size, scale: scale, height: gap) }
+            return gap
+        }
+        if canRemember, let previous = readings[displayID] { return previous.height }
+        return statusBarThickness.isFinite && range.contains(statusBarThickness) ? statusBarThickness : 24
+    }
+}
+
 /// Screen coordinates stay in points, including displays to the left or above
 /// the primary display. No model name or pixel density is assumed.
 struct NotchGeometry: Equatable {
@@ -679,6 +711,14 @@ struct NotchGeometry: Equatable {
         return compact
     }
     var musicCameraGap: CGFloat { cameraWidth }
+    var compactMusicLabelInset: CGFloat {
+        let height = compactActivityContentHeight
+        let shoulder = min(NotchLayout.shoulder, height * 0.28)
+        let bottom = min(28, height / 2)
+        // Wings normally provide this room. When menus hide them, the center
+        // text must also clear the silhouette's shoulders and bottom corners.
+        return max(4, shoulder + bottom + 4 - compactActivityWingWidth)
+    }
     func compactTimerGeometry(showsDownloads: Bool) -> NotchGeometry {
         var compact = self
         let room = compactSideRoom ?? 0

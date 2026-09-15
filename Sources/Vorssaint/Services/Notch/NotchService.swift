@@ -86,6 +86,7 @@ final class NotchService: ObservableObject {
     private var menuSpaceTimer: Timer?
     private var menuSpaceReading = false
     private var menuSpaceGeneration = 0
+    private var menuBarMeasurements = NotchMenuBarMeasurements()
     private var screenRefreshWork: DispatchWorkItem?
     private let menuSpaceQueue = DispatchQueue(label: "com.vorssaint.notch-menu-space", qos: .utility)
 
@@ -946,6 +947,7 @@ final class NotchService: ObservableObject {
 
     private func updateScreen() {
         let screens = NSScreen.screens
+        menuBarMeasurements.retainDisplays(screens.map(\.notchDisplayID))
         let builtIn = screens.map { CGDisplayIsBuiltin($0.notchDisplayID) != 0 }
         let index = NotchSupport.screenIndex(
             preference: NotchDisplay(rawValue: UserDefaults.standard.string(
@@ -961,7 +963,10 @@ final class NotchService: ObservableObject {
         var next = NotchGeometry(screen: screen.frame, safeAreaTop: screen.safeAreaInsets.top,
                                  cameraWidth: cameraWidth,
                                  layout: NotchSize(rawValue: UserDefaults.standard.string(forKey: DefaultsKey.notchSize) ?? "") ?? .compact,
-                                 menuBarHeight: NSStatusBar.system.thickness,
+                                 menuBarHeight: menuBarMeasurements.height(
+                                    displayID: screen.notchDisplayID, frame: screen.frame,
+                                    visibleTop: screen.visibleFrame.maxY, scale: screen.backingScaleFactor,
+                                    statusBarThickness: NSStatusBar.system.thickness),
                                  customWidth: UserDefaults.standard.double(forKey: DefaultsKey.notchCustomWidth),
                                  customHeight: UserDefaults.standard.double(forKey: DefaultsKey.notchCustomHeight))
         if next.hasSameMenuBar(as: geometry) { next.compactSideRoom = geometry.compactSideRoom }
