@@ -17,6 +17,21 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 
 MUTATIONS = [
+    ("Nothing loses its music gate", "core", "Sources/Vorssaint/Services/Notch/NotchSupport.swift",
+     "            && idleContent(in: defaults) != .none\n", "",
+     "selecting Nothing retracts already visible music and stops its reader with cached playback still present"),
+    ("resting music bypasses automatic opt-out", "core", "Sources/Vorssaint/Services/Notch/NotchSupport.swift",
+     "return choice == .music && !showsMusicActivity(isPlaying: isPlaying, in: defaults) ? .none : choice",
+     "return choice == .music && !isPlaying ? .none : choice",
+     "disabled automatic music stops the reader even when resting content is Music"),
+    ("resting music retains a disabled reader", "core", "Sources/Vorssaint/Services/Notch/NotchService.swift",
+     "            || NotchSupport.watchesMusicActivity())",
+     "            || NotchSupport.idleContent() == .music || NotchSupport.watchesMusicActivity())",
+     "disabled automatic music stops the reader even when resting content is Music"),
+    ("closing music retains its on-demand reader", "core", "Sources/Vorssaint/Services/Notch/NotchService.swift",
+     "        removeEventMonitors()\n        syncVisibleConsumers()\n    }\n\n    func toggle()",
+     "        removeEventMonitors()\n    }\n\n    func toggle()",
+     "closing manually opened controls stops the reader and never leaves a music strip behind"),
     ("recording metadata rebases after startup", "recording", "Sources/Vorssaint/Services/Recorder/RecorderSupport.swift",
      "return timeline.eventTime(time, since: origin)",
      "return timeline.eventTime(time, since: origin + 0.3)",

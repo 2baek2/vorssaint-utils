@@ -129,6 +129,20 @@ def main():
           + "}\n}\n")
     notch = "Sources/Vorssaint/Services/Notch/NotchService.swift"
     canvas = "Sources/Vorssaint/Services/Notch/NotchWindowHost.swift"
+    music_visibility = "".join(declaration(notch, prefix).replace("    private ", "    ", 1) for prefix in [
+        "    var idleContent:", "    var hasMusicActivity:", "    var compactActivity:",
+        "    var compactActivityGeometry:", "    var surfaceSize:", "    func collapse(",
+        "    private func syncVisibleConsumers(", "    private func releaseMonitor("])
+    for call in ["NotchSupport.controls", "NotchSupport.watchesMusicActivity", "NotchSupport.idleContent"]:
+        music_visibility = music_visibility.replace(call + "()", call + "(in: ReviewDefaults.current)")
+    music_visibility = music_visibility.replace("playback?.isPlaying == true)",
+                                                "playback?.isPlaying == true, in: ReviewDefaults.current)")
+    music_visibility = music_visibility.replace("captureControls: captureControls != nil)",
+                                                "captureControls: captureControls != nil, in: ReviewDefaults.current)")
+    music_visibility = music_visibility.replace("AppFeature.monitorDisk.isAvailable",
+                                                "AppFeature.monitorDisk.isAvailable(in: ReviewDefaults.current)")
+    write("NotchMusicVisibility.swift", "import Foundation\nextension NotchMusicVisibilityTests {\n"
+          + "final class Service: State {\n" + music_visibility + "}\n}\n")
     write("NotchScreenEdgeClicks.swift", "import AppKit\nextension NotchScreenEdgeClickTests {\nfinal class Service: State {\n"
           + "func open() { openings += 1; expanded = true; syncScreenEdgeClicks() }\n"
           + "".join(declaration(notch, prefix).replace("    private ", "    ", 1) for prefix in [

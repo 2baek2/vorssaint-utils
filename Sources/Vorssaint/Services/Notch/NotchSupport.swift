@@ -494,6 +494,7 @@ enum NotchSupport {
 
     static func watchesMusicActivity(in defaults: UserDefaults = .standard) -> Bool {
         isEnabled(in: defaults) && modules(in: defaults).contains(.music)
+            && idleContent(in: defaults) != .none
             && (defaults.object(forKey: DefaultsKey.notchShowPlayingMusic) as? Bool ?? true)
     }
 
@@ -514,7 +515,7 @@ enum NotchSupport {
 
     static func visibleIdleContent(isPlaying: Bool, in defaults: UserDefaults = .standard) -> NotchIdleContent {
         let choice = idleContent(in: defaults)
-        return choice == .music && !isPlaying ? .none : choice
+        return choice == .music && !showsMusicActivity(isPlaying: isPlaying, in: defaults) ? .none : choice
     }
 
     static func controls(in defaults: UserDefaults = .standard) -> [NotchControlItem] {

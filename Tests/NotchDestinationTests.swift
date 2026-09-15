@@ -85,6 +85,20 @@ enum NotchDestinationContract {
         for (key, value) in Defaults.registeredDefaults where key.hasPrefix("notch") { defaults.set(value, forKey: key) }
         for feature in AppFeature.allCases { defaults.set(true, forKey: feature.availabilityKey) }
         defaults.set(true, forKey: DefaultsKey.notchEnabled)
+        for resting in [NotchIdleContent.none, .music] {
+            defaults.set(resting.rawValue, forKey: DefaultsKey.notchIdleContent)
+            defaults.set(false, forKey: DefaultsKey.notchShowPlayingMusic)
+            let service = Service()
+            service.open(.music)
+            expect(service.expanded && service.selected == .music && service.panel?.acceptsKeyFocus == true,
+                   "hiding automatic music preserves explicit opening of its controls")
+            service.open(.controls)
+            expect(service.expanded && service.selected == .controls
+                   && NotchSupport.controls(in: defaults).contains(.music),
+                   "hiding automatic music preserves playback controls on the island's home page")
+        }
+        defaults.set(NotchIdleContent.music.rawValue, forKey: DefaultsKey.notchIdleContent)
+        defaults.set(true, forKey: DefaultsKey.notchShowPlayingMusic)
         let families: [(MetricDetailKind, AppFeature)] = [
             (.cpu, .monitorCPU), (.gpu, .monitorGPU), (.memory, .monitorMemory),
             (.network, .monitorNetwork), (.disk, .monitorDisk),

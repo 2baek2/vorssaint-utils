@@ -1319,7 +1319,7 @@ final class NotchService: ObservableObject {
         }
         let musicWanted = modules.contains(.music) && ((expanded && (selected == .music || (selected == .controls && NotchSupport.controls().contains(.music)))
             && !showingAppPanel && !showingSections)
-            || NotchSupport.idleContent() == .music || NotchSupport.watchesMusicActivity())
+            || NotchSupport.watchesMusicActivity())
         if musicWanted { NotchMusicService.shared.start() } else { NotchMusicService.shared.stop() }
         let needs = expanded && selected == .system && selectedMetric == nil && modules.contains(.system) && !showingAppPanel && !showingSections
         var detailNeeds = expanded && !showingSections ? selectedMetric?.monitorNeeds ?? .none : .none

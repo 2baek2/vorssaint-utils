@@ -187,6 +187,7 @@ enum NotchTests {
         NotchPresentationRefreshContract.run(expect: expect)
         NotchScreenRefreshContract.run(expect: expect)
         NotchDestinationContract.run(expect: expect)
+        NotchMusicVisibilityTests.run(expect: expect)
         NotchCaptureKeyboardTests.run(expect: expect)
         NotchDownloadProgressTests.run(expect: expect)
         NotchSliderEditingTests.run(expect: expect)
@@ -300,10 +301,14 @@ enum NotchTests {
         expect(!NotchSupport.showsMusicActivity(isPlaying: true, in: defaults), "automatic music presentation can be disabled")
         defaults.set(NotchIdleContent.music.rawValue, forKey: DefaultsKey.notchIdleContent)
         expect(NotchSupport.visibleIdleContent(isPlaying: false, in: defaults) == .none
-               && NotchSupport.visibleIdleContent(isPlaying: true, in: defaults) == .music,
-               "explicit idle music has no empty wings while stopped and returns on playback even with automatic music disabled")
+               && NotchSupport.visibleIdleContent(isPlaying: true, in: defaults) == .none,
+               "idle music cannot bypass disabled automatic music presentation")
         expect(NotchSupport.idleContent(in: defaults) == .music,
-               "hiding stopped idle music preserves the choice that keeps its playback observer available")
+               "disabling automatic music preserves the user's saved resting choice")
+        defaults.set(true, forKey: DefaultsKey.notchShowPlayingMusic)
+        expect(NotchSupport.visibleIdleContent(isPlaying: false, in: defaults) == .none
+               && NotchSupport.visibleIdleContent(isPlaying: true, in: defaults) == .music,
+               "re-enabling automatic music restores the selected music only during playback")
         let idleGeometry = NotchGeometry(screen: CGRect(x: 0, y: 0, width: 1470, height: 956),
                                         safeAreaTop: 32, cameraWidth: 180, compactSideRoom: 100)
         expect(idleGeometry.restingSize(showsContent: NotchSupport.visibleIdleContent(isPlaying: false, in: defaults) != .none)
@@ -311,14 +316,31 @@ enum NotchTests {
                "stopped idle music shrinks to the physical camera without reserving empty side space")
         defaults.set(NotchIdleContent.none.rawValue, forKey: DefaultsKey.notchIdleContent)
         defaults.set(true, forKey: DefaultsKey.notchShowPlayingMusic)
+        expect(!NotchSupport.watchesMusicActivity(in: defaults)
+               && !NotchSupport.showsMusicActivity(isPlaying: true, in: defaults)
+               && NotchSupport.visibleIdleContent(isPlaying: true, in: defaults) == .none,
+               "Nothing at rest suppresses playing music and its background observer without disabling the island")
+        expect(NotchSupport.isEnabled(in: defaults) && NotchSupport.modules(in: defaults).contains(.music),
+               "Nothing at rest keeps the island and its on-demand music section available")
+        defaults.set(NotchIdleContent.music.rawValue, forKey: DefaultsKey.notchIdleContent)
         defaults.set("music", forKey: DefaultsKey.notchHiddenModules)
-        expect(!NotchSupport.watchesMusicActivity(in: defaults), "hidden music does not keep an activity observer")
+        expect(!NotchSupport.watchesMusicActivity(in: defaults)
+               && NotchSupport.visibleIdleContent(isPlaying: true, in: defaults) == .none,
+               "hidden music cannot keep an activity observer or resting content")
         defaults.set("", forKey: DefaultsKey.notchHiddenModules)
+        defaults.set(NotchIdleContent.none.rawValue, forKey: DefaultsKey.notchIdleContent)
         defaults.set(true, forKey: DefaultsKey.notchMusicActivity)
-        expect(NotchSupport.idleContent(in: defaults) == .none, "legacy music preference cannot populate a newly empty idle surface")
+        expect(NotchSupport.idleContent(in: defaults) == .none
+               && !NotchSupport.showsMusicActivity(isPlaying: true, in: defaults),
+               "legacy music preference cannot populate a newly empty idle surface")
         defaults.set(NotchIdleContent.battery.rawValue, forKey: DefaultsKey.notchIdleContent)
-        expect(NotchSupport.visibleIdleContent(isPlaying: false, in: defaults) == .battery,
-               "idle battery remains an independent explicit choice when music is stopped")
+        expect(NotchSupport.visibleIdleContent(isPlaying: false, in: defaults) == .battery
+               && NotchSupport.showsMusicActivity(isPlaying: true, in: defaults),
+               "battery at rest preserves automatic music while playing")
+        defaults.set(false, forKey: DefaultsKey.notchShowPlayingMusic)
+        expect(NotchSupport.visibleIdleContent(isPlaying: true, in: defaults) == .battery
+               && !NotchSupport.showsMusicActivity(isPlaying: true, in: defaults),
+               "disabling automatic music leaves the selected battery visible during playback")
         defaults.set(false, forKey: AppFeature.monitorPower.availabilityKey)
         expect(NotchSupport.idleContent(in: defaults) == .none, "unavailable battery cannot appear while idle")
         defaults.set(true, forKey: AppFeature.monitorPower.availabilityKey)
