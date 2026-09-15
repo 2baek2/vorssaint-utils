@@ -7,7 +7,7 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-Dynamic Island responds sooner to the pointer, keeps music hidden when requested, fits each display's menu bar and shows track names on screens without a camera cutout. Longer timers show hours and minutes, with better spacing and stable placement beside the camera.
+Dynamic Island responds sooner, respects music visibility, fits each display's menu bar and improves timer spacing and duration labels. Screen recordings handle audio changes more reliably.
 
 ### Changed
 - Dynamic Island opens and closes sooner on hover, without extra pauses when moving between its controls.
@@ -16,6 +16,7 @@ Dynamic Island responds sooner to the pointer, keeps music hidden when requested
 - Dynamic Island follows each display's menu bar height and shows track names on screens without a camera cutout. Thanks to @ruvelro.
 
 ### Fixed
+- Screen recordings no longer fail to save when microphone or system audio changes format during recording.
 - Dynamic Island hides playing music when At rest is set to Nothing or automatic music is disabled, while keeping controls available on demand.
 - Dynamic Island simulates a camera cutout within the menu bar on displays without one, preserving its shape and expansion. Thanks to @Yahddyyp.
 
