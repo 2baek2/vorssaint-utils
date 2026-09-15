@@ -183,6 +183,7 @@ enum NotchTests {
         menuSpaceReuseContracts(expect: expect)
         menuBarHeightContracts(expect: expect)
         musicLabelContracts(expect: expect)
+        NotchHoverTests.run(expect: expect)
         NotchScreenEdgeClickTests.run(expect: expect)
         NotchPresentationRefreshContract.run(expect: expect)
         NotchScreenRefreshContract.run(expect: expect)
