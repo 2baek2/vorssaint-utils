@@ -17,6 +17,20 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 
 MUTATIONS = [
+    ("output switches reuse another device's volume baseline", "core", "Sources/Vorssaint/Services/Notch/NotchService.swift",
+     "                self.volumeBaseline = nil\n                self.muteBaseline = nil\n", "",
+     "switching output never replaces its connection notice with stored volume or mute"),
+    ("volume observation reads partially published controls", "core", "Sources/Vorssaint/Services/Notch/NotchService.swift",
+     ".receive(on: DispatchQueue.main)\n            .sink { [weak self, weak mixer] _ in",
+     ".sink { [weak self, weak mixer] _ in",
+     "switching output never replaces its connection notice with stored volume or mute"),
+    ("device alerts return to the fixed level width", "core", "Sources/Vorssaint/Services/Notch/NotchService.swift",
+     "return min(240, max(112, ceil(max(leading + 18 + 8, trailing)) + 32))", "return 112",
+     "power and accessory labels fit beside their icon without truncation"),
+    ("device alert window ignores its content width", "core", "Sources/Vorssaint/Services/Notch/NotchService.swift",
+     "if let notice { return geometry.noticeSize(wingWidth: notice.preferredWingWidth) }",
+     "if notice != nil { return geometry.notice }",
+     "a device notice widens the actual presentation beyond the compact level indicator"),
     ("Nothing loses its music gate", "core", "Sources/Vorssaint/Services/Notch/NotchSupport.swift",
      "            && idleContent(in: defaults) != .none\n", "",
      "selecting Nothing retracts already visible music and stops its reader with cached playback still present"),

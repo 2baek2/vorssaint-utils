@@ -7,9 +7,55 @@ import SwiftUI
 import QuartzCore
 
 /// Exercises the production window host without touching preferences, files,
-/// clipboard, keyboard input or hardware controls. The test window is invisible.
+/// clipboard, keyboard input or hardware controls. Tests keep the window
+/// invisible; the separate, explicitly requested notice preview is visible.
 enum NotchPresentationProbe {
+    /// An explicitly requested preview uses the real notice and animation host,
+    /// with no connection, audio adjustment or preference change.
+    private static func previewNoticeAndExit(title: String) -> Never {
+        let app = NSApplication.shared
+        app.setActivationPolicy(.prohibited)
+        guard let screen = NSScreen.main else { print("NOTCH PREVIEW FAILED: no display"); exit(1) }
+        let cameraWidth = screen.auxiliaryTopRightArea.flatMap { right in
+            screen.auxiliaryTopLeftArea.map { max(0, right.minX - $0.maxX) }
+        } ?? 0
+        var measurements = NotchMenuBarMeasurements()
+        let geometry = NotchGeometry(screen: screen.frame, safeAreaTop: screen.safeAreaInsets.top,
+            cameraWidth: cameraWidth, menuBarHeight: measurements.height(
+                displayID: screen.notchDisplayID, frame: screen.frame, visibleTop: screen.visibleFrame.maxY,
+                scale: screen.backingScaleFactor, statusBarThickness: NSStatusBar.system.thickness))
+        let notice = NotchNotice(event: .accessory, title: title,
+                                detail: FeatureStrings.notchActivities(L10n.shared.language).connected,
+                                symbol: NotchAccessorySupport.symbol(for: .audio, name: title))
+        let size = geometry.noticeSize(wingWidth: notice.preferredWingWidth)
+        let content = NotchNoticeView(notice: notice, geometry: geometry)
+            .frame(width: size.width, height: size.height).background(.black)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        let idle = geometry.restingSize(showsContent: false)
+        let host = NotchWindowHost(content: AnyView(content), geometry: geometry, size: idle)
+        host.panel.ignoresMouseEvents = true
+        host.panel.title = "Connection preview"
+        host.panel.orderFrontRegardless()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            host.present(size: size, geometry: geometry, animated: true, transitionContent: .reveal)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1 + NotchEvent.accessory.duration) {
+            host.present(size: idle, geometry: geometry, animated: true, transitionContent: .dismiss)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2 + NotchEvent.accessory.duration) {
+            host.close()
+            print("NOTCH NOTICE PREVIEW OK")
+            exit(0)
+        }
+        app.run()
+        exit(1)
+    }
+
     static func runAndExit() -> Never {
+        if let index = CommandLine.arguments.firstIndex(of: "--preview-notice"),
+           CommandLine.arguments.indices.contains(index + 1) {
+            previewNoticeAndExit(title: CommandLine.arguments[index + 1])
+        }
         if CommandLine.arguments.contains("--profile-only") { runProfileAndExit() }
         let app = NSApplication.shared
         app.setActivationPolicy(.prohibited)
@@ -143,8 +189,8 @@ enum NotchPresentationProbe {
         advance(0.60)
         if host.panel.frame != geometry.frame(for: geometry.collapsed) { failures.append("interrupted motion did not settle") }
         noticeHeightLimit = geometry.notice.height
-        for notification in [false, true] {
-            let size = geometry.noticeSize(notification: notification)
+        for wing in [CGFloat(112), 190, 240] {
+            let size = geometry.noticeSize(wingWidth: wing)
             host.present(size: size, geometry: geometry, animated: true, transitionContent: .reveal)
             advance(0.09)
             if !reduceMotion, host.visibleFrame.width <= geometry.collapsed.width || host.visibleFrame.width >= size.width {
@@ -376,7 +422,7 @@ enum NotchPresentationProbe {
                 let music = geometry.compactMusicGeometry
                 let timer = geometry.compactTimerGeometry(showsDownloads: true)
                 let states: [(CGSize, Bool)] = [(geometry.collapsed, true), (music.compactActivitySize, true), (geometry.notice, true),
-                    (geometry.expanded, false), (geometry.noticeSize(notification: true), true),
+                    (geometry.expanded, false), (geometry.noticeSize(wingWidth: 190), true),
                     (timer.compactActivitySize, true), (geometry.peek, false), (geometry.restingSize(showsContent: false), true)]
                 let shortcuts = NotchQuickAccessConfiguration(buttons: [
                     NotchQuickButton(action: .explore, side: .left),

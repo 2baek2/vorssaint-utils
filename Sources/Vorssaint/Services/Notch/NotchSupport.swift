@@ -757,17 +757,16 @@ struct NotchGeometry: Equatable {
         max(0, (compactActivitySize.width - compactActivityCameraGap - compactActivityHorizontalPadding * 2) / 2)
     }
     var notice: CGSize {
-        noticeSize(notification: false)
+        noticeSize(wingWidth: 112)
     }
     var noticeCameraGap: CGFloat { cameraWidth }
 
-    func noticeSize(notification: Bool) -> CGSize {
-        let wing: CGFloat = notification ? 190 : 112
-        return CGSize(width: min(screen.width - 24, noticeCameraGap + wing * 2), height: menuBarHeight)
+    func noticeSize(wingWidth: CGFloat) -> CGSize {
+        CGSize(width: min(screen.width - 24, noticeCameraGap + wingWidth * 2), height: menuBarHeight)
     }
 
-    func noticeWingWidth(notification: Bool) -> CGFloat {
-        max(0, (noticeSize(notification: notification).width - noticeCameraGap) / 2)
+    func noticeWingWidth(preferred: CGFloat) -> CGFloat {
+        max(0, (noticeSize(wingWidth: preferred).width - noticeCameraGap) / 2)
     }
     var peek: CGSize {
         CGSize(width: min(screen.width - 24, max(cameraWidth + 110, 340)), height: safeContentTop + 52)

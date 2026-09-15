@@ -9,7 +9,7 @@ struct NotchNoticeView: View {
     let geometry: NotchGeometry
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private var wingWidth: CGFloat { geometry.noticeWingWidth(notification: notice.notification != nil) }
+    private var wingWidth: CGFloat { geometry.noticeWingWidth(preferred: notice.preferredWingWidth) }
     private var inset: CGFloat { min(16, wingWidth / 6) }
     private var tint: Color {
         switch notice.event {
@@ -57,6 +57,7 @@ struct NotchNoticeView: View {
                     .lineLimit(1)
                     .contentTransition(.numericText())
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: notice.detail)
             .transaction { $0.disablesAnimations = false }
         }

@@ -15,6 +15,15 @@ struct NotchNotice: Equatable {
     var notification: NotchNotificationContent? = nil
     var notificationID: UUID? = nil
 
+    var preferredWingWidth: CGFloat {
+        if notification != nil { return 190 }
+        let font = NSFont.monospacedDigitSystemFont(ofSize: 11, weight: .medium)
+        let leading = ((level == nil ? title : detail) as NSString).size(withAttributes: [.font: font]).width
+        let trailing = level == nil ? (detail as NSString).size(withAttributes: [.font: font]).width : 0
+        // Reserve the icon, spacing and both insets before limiting long names.
+        return min(240, max(112, ceil(max(leading + 18 + 8, trailing)) + 32))
+    }
+
     var accessibilityText: String {
         notification?.accessibilityText ?? [title, detail].filter { !$0.isEmpty }.joined(separator: ", ")
     }
@@ -82,6 +91,7 @@ final class NotchService: ObservableObject {
     private var gesture = NotchGestureSupport()
     private var volumeBaseline: Double?
     private var muteBaseline: Bool?
+    private var volumeDeviceUID: String?
     private var notchNeedsMonitor = false
     private var menuSpaceTimer: Timer?
     private var menuSpaceReading = false
@@ -158,7 +168,7 @@ final class NotchService: ObservableObject {
         }
         if expanded { return expandedSize }
         if dragPlaceholder { return CGSize(width: geometry.peek.width, height: geometry.safeContentTop + 66) }
-        if let notice { return geometry.noticeSize(notification: notice.notification != nil) }
+        if let notice { return geometry.noticeSize(wingWidth: notice.preferredWingWidth) }
         if peeking { return geometry.peek }
         if compactActivity != nil { return compactActivityGeometry.compactActivitySize }
         return geometry.restingSize(showsContent: idleContent != .none)
@@ -1230,13 +1240,7 @@ final class NotchService: ObservableObject {
         }
         stopPower()
         if NotchSupport.routes(.volume) {
-            let mixer = AppVolumeMixer.shared
-            volumeBaseline = mixer.systemOutputVolume
-            muteBaseline = mixer.systemOutputMuted
-            mixer.$systemOutputVolume.combineLatest(mixer.$systemOutputMuted)
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] volume, muted in self?.volumeChanged(volume, muted: muted) }
-                .store(in: &subscriptions)
+            bindVolumeEvents()
         }
         if NotchSupport.routes(.systemNotification) {
             NotchNotificationService.shared.received.sink { [weak self] item in
@@ -1266,9 +1270,31 @@ final class NotchService: ObservableObject {
         showVolume(volume, muted: mixer.systemOutputMuted)
     }
 
+    private func bindVolumeEvents() {
+        let mixer = AppVolumeMixer.shared
+        volumeDeviceUID = mixer.currentOutputDeviceUID
+        volumeBaseline = mixer.systemOutputVolume
+        muteBaseline = mixer.systemOutputMuted
+        mixer.$systemOutputVolume.combineLatest(mixer.$systemOutputMuted, mixer.$currentOutputDeviceUID)
+            .handleEvents(receiveOutput: { [weak self] _, _, deviceUID in
+                guard let self, deviceUID != self.volumeDeviceUID else { return }
+                self.volumeDeviceUID = deviceUID
+                self.volumeBaseline = nil
+                self.muteBaseline = nil
+            })
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self, weak mixer] _ in
+                guard let mixer else { return }
+                // Published fields arrive separately and before assignment. Read
+                // the settled device and controls together on the main queue.
+                self?.volumeChanged(mixer.systemOutputVolume, muted: mixer.systemOutputMuted)
+            }
+            .store(in: &subscriptions)
+    }
+
     private func volumeChanged(_ volume: Double?, muted: Bool?) {
         defer { volumeBaseline = volume; muteBaseline = muted }
-        guard let volume, volumeBaseline != nil,
+        guard volumeDeviceUID != nil, let volume, volumeBaseline != nil,
               volume != volumeBaseline || (muteBaseline != nil && muted != muteBaseline) else { return }
         showVolume(volume, muted: muted)
     }

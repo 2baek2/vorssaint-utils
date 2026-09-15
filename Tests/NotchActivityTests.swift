@@ -346,6 +346,15 @@ enum NotchActivityTests {
     }
 
     private static func accessoryContracts(expect: (Bool, String) -> Void) {
+        for (name, symbol) in [("airpods", "airpods"), ("AIRPODS PRO", "airpodspro"),
+                               ("My airpods pro 2", "airpodspro"), ("airpods max", "airpodsmax"),
+                               ("Max's airpods", "airpods"), ("Wireless Headphones", "headphones")] {
+            expect(NotchAccessorySupport.symbol(for: .audio, name: name) == symbol,
+                   "recognized headset families use their native symbol, with generic audio as fallback")
+        }
+        expect(NotchAccessorySupport.symbol(for: .keyboard, name: "Keyboard") == "keyboard"
+               && NotchAccessorySupport.symbol(for: .device, name: "Device") == "battery.25percent",
+               "model-specific audio symbols preserve other accessory types")
         func device(_ percent: Int, id: String = "HID:1", name: String = "Keyboard") -> PeripheralBatteryDevice {
             PeripheralBatteryDevice(id: id, name: name, percent: percent, kind: .keyboard)
         }

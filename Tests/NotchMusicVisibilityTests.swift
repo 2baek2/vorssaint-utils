@@ -34,7 +34,6 @@ enum NotchMusicVisibilityTests {
         struct Tool { let capturesAudio = false }
         let selectedTool = Tool()
     }
-    struct Notice { var notification: Bool? }
     enum NotchContentTransition { case none, dismiss }
     struct Host { func containsHover(_ point: CGPoint) -> Bool { false } }
     struct Panel {
@@ -54,7 +53,7 @@ enum NotchMusicVisibilityTests {
         var selectedMetric: Metric?
         var modules: [NotchModule] = []
         var captureControls: CaptureControls?
-        var notice: Notice?
+        var notice: NotchNotice?
         var dragPlaceholder = false
         var hasTimerActivity = false
         var hasDownloadActivity = false
@@ -180,5 +179,13 @@ enum NotchMusicVisibilityTests {
         expect(service.compactActivity == .timer, "Nothing for resting music preserves a running timer")
         service.hasTimerActivity = false
         expect(service.compactActivity == .downloads, "Nothing for resting music preserves active downloads")
+        let notice = NotchNotice(event: .accessory, title: "Wireless Headphones", detail: "Connected", symbol: "headphones")
+        service.notice = notice
+        expect(service.surfaceSize == service.geometry.noticeSize(wingWidth: notice.preferredWingWidth)
+               && service.surfaceSize.width > service.geometry.notice.width,
+               "a device notice widens the actual presentation beyond the compact level indicator")
+        service.notice = nil
+        expect(service.surfaceSize == service.compactActivityGeometry.compactActivitySize,
+               "dismissing a device notice restores the underlying activity's width")
     }
 }

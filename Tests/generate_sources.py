@@ -128,6 +128,13 @@ def main():
           + declaration(shelf, "    func completeInternalDrag(")
           + "}\n}\n")
     notch = "Sources/Vorssaint/Services/Notch/NotchService.swift"
+    write("NotchNotice.swift", "import AppKit\n" + declaration(notch, "struct NotchNotice:"))
+    write("NotchVolumeFeedback.swift", "import Foundation\nimport Combine\n"
+          + "extension NotchVolumeFeedbackTests {\nfinal class Service: State {\n"
+          + "".join(declaration(notch, prefix).replace("    private ", "    ", 1) for prefix in [
+              "    private func bindVolumeEvents(", "    private func volumeChanged(",
+              "    private func showVolume(", "    func showCurrentVolume("])
+          + "}\n}\n")
     canvas = "Sources/Vorssaint/Services/Notch/NotchWindowHost.swift"
     write("NotchHover.swift", "import Foundation\nextension NotchHoverTests {\nfinal class Service: State {\n"
           + declaration(notch, "    func hover(") + "}\n}\n")
