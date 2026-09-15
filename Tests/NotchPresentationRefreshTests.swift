@@ -68,6 +68,8 @@ enum NotchPresentationRefreshContract {
         }
         func toggle() { expanded.toggle() }
         func collapse() { expanded = false }
+        func syncScreenEdgeClicks() {}
+        func removeScreenEdgeClickMonitors() {}
     }
 
     static func run(expect: (Bool, String) -> Void) {

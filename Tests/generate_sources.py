@@ -129,6 +129,13 @@ def main():
           + "}\n}\n")
     notch = "Sources/Vorssaint/Services/Notch/NotchService.swift"
     canvas = "Sources/Vorssaint/Services/Notch/NotchWindowHost.swift"
+    write("NotchScreenEdgeClicks.swift", "import AppKit\nextension NotchScreenEdgeClickTests {\nfinal class Service: State {\n"
+          + "func open() { openings += 1; expanded = true; syncScreenEdgeClicks() }\n"
+          + "".join(declaration(notch, prefix).replace("    private ", "    ", 1) for prefix in [
+              "    private var screenEdgeClickArea:", "    private func syncScreenEdgeClicks(",
+              "    private func handleScreenEdgeEvent(", "    private func handleScreenEdgeClick(",
+              "    private func removeScreenEdgeClickMonitors("])
+          + "}\n}\n")
     write("NotchScreenRefresh.swift", "import Foundation\n\nextension NotchScreenRefreshContract {\nfinal class Service: State {\n"
           + declaration(notch, "    private func screenParametersDidChange()").replace("private func", "func", 1)
           + declaration(notch, "    private func invalidateMenuSpace()")

@@ -6,6 +6,7 @@ import CoreGraphics
 
 enum NotchTests {
     static func run(expect: (Bool, String) -> Void) {
+        NotchScreenEdgeClickTests.run(expect: expect)
         NotchPresentationRefreshContract.run(expect: expect)
         NotchScreenRefreshContract.run(expect: expect)
         NotchDestinationContract.run(expect: expect)

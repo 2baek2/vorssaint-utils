@@ -53,6 +53,8 @@ final class NotchService: ObservableObject {
     private var observers: [(NotificationCenter, NSObjectProtocol)] = []
     private var subscriptions = Set<AnyCancellable>()
     private var eventMonitors: [Any] = []
+    private var screenEdgeClickMonitors: [Any] = []
+    private var screenEdgePressArea: CGRect?
     private var captureControlsMonitors: [Any] = []
     private var hoverWork: DispatchWorkItem?
     private var noticeWork: DispatchWorkItem?
@@ -302,6 +304,7 @@ final class NotchService: ObservableObject {
         hoverState = NotchHoverState()
         openedByHover = false
         removeEventMonitors()
+        removeScreenEdgeClickMonitors()
         removeCaptureControlsClickThrough()
         releaseMonitor()
         windowHost?.close()
@@ -768,6 +771,7 @@ final class NotchService: ObservableObject {
         let active = expanded || peeking || notice != nil || dragPlaceholder || captureControls != nil || compactActivityIsVisible
         guard active || geometry.isNotched || geometry.compactSideRoom != nil else {
             panel?.orderOut(nil)
+            removeScreenEdgeClickMonitors()
             return
         }
         let access = NotchQuickAccessConfiguration.current()
@@ -788,6 +792,74 @@ final class NotchService: ObservableObject {
                 self?.hoverState.close(pointerInside: true)
             }, activate: { [weak self] in self?.toggle() })
         if panel?.isVisible != true { panel?.orderFrontRegardless() }
+        syncScreenEdgeClicks()
+    }
+
+    private var screenEdgeClickArea: CGRect? {
+        guard running, !suspended, !expanded, captureControls == nil, notice == nil,
+              !dragPlaceholder, !heldDrag, let panel, panel.isVisible, !panel.ignoresMouseEvents else { return nil }
+        let geometry = compactActivityIsVisible ? compactActivityGeometry : self.geometry
+        guard geometry.topInset == 0 else { return nil }
+        let area = geometry.activationArea(in: surfaceSize, hasHeader: peeking, compactActivity: compactActivityIsVisible)
+        guard !area.isEmpty else { return nil }
+        let frame = geometry.frame(for: surfaceSize)
+        return CGRect(x: frame.minX + area.minX, y: frame.maxY - area.maxY, width: area.width, height: area.height)
+    }
+
+    private func syncScreenEdgeClicks() {
+        guard screenEdgeClickArea != nil else { removeScreenEdgeClickMonitors(); return }
+        guard screenEdgeClickMonitors.isEmpty else { return }
+        // The menu bar owns the first screen row even above its window level.
+        // Observe only mouse clicks, with no event tap or Accessibility requirement.
+        let events: NSEvent.EventTypeMask = [.leftMouseDown, .leftMouseUp, .leftMouseDragged]
+        if let token = NSEvent.addGlobalMonitorForEvents(matching: events, handler: { [weak self] event in
+            self?.handleScreenEdgeEvent(event)
+        }) { screenEdgeClickMonitors.append(token) }
+        if let token = NSEvent.addLocalMonitorForEvents(matching: events, handler: { [weak self] event in
+            self?.handleScreenEdgeEvent(event)
+            return event
+        }) { screenEdgeClickMonitors.append(token) }
+    }
+
+    private func handleScreenEdgeEvent(_ event: NSEvent) {
+        guard event.type == .leftMouseDown || screenEdgePressArea != nil else { return }
+        guard let location = event.cgEvent?.location, let primary = NSScreen.withMenuBar else {
+            screenEdgePressArea = nil
+            return
+        }
+        handleScreenEdgeClick(event.type, at: CGPoint(x: location.x, y: primary.frame.maxY - location.y),
+                              isNotchWindow: event.window === panel)
+    }
+
+    private func handleScreenEdgeClick(_ type: NSEvent.EventType, at point: CGPoint, isNotchWindow: Bool) {
+        guard let area = screenEdgeClickArea else { screenEdgePressArea = nil; return }
+        let local = CGPoint(x: point.x - area.minX, y: area.maxY - point.y)
+        switch type {
+        case .leftMouseDown:
+            screenEdgePressArea = nil
+            guard !isNotchWindow, !keepsWorkingSurface,
+                  CGRect(x: 0, y: 0, width: area.width, height: 1).contains(local),
+                  windowHost?.contains(point) == true else { return }
+            screenEdgePressArea = area
+            hoverWork?.cancel(); hoverWork = nil
+            hoverState.close(pointerInside: true)
+        case .leftMouseUp:
+            let pressedArea = screenEdgePressArea
+            screenEdgePressArea = nil
+            guard pressedArea == area, CGRect(origin: .zero, size: area.size).contains(local),
+                  windowHost?.contains(point) == true else { return }
+            open()
+        case .leftMouseDragged:
+            screenEdgePressArea = nil
+        default:
+            break
+        }
+    }
+
+    private func removeScreenEdgeClickMonitors() {
+        screenEdgeClickMonitors.forEach(NSEvent.removeMonitor)
+        screenEdgeClickMonitors.removeAll()
+        screenEdgePressArea = nil
     }
 
     private func stopMenuSpaceMonitoring() {
