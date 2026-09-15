@@ -34,8 +34,41 @@ def write(name, text):
         path.write_text(text)
 
 
+def availability_declaration(path, prefix):
+    return declaration(path, prefix).replace(".feature.isAvailable", ".feature.isAvailable(in: ReviewDefaults.current)")
+
+
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
+    mixer = "Sources/Vorssaint/Services/Audio/AppVolumeMixer.swift"
+    write("MixerOutputAdjustment.swift", "import CoreAudio\nimport Foundation\n"
+          + "extension MixerOutputAdjustmentContract {\nfinal class Mixer {\n"
+          + declaration(mixer, "    private struct OutputAdjustment {")
+          + "var systemOutputVolume: Double?\nvar systemOutputMuted: Bool?\n"
+          + "var outputControlListenerDevice: AudioObjectID?\n"
+          + "var outputControlListenerAddresses: [AudioObjectPropertyAddress] = []\n"
+          + "var outputControlRefreshGeneration = 0\n"
+          + "private var pendingOutputAdjustment: OutputAdjustment?\nprivate var outputWriteInFlight: OutputAdjustment?\n"
+          + "let outputControlLock = NSLock()\nvar outputControlLifetime = UUID()\nlet halQueue = Queue()\n"
+          + "var controlRefreshes: [AudioObjectID] = []\nvar listenerRefreshes = 0\n"
+          + "static let outputControlListenerCallback: AudioObjectPropertyListenerProc = { _, _, _, _ in noErr }\n"
+          + "var listenerClient: UnsafeMutableRawPointer? { nil }\n"
+          + "static func defaultOutputDeviceID() -> AudioObjectID { Hardware.device }\n"
+          + "static func setOutputVolume(_ value: Float, for device: AudioObjectID) -> Bool {\n"
+          + "Hardware.writes.append(.init(device: device, volume: value, muted: nil))\n"
+          + "let after = Hardware.afterVolumeWrite; Hardware.afterVolumeWrite = nil; after?()\nreturn Hardware.succeeds\n}\n"
+          + "static func setOutputMuted(_ value: Bool, for device: AudioObjectID) -> Bool {\n"
+          + "Hardware.writes.append(.init(device: device, volume: nil, muted: value)); return Hardware.succeeds\n}\n"
+          + "func scheduleListenerRefresh() { listenerRefreshes += 1 }\n"
+          + "func scheduleOutputControlRefresh(for device: AudioObjectID) { controlRefreshes.append(device) }\n"
+          + "func selectOutput(_ device: AudioObjectID?, volume: Double?, muted: Bool?) {\n"
+          + "removeOutputControlListeners(); outputControlListenerDevice = device; applyOutputControls(volume: volume, muted: muted)\n}\n"
+          + "func readSnapshot(volume: Double?, muted: Bool?) { applyOutputControls(volume: volume, muted: muted) }\n"
+          + "".join(declaration(mixer, prefix) for prefix in [
+              "    func requestOutputAdjustment(", "    private func removeOutputControlListeners(",
+              "    private func isCurrentOutputAdjustment(", "    private var hasCurrentOutputAdjustment:",
+              "    private func applyOutputControls(", "    private func drainOutputAdjustment("])
+          + "}\n}\n")
     cleaner = "Sources/Vorssaint/Services/Cleaner/JunkCleaner.swift"
     write("CleanerEligibilityBodies.swift", "import Foundation\nextension CleanerEligibilityTests {\n"
           + "".join(declaration(cleaner, "    private static func " + name)
@@ -68,10 +101,16 @@ def main():
           + "}\n}\n")
     playback_adapter = "Sources/NowPlayingAdapter/NowPlayingSelection.swift"
     write("NotchPlaybackRouting.swift", "import Foundation\nimport ObjectiveC\nextension NotchPlaybackRoutingContract {\n"
+          + declaration(playback_adapter, "    private struct Identity:").replace("private struct", "struct", 1)
+          + declaration(playback_adapter, "    static var target:")
+          + declaration(playback_adapter, "    static func publish(").replace("    static func", "    @discardableResult\n    static func", 1)
+          + declaration(playback_adapter, "    static func validatedTarget(")
           + declaration(playback_adapter, "    static func readInfo(")
           + declaration(playback_adapter, "    static func supportedCommands(")
           + declaration(playback_adapter, "    static func send(")
-          + declaration(playback_adapter, "    private static func makeTarget(").replace("private static", "static", 1) + "}\n")
+          + declaration(playback_adapter, "    private static func makeTarget(").replace("private static", "static", 1)
+          + declaration("Sources/NowPlayingAdapter/NowPlayingAdapter.swift", "private func sendPlaybackCommand(")
+            .replace("private func", "static func", 1) + "}\n")
     write("NotchActivationButton.swift", "import AppKit\n"
           + declaration("Sources/Vorssaint/Services/Notch/NotchWindowHost.swift", "final class NotchActivationButton:"))
     shelf = "Sources/Vorssaint/Services/Shelf/ShelfService.swift"
@@ -90,12 +129,40 @@ def main():
           + "}\n}\n")
     notch = "Sources/Vorssaint/Services/Notch/NotchService.swift"
     canvas = "Sources/Vorssaint/Services/Notch/NotchWindowHost.swift"
+    write("NotchScreenRefresh.swift", "import Foundation\n\nextension NotchScreenRefreshContract {\nfinal class Service: State {\n"
+          + declaration(notch, "    private func screenParametersDidChange()").replace("private func", "func", 1)
+          + declaration(notch, "    private func invalidateMenuSpace()")
+          + declaration(notch, "    private func stopMenuSpaceMonitoring()")
+          + declaration(notch, "    private func syncMenuSpaceMonitoring()").replace("private func", "func", 1)
+              .replace("AXIsProcessTrusted()", "accessibilityGranted")
+          + "}\n}\n")
     write("NotchPresentationRefresh.swift", "import Foundation\nimport Combine\n"
           + "extension NotchPresentationRefreshContract {\nfinal class Service: State {\n"
           + declaration(notch, "    func refreshPresentation(")
           + declaration(notch, "    func updateCaptureHeight(")
           + declaration(notch, "    func removeCapture(")
           + declaration(notch, "    private func clearCapture(")
+          + "}\n}\n")
+    metric_view = "Sources/Vorssaint/UI/MenuPanel/MetricDetailView.swift"
+    renderer = "Sources/Vorssaint/App/MenuBarRenderer.swift"
+    metric_cases = "\n".join(line for line in declaration(metric_view, "enum MetricDetailKind:").splitlines()
+                             if line.startswith("    case "))
+    menu_metric_cases = "\n".join(line for line in declaration(renderer, "enum MenuBarMetric:").splitlines()
+                                  if line.startswith("    case "))
+    write("NotchDestinations.swift", "import Foundation\n\nextension NotchDestinationContract {\n"
+          + "enum MetricDetailKind: String {\n" + metric_cases + "\n}\n"
+          + "enum MenuBarMetric: String, CaseIterable {\n" + menu_metric_cases + "\n"
+          + declaration(renderer, "    var feature: AppFeature")
+          + declaration(metric_view, "    var detailKind:") + "}\n"
+          + "final class Service: State {\n"
+          + "func syncWithPreferences() { presentationSyncs += 1; refreshModules(); syncVisibleConsumers(); NotchTimerService.shared.syncWithPreferences() }\n"
+          + availability_declaration(notch, "    private func metricIsAvailable(")
+          + declaration(notch, "    private func refreshModules(")
+              .replace("NotchSupport.modules()", "NotchSupport.modules(in: ReviewDefaults.current)")
+          + declaration(notch, "    func open(_ module:")
+              .replace("NotchSupport.isEnabled()", "NotchSupport.isEnabled(in: ReviewDefaults.current)")
+          + declaration(notch, "    private func updateSession(").replace("private func", "func", 1)
+              .replace("AppFeature.mixer.isAvailable", "AppFeature.mixer.isAvailable(in: ReviewDefaults.current)")
           + "}\n}\n")
     write("ShelfDropRouting.swift", "import AppKit\n\nextension ShelfDropRoutingContract {\n"
           + declaration(canvas, "struct NotchFileDropActions {")
@@ -135,11 +202,22 @@ def main():
     view = "Sources/Vorssaint/UI/QuickLauncher/QuickLauncherView.swift"
     panel_layout = (ROOT / "Sources/Vorssaint/UI/MenuPanel/PanelLayout.swift").read_text()
     protocol = next(line for line in panel_layout.splitlines() if line.startswith("protocol PanelOrderItem:"))
-    write("QuickLauncherBodies.swift", "import Foundation\n" + protocol + "\n\nextension QuickLauncherContract {\n"
+    write("QuickLauncherBodies.swift", "import Foundation\nimport Carbon.HIToolbox\n" + protocol + "\n\nextension QuickLauncherContract {\n"
           + declaration(service, "enum QuickLauncherItem:")
           + "final class Launcher {\nvar isEditing = false\nvar activeUtility: QuickLauncherItem?\n"
+          + "var editingOptionsItem: QuickLauncherItem?\nvar selectedIndex: Int?\nvar presentationID = UUID()\n"
+          + "var candidates: [QuickLauncherItem] = QuickLauncherItem.allCases\n"
+          + "var visibleItems: [QuickLauncherItem] { candidates.filter { $0.feature.isAvailable(in: ReviewDefaults.current) } }\n"
           + 'func hide() { events.append("hide") }\n'
-          + declaration(service, "    func run(_ item: QuickLauncherItem)")
+          + availability_declaration(service, "    func run(_ item: QuickLauncherItem)")
+          + declaration(service, "    func prepareForPresentation()")
+          + availability_declaration(service, "    func refreshAvailability()")
+          + declaration(service, "    private func clampSelection()")
+          + declaration(service, "    func activateSelection()")
+          + declaration(service, "    func activate(at index:")
+          + declaration(service, "    func moveSelection(")
+          + declaration(service, "    func handlePanelKey(")
+          + declaration(service, "    private static func digitIndex(")
           + "}\nstruct Tile {\nvar keepAwake = State()\nvar micMute = State()\nvar recorder = State()\n"
           + declaration(view, "    private func icon(for item: QuickLauncherItem)")
           + declaration(view, "    private func isActive(_ item: QuickLauncherItem)")
@@ -216,6 +294,25 @@ def main():
           + "}\n}\n")
 
     music = "Sources/Vorssaint/Services/Notch/NotchMusicService.swift"
+    write("NotchMusicControls.swift", "import Foundation\n\nextension NotchMusicCommandContract {\n"
+          + "final class Service {\ntypealias Command = NotchPlaybackCommand\n"
+          + "var playback: NotchPlayback?\nvar generation = UUID()\nvar queueRequest: UUID?\n"
+          + "var queueVisible = true\nvar queueLoading = false\nvar queueActionPending = false\n"
+          + "var commandFailed = false\nvar queueActionFailed = false\nvar commandPending = false\n"
+          + "var canSeek: Bool { playback?.canSeek == true }\n"
+          + "func beginAutomation(_ command: Command, playback: NotchPlayback) -> Bool { false }\nfunc cancelAutomationAction() {}\n"
+          + "var process: Process?\nvar input: Pipe?\nlet queue = Scheduler()\n"
+          + "lazy var commandWriter = NotchMusicCommandWriter { [queue = self.queue] in queue.async(execute: $0) }\n"
+          + "var wantsPlayback = false\nvar restartCount = 0\nvar restartWork: DispatchWorkItem?\nvar launches = 0\n"
+          + "func launch() { guard wantsPlayback, process == nil else { return }; launches += 1; process = Process(); input = Pipe(); commandWriter.start() }\n"
+          + "func disconnect() { generation = UUID(); commandWriter.stop(); process = nil; input = nil; playback = nil }\n"
+          + declaration(music, "    func start()")
+          + declaration(music, "    func stop()")
+          + declaration(music, "    private func connectionEnded()").replace("private func", "func", 1)
+          + declaration(music, "    func seek(")
+          + declaration(music, "    func send(_ command: Command)").replace("    func", "    @discardableResult\n    func", 1)
+          + declaration(music, "    func send(_ command: Command, context:").replace("    func", "    @discardableResult\n    func", 1)
+          + "}\n}\n")
     write("NotchQueueSelection.swift", "import Foundation\n\nextension NotchQueueContract {\n"
           + "final class Service {\nvar queueVisible = true\nvar queueRequest: UUID?\n"
           + "var upcoming: NotchQueueSnapshot?\nvar playback: NotchPlayback?\n"
@@ -224,6 +321,23 @@ def main():
           + "func send(_ command: NotchPlaybackCommand) -> Bool { commands.append(command); return sendAllowed && command.message != nil }\n"
           + declaration(music, "    func playQueued(")
           + "}\n}\n")
+    write("NotchMusicAutomationBodies.swift", "import Foundation\n\nextension NotchMusicAutomationFlowContract {\n"
+          + "final class Service {\ntypealias Command = NotchPlaybackCommand\nvar playback: NotchPlayback?\n"
+          + "var automationAvailability: NotchMusicAutomation.Availability?\nvar automationTarget: NotchMusicAutomation.Target?\n"
+          + "var generation = UUID()\nvar commandPending = false\nvar commandFailed = false\nvar requestingAutomation = false\n"
+          + "var automationCancellation = DispatchWorkItem {}\nvar automationConsentCancellation = DispatchWorkItem {}\n"
+          + "var automationTimeout: DispatchWorkItem?\nvar automationAction: AutomationAction?\nvar awaitingAutomationValidation = false\n"
+          + "let queue = Scheduler()\nvar refreshes = 0\nfunc refreshAutomation() { refreshes += 1 }\n"
+          + "var validationRequests: [Command] = []\nfunc send(_ command: Command) -> Bool { validationRequests.append(command); return true }\n"
+          + declaration(music, "    private struct AutomationAction {").replace("private struct", "struct", 1)
+          + declaration(music, "    var canSeek:")
+          + declaration(music, "    func canPerform(")
+          + declaration(music, "    func requestAutomationAccess()")
+          + declaration(music, "    private func beginAutomation(").replace("private func", "func", 1)
+          + declaration(music, "    private func receiveValidation(").replace("private func", "func", 1)
+          + declaration(music, "    private func cancelAutomationAction()").replace("private func", "func", 1)
+          + "}\n}\nextension NotchMusicAutomationFlowContract.NotchMusicAutomation {\n"
+          + declaration("Sources/Vorssaint/Services/Notch/NotchMusicAutomation.swift", "    static func send(") + "}\n")
 
     downloads = "Sources/Vorssaint/Services/Notch/NotchDownloadService.swift"
     write("NotchDownloadFolderChoice.swift", "import Foundation\n\nextension NotchDownloadFolderChoiceContract {\n"

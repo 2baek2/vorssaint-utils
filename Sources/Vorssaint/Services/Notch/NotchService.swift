@@ -84,6 +84,7 @@ final class NotchService: ObservableObject {
     private var menuSpaceTimer: Timer?
     private var menuSpaceReading = false
     private var menuSpaceGeneration = 0
+    private var screenRefreshWork: DispatchWorkItem?
     private let menuSpaceQueue = DispatchQueue(label: "com.vorssaint.notch-menu-space", qos: .utility)
 
     private init() {}
@@ -198,7 +199,11 @@ final class NotchService: ObservableObject {
         // Requested file work can continue while locked, but disabling its
         // feature must still cancel it before presentation resumes.
         NotchFileToolsService.shared.syncWithPreferences()
-        guard !suspended else { return }
+        guard !suspended else {
+            if session.canRunTimer { NotchTimerService.shared.syncWithPreferences() }
+            else { NotchTimerService.shared.suspend() }
+            return
+        }
         refreshModules()
         NotchDownloadService.shared.syncWithPreferences()
         NotchCalendarService.shared.syncWithPreferences()
@@ -235,6 +240,11 @@ final class NotchService: ObservableObject {
         if modules != updated { modules = updated }
         let selection = modules.contains(selected) ? selected : modules.first ?? .controls
         if selected != selection { selected = selection }
+        if let selectedMetric, !metricIsAvailable(selectedMetric) { self.selectedMetric = nil }
+    }
+
+    private func metricIsAvailable(_ metric: MetricDetailKind) -> Bool {
+        MenuBarMetric.allCases.contains { $0.detailKind == metric && $0.feature.isAvailable }
     }
 
     func stop(restoreCapture: Bool = true) {
@@ -260,6 +270,7 @@ final class NotchService: ObservableObject {
     }
 
     private func tearDownPresentation() {
+        screenRefreshWork?.cancel(); screenRefreshWork = nil
         musicDetailVisible = false
         panel?.handleScroll = nil
         gesture = NotchGestureSupport()
@@ -270,7 +281,6 @@ final class NotchService: ObservableObject {
         subscriptions.removeAll()
         stopPower()
         NotchMusicService.shared.stop()
-        NotchTimerService.shared.suspend()
         CameraPreviewService.shared.hideEmbedded()
         NotchAccessoryService.shared.suspend()
         NotchDownloadService.shared.stop()
@@ -305,8 +315,12 @@ final class NotchService: ObservableObject {
         else { refreshModules() }
         guard let panel else { return }
         let destination = module.flatMap { modules.contains($0) ? $0 : nil } ?? selected
+        let metric = metric.flatMap { metricIsAvailable($0) ? $0 : nil }
         let changesPresentation = !expanded || selected != destination
             || showingAppPanel != appPanel || selectedMetric != metric || showingSections != sections
+        if changesPresentation, destination == .tools, !appPanel, !sections, metric == nil {
+            QuickLauncherService.shared.prepareForPresentation()
+        }
         (NSApp.delegate as? AppDelegate)?.closePopover(preservingNotch: true)
         if !expanded, modules.contains(.clipboard) { ClipboardHistoryService.shared.rememberPasteTarget() }
         panel.acceptsKeyFocus = true
@@ -512,7 +526,7 @@ final class NotchService: ObservableObject {
     }
 
     func showMetric(_ metric: MetricDetailKind, toggle: Bool = false) {
-        guard metric.panelSection.isAvailable else { return }
+        guard metricIsAvailable(metric) else { return }
         if toggle, expanded, selectedMetric == metric, !showingSections { collapse(); return }
         open(.system, metric: metric)
     }
@@ -783,6 +797,14 @@ final class NotchService: ObservableObject {
     }
 
     private func syncMenuSpaceMonitoring() {
+        guard AXIsProcessTrusted() else {
+            stopMenuSpaceMonitoring()
+            if geometry.compactSideRoom != nil {
+                geometry.compactSideRoom = nil
+                refreshPresentation(animated: false)
+            }
+            return
+        }
         let wanted = running && !suspended && !expanded && captureControls == nil
             && (idleContent != .none || compactActivity != nil || !geometry.isNotched)
         guard wanted else { stopMenuSpaceMonitoring(); return }
@@ -794,15 +816,25 @@ final class NotchService: ObservableObject {
         readMenuSpace()
     }
 
-    private func invalidateMenuSpace(resetGeometry: Bool = false) {
+    private func invalidateMenuSpace() {
         menuSpaceGeneration += 1
         // Keep the last measured layout until its replacement arrives. Clearing
-        // it first briefly inserts the below-camera fallback on every activation.
-        if resetGeometry {
-            geometry.compactSideRoom = nil
-            if !expanded, captureControls == nil { refreshPresentation(animated: false) }
-        }
+        // it for a brightness notification makes the compact content flicker.
         readMenuSpace()
+    }
+
+    private func screenParametersDidChange() {
+        guard running, !suspended else { return }
+        screenRefreshWork?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            self.screenRefreshWork = nil
+            guard self.running, !self.suspended else { return }
+            self.invalidateMenuSpace()
+            self.syncWithPreferences()
+        }
+        screenRefreshWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: work)
     }
 
     private func readMenuSpace() {
@@ -892,9 +924,7 @@ final class NotchService: ObservableObject {
             self.hover(self.windowHost?.contains(NSEvent.mouseLocation) == true)
         }
         observe(.default, NSApplication.didChangeScreenParametersNotification) { [weak self] in
-            guard let self, !self.suspended else { return }
-            self.invalidateMenuSpace(resetGeometry: true)
-            self.syncWithPreferences()
+            self?.screenParametersDidChange()
         }
         observe(.default, UserDefaults.didChangeNotification) { [weak self] in
             // AppStorage can notify during a view update; defer any window work.
@@ -951,19 +981,27 @@ final class NotchService: ObservableObject {
     private func updateSession(_ change: (inout NotchSessionState) -> Void) {
         guard running else { return }
         let couldPresent = session.canPresent
+        let timerCouldRun = session.canRunTimer
         change(&session)
-        guard couldPresent != session.canPresent else { return }
-        if session.canPresent {
-            syncWithPreferences()
-        } else {
-            let cancel = captureControlsCancel
-            endCaptureControls()
-            cancel?()
-            captureClose?()
-            clearCapture()
-            tearDownPresentation()
-            if AppFeature.mixer.isAvailable { PreciseVolumeRollerService.shared.syncWithPreferences() }
+        if couldPresent != session.canPresent {
+            if session.canPresent {
+                syncWithPreferences()
+            } else {
+                let cancel = captureControlsCancel
+                endCaptureControls()
+                cancel?()
+                captureClose?()
+                clearCapture()
+                tearDownPresentation()
+                if AppFeature.mixer.isAvailable { PreciseVolumeRollerService.shared.syncWithPreferences() }
+            }
         }
+        // A dark display does not stop an alarm while the same user and Mac
+        // remain awake. Privacy changes still apply when presentation is
+        // already suspended by the display.
+        guard timerCouldRun != session.canRunTimer, !session.canPresent else { return }
+        if session.canRunTimer { NotchTimerService.shared.syncWithPreferences() }
+        else { NotchTimerService.shared.suspend() }
     }
 
     private func installEventMonitors() {

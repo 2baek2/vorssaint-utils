@@ -21,8 +21,6 @@ final class RecorderWriter {
     private let microphoneInput: AVAssetWriterInput?
     private let pauseClock: RecorderPauseClock
 
-    /// Chosen before capture starts, in the host clock shared by every source.
-    private var origin: CMTime?
     private var lastVideoSample: CMSampleBuffer?
     private var lastVideoTime: CMTime = .zero
     private var started = false
@@ -144,8 +142,7 @@ final class RecorderWriter {
     }
 
     func beginSession(at time: CMTime) {
-        guard !started, time.isNumeric else { return }
-        origin = time
+        guard !started, time.isNumeric, pauseClock.begin(at: time.seconds) else { return }
         writer.startSession(atSourceTime: .zero)
         started = true
     }
@@ -155,12 +152,11 @@ final class RecorderWriter {
         let presentation = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
         guard presentation.isValid else { return }
 
-        guard let origin, started else { return }
+        guard started else { return }
         let duration = CMSampleBufferGetDuration(sampleBuffer)
         let seconds = duration.isValid && !duration.isIndefinite ? max(0, duration.seconds) : 0
         guard let mapped = pauseClock.sampleTime(start: presentation.seconds,
-                                                 duration: seconds,
-                                                 since: origin.seconds) else { return }
+                                                 duration: seconds) else { return }
         let shifted = CMTime(seconds: mapped, preferredTimescale: 600_000_000)
 
         switch kind {
@@ -203,9 +199,9 @@ final class RecorderWriter {
             writer.cancelWriting()
             return false
         }
-        if let origin, let lastVideoSample {
+        if let lastVideoSample {
             let end = CMTime(
-                seconds: pauseClock.elapsed(since: origin.seconds, at: wallClockEnd.seconds),
+                seconds: pauseClock.elapsed(at: wallClockEnd.seconds),
                 preferredTimescale: 600_000_000)
             if end > lastVideoTime, videoInput.isReadyForMoreMediaData,
                let tail = RecorderSampleTiming.retimed(lastVideoSample, to: end) {

@@ -820,7 +820,8 @@ struct NotchSessionState {
     var sleeping = false
     var displaysSleeping = false
     var onConsole = true
-    var canPresent: Bool { !locked && !sleeping && !displaysSleeping && onConsole }
+    var canRunTimer: Bool { !locked && !sleeping && onConsole }
+    var canPresent: Bool { canRunTimer && !displaysSleeping }
 }
 
 /// Reserve enough backing space for both ends. The visible silhouette moves

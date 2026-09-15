@@ -181,17 +181,28 @@ struct RecorderPauseTimeline {
     }
 }
 
-/// Thread-safe shared pause state for the writer and the two event samplers.
-/// It exists only for the lifetime of one recording.
+/// One origin and pause state for the writer, event samplers and elapsed display.
+/// It exists only for the lifetime of one recording. Starting a later source
+/// must never rebase events against that source's startup time.
 final class RecorderPauseClock {
     private let lock = NSLock()
     private var timeline = RecorderPauseTimeline()
+    private var origin: Double?
 
     var isPaused: Bool { lock.withLock { timeline.isPaused } }
 
     @discardableResult
+    func begin(at time: Double) -> Bool {
+        lock.withLock {
+            guard origin == nil, time.isFinite else { return false }
+            origin = time
+            return true
+        }
+    }
+
+    @discardableResult
     func pause(at time: Double) -> Bool {
-        lock.withLock { timeline.pause(at: time) }
+        lock.withLock { origin != nil && timeline.pause(at: time) }
     }
 
     @discardableResult
@@ -199,16 +210,25 @@ final class RecorderPauseClock {
         lock.withLock { timeline.resume(at: time) }
     }
 
-    func elapsed(since origin: Double, at time: Double) -> Double {
-        lock.withLock { timeline.elapsed(since: origin, at: time) }
+    func elapsed(at time: Double) -> Double {
+        lock.withLock {
+            guard let origin else { return 0 }
+            return timeline.elapsed(since: origin, at: time)
+        }
     }
 
-    func sampleTime(start: Double, duration: Double, since origin: Double) -> Double? {
-        lock.withLock { timeline.sampleTime(start: start, duration: duration, since: origin) }
+    func sampleTime(start: Double, duration: Double) -> Double? {
+        lock.withLock {
+            guard let origin else { return nil }
+            return timeline.sampleTime(start: start, duration: duration, since: origin)
+        }
     }
 
-    func eventTime(_ time: Double, since origin: Double) -> Double? {
-        lock.withLock { timeline.eventTime(time, since: origin) }
+    func eventTime(_ time: Double) -> Double? {
+        lock.withLock {
+            guard let origin, time >= origin else { return nil }
+            return timeline.eventTime(time, since: origin)
+        }
     }
 }
 

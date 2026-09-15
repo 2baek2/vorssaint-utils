@@ -5,6 +5,7 @@ import AVFoundation
 
 enum RecorderWriterTests {
     static func run(expect: @escaping (Bool, String) -> Void) {
+        checkClock(expect: expect)
         let finished = DispatchSemaphore(value: 0)
         Task.detached {
             do {
@@ -18,6 +19,24 @@ enum RecorderWriterTests {
         finished.wait()
     }
 
+    private static func checkClock(expect: (Bool, String) -> Void) {
+        let clock = RecorderPauseClock()
+        expect(clock.eventTime(100) == nil && clock.sampleTime(start: 100, duration: 0.01) == nil
+            && clock.elapsed(at: 100) == 0 && !clock.pause(at: 100),
+               "a session that has not begun admits no capture events or pauses")
+        expect(!clock.begin(at: .nan) && !clock.begin(at: .infinity) && clock.begin(at: 100),
+               "the shared origin requires a finite timestamp")
+        expect(!clock.begin(at: 100.3) && abs(clock.elapsed(at: 100.3) - 0.3) < 0.0001,
+               "starting a later source cannot reset the recording origin or elapsed display")
+        expect(clock.eventTime(99.9) == nil && clock.sampleTime(start: 99.9, duration: 0.01) == nil,
+               "events and samples preceding the recording are rejected")
+        expect(clock.pause(at: 110) && clock.elapsed(at: 115) == 10 && clock.eventTime(115) == nil,
+               "pausing freezes the shared elapsed display and discards events")
+        expect(clock.resume(at: 120) && clock.sampleTime(start: 121, duration: 0.01) == 11
+            && clock.eventTime(121) == 11 && clock.elapsed(at: 121) == 11,
+               "samples, events and elapsed display remove the same pause")
+    }
+
     private static func check(expect: (Bool, String) -> Void,
                               delayedVideo: Bool = false, capturesAudio: Bool = true) async throws {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("recorder-sync-\(UUID()).mov")
@@ -29,6 +48,8 @@ enum RecorderWriterTests {
             capturesSystemAudio: capturesAudio, capturesMicrophone: capturesAudio, pauseClock: pause)!
         precondition(writer.start())
         writer.beginSession(at: origin)
+        var pointer = RecorderPointerTrack()
+        var typing = RecorderTypingTrack()
 
         // The microphone callback arrives first but its capture starts later.
         // Video and system audio must retain their earlier timestamps.
@@ -36,6 +57,8 @@ enum RecorderWriterTests {
         for index in 0..<100 {
             if index == 50 {
                 pause.pause(at: 100.5)
+                expect(pause.eventTime(100.75) == nil && pause.elapsed(at: 100.75) == 0.5,
+                       "events during a pause do not reach either metadata track")
                 pause.resume(at: 101)
             }
             let source = origin + time(Double(index) / 100 + (index >= 50 ? 0.5 : 0))
@@ -47,6 +70,13 @@ enum RecorderWriterTests {
                 let block = CMSampleBufferGetDataBuffer(audio)!
                 precondition(CMBlockBufferFillDataBytes(with: 0x30, blockBuffer: block,
                     offsetIntoDestination: 0, dataLength: 480 * 4) == noErr)
+                // The event sources first contribute after video startup. Their
+                // later start must not shift these markers ahead of the pixels.
+                if let eventTime = pause.eventTime(source.seconds) {
+                    pointer.samples.append(.init(time: eventTime, point: CGPoint(x: 0.5, y: 0.5)))
+                    pointer.clicks.append(.init(time: eventTime, isDown: true))
+                    typing.times.append(eventTime)
+                }
             }
             writer.append(audio, kind: .systemAudio)
             if index > 10 {
@@ -63,6 +93,12 @@ enum RecorderWriterTests {
         expect(finished, "the raw multitrack MOV finishes")
         expect(writer.videoFrameCount == 3, "all three captured video frames are retained")
         guard finished else { return }
+        // Use the same stored formats read by the editor, including their
+        // timestamp precision, alongside the MOV's decoded timestamps below.
+        let savedPointer = RecorderPointerTrack.decoded(pointer.encoded())
+        let savedTyping = RecorderTypingTrack.decoded(typing.encoded())
+        let eventTimes = savedPointer.samples.map(\.time) + savedPointer.clicks.map(\.time) + savedTyping.times
+        expect(eventTimes.count == 6, "both metadata tracks retain markers before and after pause/resume")
         let asset = AVURLAsset(url: url)
         let tracks = try await asset.load(.tracks)
         expect(tracks.count == (capturesAudio ? 3 : 1), "the raw MOV contains exactly the enabled tracks")
@@ -70,6 +106,8 @@ enum RecorderWriterTests {
             let type = track.mediaType
             let range = try await track.load(.timeRange)
             expect(abs(range.end.seconds - 1) < 0.05, "\(type.rawValue) ends on the shared timeline after the pause")
+            expect(abs(range.end.seconds - pause.elapsed(at: 101.5)) < 0.05,
+                   "the elapsed display ends with every recorded track")
             if type == .video {
                 let segments = try await track.load(.segments)
                 expect(!segments.contains { $0.isEmpty && $0.timeMapping.target.start.seconds < 0.001 },
@@ -90,6 +128,8 @@ enum RecorderWriterTests {
                 expect(reader.status == .completed, "the saved video decodes fully")
                 expect([0.4, 0.8].allSatisfy { expected in timestamps.contains { abs($0 - expected) < 0.001 } },
                        "the raw MOV preserves video marker timestamps across pause/resume")
+                expect(eventTimes.allSatisfy { event in timestamps.contains { abs($0 - event) < 0.001 } },
+                       "stored pointer, click and typing markers align with decoded video after delayed startup and pauses")
                 continue
             }
             let reader = try AVAssetReader(asset: asset)
@@ -115,6 +155,8 @@ enum RecorderWriterTests {
             expect(reader.status == .completed, "the saved audio decodes fully")
             expect(markers.count == 2 && abs(markers[0] - 0.4) < 0.025 && abs(markers[1] - 0.8) < 0.025,
                    "audio markers align with video before and after the pause")
+            expect(eventTimes.allSatisfy { event in markers.contains { abs($0 - event) < 0.025 } },
+                   "stored pointer, click and typing markers align with decoded audio")
         }
     }
 

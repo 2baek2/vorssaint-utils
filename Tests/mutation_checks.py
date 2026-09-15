@@ -17,6 +17,10 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 
 MUTATIONS = [
+    ("recording metadata rebases after startup", "recording", "Sources/Vorssaint/Services/Recorder/RecorderSupport.swift",
+     "return timeline.eventTime(time, since: origin)",
+     "return timeline.eventTime(time, since: origin + 0.3)",
+     "stored pointer, click and typing markers align with decoded video after delayed startup and pauses"),
     ("missing feed loses fallback requirement", "app-updates", "Sources/Vorssaint/Services/AppUpdates/AppUpdateFeedSupport.swift",
      "return Findings(catalogFallbackPaths: Set(apps.map(\\.path)))", "return Findings()",
      "manifest 404 missing: only usable catalog coverage clears a missing-feed warning"),
