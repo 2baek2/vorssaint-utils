@@ -33,6 +33,7 @@ enum NotchMusicVisibilityTests {
     struct CaptureControls {
         struct Tool { let capturesAudio = false }
         let selectedTool = Tool()
+        var onSelectionProgressChange: ((Bool) -> Void)?
     }
     enum NotchContentTransition { case none, dismiss }
     struct Host { func containsHover(_ point: CGPoint) -> Bool { false } }
@@ -55,6 +56,9 @@ enum NotchMusicVisibilityTests {
         var selectedMetric: Metric?
         var modules: [NotchModule] = []
         var captureControls: CaptureControls?
+        var captureControlsCollapsed = false
+        var captureSelectionInProgress = false
+        var captureControlsWork: DispatchWorkItem?
         var captureControlsSubscription: Bool?
         var captureControlsCancel: (() -> Void)?
         var notice: NotchNotice?
