@@ -18,7 +18,7 @@ Dynamic Island adds configurable reopening and hidden-until-hover behavior, medi
 ### Changed
 - Capture controls collapse after three idle seconds or when selection starts, with a collapse arrow and compact hover or click access to reopen.
 - Dynamic Island offers an adjustable hover activation time to avoid accidental openings, while keeping transitions between controls responsive.
-- Timers show hours and minutes in the duration ruler, countdown, compact view and focus settings.
+- Timers show hours in the duration ruler, countdown, compact view and focus settings, with the ruler and compact view written as 1h35.
 - Compact timers have more breathing room and stay beside the camera when menu space changes, including in full screen.
 - Dynamic Island follows each display's menu bar height and shows track names on screens without a camera cutout. Thanks to @ruvelro.
 - Screen recordings exported with the Balanced quality keep the full resolution of the screen, so text stays as sharp as in the system recorder; only Small file reduces the picture.
