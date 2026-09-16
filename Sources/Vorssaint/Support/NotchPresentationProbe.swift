@@ -68,6 +68,9 @@ enum NotchPresentationProbe {
         host.panel.ignoresMouseEvents = true
         host.panel.orderFrontRegardless()
         var failures: [String] = []
+        if host.panel.collectionBehavior.intersection([.managed, .transient, .stationary]) != .stationary {
+            failures.append("the island must stay stationary when revealing the desktop, without a conflicting window motion policy")
+        }
         if host.panel.level.rawValue <= NSWindow.Level.statusBar.rawValue
             || host.panel.level.rawValue >= NSWindow.Level.popUpMenu.rawValue {
             failures.append("top-edge activation must outrank status items while leaving native menus above the island")

@@ -51,8 +51,9 @@ final class NotchWindowHost: NSObject, CAAnimationDelegate {
         panel.isReleasedWhenClosed = false
         panel.animationBehavior = .none
         panel.level = NotchPanel.normalLevel
-        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary,
-                                    .transient, .ignoresCycle]
+        // Stationary and transient are mutually exclusive. Keep the island
+        // anchored when the desktop is revealed, outside the system's window motion.
+        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary, .ignoresCycle]
         panel.contentView = quickAccessContainer ?? canvas
         canvas.layoutSubtreeIfNeeded()
         appliedFrame = panel.frame
