@@ -4,10 +4,10 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [3.4.0-beta.2] - 2026-09-16
 
 ### Summary
-Dynamic Island adds configurable reopening and hidden-until-hover behavior, media drop choices and capture controls that stay out of the way. Improvements also cover music, display fit, alerts, screenshot selection and watermarks, recording audio, image conversion and the sharpness of screenshots and recordings.
+Dynamic Island adds a configurable reopening page, a hidden mode revealed on hover, media drop choices and capture controls that stay out of the way. Improvements also cover music, display fit, alerts, timers, screenshot focus and watermarks, recording audio, image conversion and the sharpness of screenshots and recordings.
 
 ### Added
 - The screenshot editor adds reusable text and image watermarks with adjustable position, size, transparency and rotation. Thanks to @Logimon.
@@ -21,11 +21,11 @@ Dynamic Island adds configurable reopening and hidden-until-hover behavior, medi
 - Timers show hours in the duration ruler, countdown, compact view and focus settings, with the ruler and compact view written as 1h35.
 - Compact timers have more breathing room and stay beside the camera when menu space changes, including in full screen.
 - Dynamic Island follows each display's menu bar height and shows track names on screens without a camera cutout. Thanks to @ruvelro.
-- Screen recordings exported with the Balanced quality keep the full resolution of the screen, so text stays as sharp as in the system recorder; only Small file reduces the picture.
+- Balanced screen recordings keep the full screen resolution and stay as sharp as the system recorder, while only Small file reduces the picture.
 
 ### Fixed
 - Image conversion respects logo watermark opacity and centers previews. Thanks to @ruvelro.
-- Screenshots saved, copied, dragged or shared now carry their display density, so Retina captures open in Preview, Quick Look and documents at their real size and as sharp as system screenshots instead of doubled and softened.
+- Saved, copied, dragged and shared screenshots carry their display density, so Retina captures open at their real size and as sharp as system screenshots.
 - Dynamic Island stays anchored when revealing the desktop after hover expansion.
 - Dynamic Island shows recognizable headset icons, keeps device alerts readable and avoids false volume alerts when switching audio outputs.
 - Screen recordings no longer fail to save when microphone or system audio changes format during recording.
