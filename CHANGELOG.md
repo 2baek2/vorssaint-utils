@@ -7,9 +7,10 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-Dynamic Island adds configurable reopening and hover behavior, media drop choices and smoother tool and desktop transitions. Improvements also cover music, display fit, alerts and recording audio.
+Dynamic Island adds configurable reopening and hover behavior, media drop choices and smoother tool and desktop transitions. Improvements also cover music, display fit, alerts, recording audio and image conversion.
 
 ### Added
+- Image conversion adds a naming menu and an optional subfolder for batch results. Thanks to @ruvelro.
 - Dynamic Island adds a configurable reopening page and fresh shelf or media choices for each drag, with smooth transitions between media tools.
 
 ### Changed
@@ -19,6 +20,7 @@ Dynamic Island adds configurable reopening and hover behavior, media drop choice
 - Dynamic Island follows each display's menu bar height and shows track names on screens without a camera cutout. Thanks to @ruvelro.
 
 ### Fixed
+- Image conversion respects logo watermark opacity and centers previews. Thanks to @ruvelro.
 - Dynamic Island stays anchored when revealing the desktop after hover expansion.
 - Dynamic Island shows recognizable headset icons, keeps device alerts readable and avoids false volume alerts when switching audio outputs.
 - Screen recordings no longer fail to save when microphone or system audio changes format during recording.
