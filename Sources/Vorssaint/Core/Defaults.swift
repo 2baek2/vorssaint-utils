@@ -754,8 +754,11 @@ enum UpdateHighlightsInfo {
         guard let version = UpdateServiceSupport.SemanticVersion(raw: appVersion),
               let release = UpdateServiceSupport.SemanticVersion(raw: releaseVersion),
               (version.major, version.minor, version.patch) == (release.major, release.minor, release.patch),
-              version.prerelease.count == 2, version.prerelease[0].description == "beta",
+              (2...3).contains(version.prerelease.count), version.prerelease[0].description == "beta",
               let number = Int(version.prerelease[1].description) else { return false }
+        if version.prerelease.count == 3 {
+            guard case let .numeric(hotfix) = version.prerelease[2], hotfix >= 0 else { return false }
+        }
         return number >= 1
     }
 

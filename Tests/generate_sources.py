@@ -144,6 +144,19 @@ def main():
               "    private func bindVolumeEvents(", "    private func volumeChanged(",
               "    private func showVolume(", "    func showCurrentVolume("])
           + "}\n}\n")
+    update = "Sources/Vorssaint/Services/Update/UpdateService.swift"
+    update_view = "Sources/Vorssaint/UI/Notch/NotchUpdateControl.swift"
+    write("NotchUpdate.swift", "import AppKit\nimport SwiftUI\nimport Combine\nextension NotchUpdateTests {\n"
+          + "final class UpdateService: ObservableObject {\nstatic let shared = UpdateService()\n"
+          + declaration(update, "    enum State:")
+          + "@Published var state: State = .idle\n}\n"
+          + "final class L10n: ObservableObject {\nstatic let shared = L10n()\n@Published var language = AppLanguage.enUS\n"
+          + declaration("Sources/Vorssaint/Core/Localization.swift", "    var s: Strings")
+          + "}\nfinal class Service: State {\n"
+          + declaration(notch, "    func showUpdate()")
+          + "}\n"
+          + declaration(update_view, "struct NotchUpdateControl:")
+          + "}\n")
     canvas = "Sources/Vorssaint/Services/Notch/NotchWindowHost.swift"
     write("NotchHover.swift", "import AppKit\nextension NotchHoverTests {\nfinal class Service: State {\n"
           + "".join(declaration(notch, prefix).replace("    private ", "    ", 1) for prefix in [
