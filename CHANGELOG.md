@@ -32,6 +32,7 @@ Dynamic Island adds configurable reopening and hidden-until-hover behavior, medi
 - Dynamic Island hides playing music when At rest is set to Nothing or automatic music is disabled, while keeping controls available on demand.
 - Dynamic Island simulates a camera cutout within the menu bar on displays without one, preserving its shape and expansion. Thanks to @Yahddyyp.
 - Screen captures respond to the first drag and keep the selector and magnifier smooth with Dynamic Island controls. Thanks to @ruvelro.
+- Screenshot previews take the keyboard when they appear, so ⌘C and ⌘S work right after a capture, and More options can turn that off.
 
 ## [3.4.0-beta.1] - 2026-09-15
 
