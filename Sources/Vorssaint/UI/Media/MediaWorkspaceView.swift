@@ -54,6 +54,7 @@ struct MediaWorkspaceView: View {
     @ObservedObject private var media: MediaService
     @ObservedObject private var featureRuntime = FeatureRuntime.shared
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.notchPresentation) private var inNotch
 
     @AppStorage(DefaultsKey.mediaLastTool) private var toolRaw = MediaTool.videoCompressor.rawValue
     @AppStorage(DefaultsKey.mediaVideoStart) private var videoStart = 0.0
@@ -129,17 +130,23 @@ struct MediaWorkspaceView: View {
     private let initialInputs: [URL]
     private let initialTool: MediaTool?
     private let preservesServiceState: Bool
+    private let onContentHeightChange: ((CGFloat) -> Void)?
+    private let onToolChange: (() -> Void)?
 
     init(compact: Bool, onClose: (() -> Void)? = nil,
          media: MediaService = .shared, initialInputs: [URL] = [],
          initialTool: MediaTool? = nil, preservesServiceState: Bool = false,
-         workspace: MediaWorkspaceSelection? = nil) {
+         workspace: MediaWorkspaceSelection? = nil,
+         onContentHeightChange: ((CGFloat) -> Void)? = nil,
+         onToolChange: (() -> Void)? = nil) {
         self.compact = compact
         self.onClose = onClose
         self.media = media
         self.initialInputs = initialInputs
         self.initialTool = initialTool
         self.preservesServiceState = preservesServiceState
+        self.onContentHeightChange = onContentHeightChange
+        self.onToolChange = onToolChange
         _workspace = StateObject(wrappedValue: workspace ?? MediaWorkspaceSelection())
     }
 
@@ -173,6 +180,8 @@ struct MediaWorkspaceView: View {
         Binding {
             selectedTool
         } set: { newValue in
+            guard newValue != selectedTool else { return }
+            onToolChange?()
             selectedTool = newValue
         }
     }
@@ -183,15 +192,7 @@ struct MediaWorkspaceView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: compact ? 10 : 14) {
-            header
-            toolPicker
-            ScrollView {
-                content
-                    .padding(.trailing, 1)
-            }
-            .frame(maxHeight: compact && !preservesServiceState ? 430 : .infinity)
-        }
+        layout
         .onAppear {
             if !workspace.loadedInitialInputs {
                 workspace.loadedInitialInputs = true
@@ -228,6 +229,33 @@ struct MediaWorkspaceView: View {
                 mediaDefaultsTask?.cancel()
                 workspace.durationLoading.cancel()
                 cancelVideoImport()
+            }
+        }
+    }
+
+    private var layout: some View {
+        Group {
+            if let onContentHeightChange {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: compact ? 10 : 14) {
+                        header
+                        toolPicker
+                        content.padding(.trailing, 1)
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: {
+                        onContentHeightChange($0)
+                    }
+                }
+            } else {
+                VStack(alignment: .leading, spacing: compact ? 10 : 14) {
+                    header
+                    toolPicker
+                    ScrollView {
+                        content.padding(.trailing, 1)
+                    }
+                    .frame(maxHeight: compact ? 430 : .infinity)
+                }
             }
         }
     }
@@ -272,63 +300,74 @@ struct MediaWorkspaceView: View {
         }
     }
 
-    private var fileCard: some View {
-        VStack(alignment: .leading, spacing: 9) {
-            ZStack(alignment: .trailing) {
-                Button {
-                    chooseInput()
-                } label: {
-                    HStack(spacing: 9) {
-                        Image(systemName: selectedTool == .textExtractor ? "doc.text.viewfinder" : "doc.badge.plus")
-                            .font(.system(size: 16, weight: .semibold))
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(inputTitle)
-                                .font(.system(size: compact ? 11.5 : 12.5, weight: .semibold))
-                                .lineLimit(1)
-                                .truncationMode(.middle)
-                            Text(l10n.s.mediaDropHint)
-                                .font(.system(size: compact ? 9.5 : 10.5))
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                        }
-                        Spacer(minLength: 0)
-                    }
-                    .padding(compact ? 9 : 12)
-                    .padding(.trailing, inputURLs.isEmpty ? 0 : (compact ? 30 : 34))
-                    .frame(maxWidth: .infinity, minHeight: compact ? 52 : 62, alignment: .leading)
-                    .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                }
-                .buttonStyle(.plain)
-                .frame(maxWidth: .infinity, minHeight: compact ? 52 : 62, alignment: .leading)
-
-                if !inputURLs.isEmpty {
-                    Button {
-                        clearInput()
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: compact ? 14 : 16, weight: .semibold))
-                            .foregroundStyle(.secondary)
-                            .frame(width: compact ? 24 : 28, height: compact ? 24 : 28)
-                            .contentShape(Circle())
-                    }
-                    .buttonStyle(.plain)
-                    .help(l10n.s.mediaCancel)
-                    .padding(.trailing, compact ? 8 : 10)
-                }
-            }
-            .frame(maxWidth: .infinity, minHeight: compact ? 52 : 62, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(isDropTargeted ? Color.accentColor.opacity(0.16) : PanelSurface.controlFill(for: colorScheme))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(isDropTargeted ? Color.accentColor.opacity(0.7) : PanelSurface.border(for: colorScheme),
-                                  lineWidth: isDropTargeted ? 1.2 : 0.8)
-            )
-            .onDrop(of: [.fileURL], isTargeted: $isDropTargeted) { providers in
+    @ViewBuilder private var inputDropTarget: some View {
+        if inNotch {
+            inputSelector
+        } else {
+            inputSelector.onDrop(of: [.fileURL], isTargeted: $isDropTargeted) { providers in
                 acceptDrop(providers)
             }
+        }
+    }
+
+    private var inputSelector: some View {
+        ZStack(alignment: .trailing) {
+            Button {
+                chooseInput()
+            } label: {
+                HStack(spacing: 9) {
+                    Image(systemName: selectedTool == .textExtractor ? "doc.text.viewfinder" : "doc.badge.plus")
+                        .font(.system(size: 16, weight: .semibold))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(inputTitle)
+                            .font(.system(size: compact ? 11.5 : 12.5, weight: .semibold))
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                        Text(l10n.s.mediaDropHint)
+                            .font(.system(size: compact ? 9.5 : 10.5))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .padding(compact ? 9 : 12)
+                .padding(.trailing, inputURLs.isEmpty ? 0 : (compact ? 30 : 34))
+                .frame(maxWidth: .infinity, minHeight: compact ? 52 : 62, alignment: .leading)
+                .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            }
+            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity, minHeight: compact ? 52 : 62, alignment: .leading)
+
+            if !inputURLs.isEmpty {
+                Button {
+                    clearInput()
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: compact ? 14 : 16, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .frame(width: compact ? 24 : 28, height: compact ? 24 : 28)
+                        .contentShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .help(l10n.s.mediaCancel)
+                .padding(.trailing, compact ? 8 : 10)
+            }
+        }
+        .frame(maxWidth: .infinity, minHeight: compact ? 52 : 62, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(isDropTargeted ? Color.accentColor.opacity(0.16) : PanelSurface.controlFill(for: colorScheme))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(isDropTargeted ? Color.accentColor.opacity(0.7) : PanelSurface.border(for: colorScheme),
+                              lineWidth: isDropTargeted ? 1.2 : 0.8)
+        )
+    }
+
+    private var fileCard: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            inputDropTarget
 
             HStack(spacing: 7) {
                 Text(l10n.s.mediaOutput)

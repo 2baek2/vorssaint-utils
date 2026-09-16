@@ -7,10 +7,13 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-Dynamic Island responds sooner, respects music visibility, fits each display's menu bar and improves timer and device alerts. Screen recordings handle audio changes more reliably.
+Dynamic Island adds configurable reopening and hover behavior, media drop choices and smoother tool transitions. Improvements also cover music, display fit, alerts and recording audio.
+
+### Added
+- Dynamic Island adds a configurable reopening page and fresh shelf or media choices for each drag, with smooth transitions between media tools.
 
 ### Changed
-- Dynamic Island opens and closes sooner on hover, without extra pauses when moving between its controls.
+- Dynamic Island offers an adjustable hover activation time to avoid accidental openings, while keeping transitions between controls responsive.
 - Timers show hours and minutes in the duration ruler, countdown, compact view and focus settings.
 - Compact timers have more breathing room and stay beside the camera when menu space changes, including in full screen.
 - Dynamic Island follows each display's menu bar height and shows track names on screens without a camera cutout. Thanks to @ruvelro.
