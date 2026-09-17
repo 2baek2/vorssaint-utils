@@ -7,7 +7,7 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-App Switcher makes multiple windows easier to see with large icons, the mixer remembers pinned apps and their order, and capture guides reveal the repeat-region shortcut. Dynamic Island reduces background work for music bars and lyrics, improves compact spacing, transitions and access to music controls, while panel permission buttons align with the card text.
+App Switcher makes multiple windows easier to see with large icons, the mixer remembers pinned apps and their order, and capture guides reveal the repeat-region shortcut. Dynamic Island reduces background work for music bars and lyrics, improves compact spacing, transitions and access to music controls, while panel permission buttons align with the card text and Command Bar offers reliable Keep Awake durations.
 
 ### Added
 - Capture guides show R to repeat the last selected area, including in Dynamic Island. Thanks to @marcelharinck.
@@ -20,6 +20,7 @@ App Switcher makes multiple windows easier to see with large icons, the mixer re
 - Dynamic Island opens and closes smoothly at the top edge when set to hide until hover.
 
 ### Fixed
+- Command Bar offers all Keep Awake durations without turning unsupported times into indefinite sessions. Thanks to @tuttopassastudios and @brandom.
 - Panel permission and recent capture buttons align with the card text. Thanks to @COMEBACKISREAL.
 - App Switcher shows two window previews side by side when space allows, even with only one app in the icon row.
 - Dynamic Island offers playback controls when a music app is recognized and updates them after permission is granted.
