@@ -7,7 +7,7 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-App Switcher makes multiple windows easier to see with large icons, the mixer remembers pinned apps and their order, and capture guides reveal the repeat-region shortcut. Dynamic Island reduces background work for music bars and lyrics, improves compact spacing, transitions and access to music controls, while panel buttons align with their text, Command Bar adds emoji skin tones and reliable Keep Awake durations, and recent captures open promptly from other apps.
+App Switcher makes multiple windows easier to see and brings selected windows forward without raising siblings. The mixer remembers pinned apps and their order, capture guides reveal repeat-region shortcuts, Dynamic Island improves music efficiency and interaction, panel buttons align correctly, Command Bar adds emoji skin tones and reliable Keep Awake durations, and recent captures open promptly from other apps.
 
 ### Added
 - Command Bar offers a default emoji skin tone and one-off alternatives from each emoji’s actions. Thanks to @justin-chiam.
@@ -21,6 +21,7 @@ App Switcher makes multiple windows easier to see with large icons, the mixer re
 - Dynamic Island opens and closes smoothly at the top edge when set to hide until hover.
 
 ### Fixed
+- App Switcher brings the selected window forward while preserving focus recovery and the correct app menus. Thanks to @shlok1806.
 - Recent captures appear promptly when opened from another app and close when switching apps. Thanks to @iltonandrew.
 - Command Bar offers all Keep Awake durations without turning unsupported times into indefinite sessions. Thanks to @tuttopassastudios and @brandom.
 - Panel permission and recent capture buttons align with the card text. Thanks to @COMEBACKISREAL.
