@@ -634,7 +634,7 @@ private final class NotchCanvas: NSView {
         edge.frame = bounds
         contentCover.frame = bounds
         var translation = CGAffineTransform(translationX: (bounds.width - contentSize.width) / 2, y: 0)
-        silhouette.path = NotchShape(attached: true, radius: min(28, contentSize.height / 2))
+        silhouette.path = NotchShape(attached: true, radius: NotchLayout.surfaceRadius(height: contentSize.height))
             .path(in: CGRect(origin: .zero, size: contentSize)).cgPath.copy(using: &translation)
         edge.path = silhouette.path
         edge.opacity = contentSize.height > 64 ? 1 : 0
