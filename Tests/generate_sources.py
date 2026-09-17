@@ -86,6 +86,22 @@ def main():
           + declaration("Sources/Vorssaint/Services/Switcher/WindowEnumerator.swift",
                         "    static func dockPreviewMayActivate(")
           + "}\n")
+    # Entire input/mute services retain their production control flow. Only
+    # visibility, scheduling, defaults and HAL transport are replaced by fixtures.
+    input_source = "Sources/Vorssaint/Services/Audio/AudioInputDeviceManager.swift"
+    mute_source = "Sources/Vorssaint/Services/QuickTools/MicMuteService.swift"
+    input_bodies = (declaration(input_source, "struct MixerInputDevice:")
+                    + declaration(input_source, "final class AudioInputDeviceManager:")
+                    + declaration(mute_source, "final class MicMuteService:"))
+    input_bodies = (input_bodies.replace("fileprivate ", "")
+                   .replace("private(set) ", "").replace("private ", "")
+                   .replace("static let shared =", "static var shared ="))
+    for operation in ("HasProperty", "IsPropertySettable", "GetPropertyDataSize",
+                      "GetPropertyData", "SetPropertyData", "AddPropertyListener",
+                      "RemovePropertyListener"):
+        input_bodies = input_bodies.replace("AudioObject" + operation + "(", "HAL." + operation + "(")
+    write("MixerInputVolume.swift", "import Foundation\nimport Combine\nimport CoreAudio\nimport AudioToolbox\n"
+          + "extension MixerInputVolumeContract {\n" + input_bodies + "}\n")
     mixer = "Sources/Vorssaint/Services/Audio/AppVolumeMixer.swift"
     write("MixerOutputAdjustment.swift", "import CoreAudio\nimport Foundation\n"
           + "extension MixerOutputAdjustmentContract {\nfinal class Mixer {\n"

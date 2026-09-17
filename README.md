@@ -74,7 +74,7 @@ The rest bends the same way: panel sections reorder and hide, the compact layout
 - **Volume mixer.** Adjust the Mac's overall volume or slide any single app up or down, enter an exact percentage, and push a quiet one past 100 percent when a video is just too low. Send system sounds through another output, or hide the apps you never adjust to keep the list short. Pin favorites from each row’s menu and hold Command while dragging an app to reorder it; positions survive closing apps and travel with settings backups. No audio driver, no setup.
 - **Per app output.** Send your music to the speakers and a call to your headset at the same time.
 - **Output switcher.** Cycle between chosen outputs with one shortcut, and drop the volume automatically when headphones disconnect.
-- **Microphone tools.** Pin your favorite input so the Mac stops guessing, and mute every microphone at once with a click or shortcut, whichever one an app is using.
+- **Microphone tools.** Pin your favorite input so the Mac stops guessing, adjust its input volume in the mixer with an exact percentage on supported devices, and mute every microphone at once with a click or shortcut, whichever one an app is using. Input volume stays locked while microphone mute is active.
 - **Music app blocker.** Stops the Music app from bursting in when headphones connect. You can still open it yourself.
 
 ### Know what your Mac is doing

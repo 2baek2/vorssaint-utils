@@ -94,6 +94,7 @@ struct MetricsTests {
         NotchTests.run { expect($0, $1) }
         NotchVolumeKeyTests.run { expect($0, $1) }
         MixerOutputAdjustmentContract.run(suite)
+        MixerInputVolumeContract.run(suite)
 
         // MARK: Byte / rate formatting
 
