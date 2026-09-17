@@ -41,6 +41,7 @@ struct MetricsTests {
             ("uninstaller", { UninstallerFlowTests.run(suite) }),
             ("launcher", { QuickLauncherContract.run(suite) }),
             ("switcher", { SwitcherScrollContract.run(suite) }),
+            ("keep-awake", { KeepAwakeCatalogContract.run(suite) }),
         ]
         var selected = Set<String>()
         var listOnly = false
