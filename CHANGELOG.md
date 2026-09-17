@@ -22,6 +22,7 @@ App Switcher makes multiple windows easier to see and brings selected windows fo
 - Dynamic Island opens and closes smoothly at the top edge when set to hide until hover.
 
 ### Fixed
+- Dynamic Island shows a video playing in a browser even when a music app is open but stopped. Thanks to @ruvelro.
 - App Switcher brings the selected window forward while preserving focus recovery and the correct app menus. Thanks to @shlok1806.
 - Recent captures appear promptly when opened from another app and close when switching apps. Thanks to @iltonandrew.
 - Command Bar offers all Keep Awake durations without turning unsupported times into indefinite sessions. Thanks to @tuttopassastudios and @brandom.

@@ -159,8 +159,20 @@ enum NotchMusicHardeningTests {
         }
         expect(choose([browser, music]) == music, "a browser video cannot take controls from playing music")
         expect(choose([music, browser]) == music, "source discovery order does not change music priority")
-        expect(choose([browser, paused], previous: 10) == paused, "pausing music keeps its resume control reachable")
-        expect(choose([browser, paused]) == paused, "reopening the music surface can still reach paused music")
+        expect(choose([browser, paused], previous: 10) == browser,
+               "a video playing takes the island from music paused in the background")
+        expect(choose([browser, paused]) == browser,
+               "the same holds on a first read, with nothing remembered")
+        let idleBrowser = source(20, music: false, playing: false)
+        expect(choose([idleBrowser, paused], previous: 10) == paused,
+               "pausing music keeps its resume control reachable once nothing is playing")
+        expect(choose([idleBrowser, paused]) == paused, "reopening the music surface can still reach paused music")
+        expect(choose([browser, paused, other], previous: 10) == other,
+               "playing music still outranks a playing browser and a paused music app")
+        // A music app open but stopped, a video playing in the browser: the
+        // island used to go blank, since paused music outranked everything.
+        expect(choose([paused, browser], previous: nil, system: 20) == browser,
+               "a stopped music app left open never blanks the island over a playing video")
         expect(choose([browser, source(10, music: true, track: false)]) == browser,
                "an empty music app does not hide browser playback")
         expect(choose([browser], previous: 10) == browser, "closing the music app releases its priority")
