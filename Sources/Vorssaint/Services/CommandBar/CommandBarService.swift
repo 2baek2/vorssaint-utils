@@ -1758,6 +1758,7 @@ final class CommandBarService: ObservableObject {
                 })
             }
         }
+        actions.append(contentsOf: skinToneActions(for: entry))
         if CommandBarPreferences.acceptsPin(rowID: entry.id) {
             actions.append(RowAction(id: "pin",
                                      title: isPinned(entry) ? bar.actionUnpin : bar.actionPin,
@@ -1803,6 +1804,28 @@ final class CommandBarService: ObservableObject {
             })
         }
         return actions
+    }
+
+    /// The other tones of the selected emoji, for the person whose default is
+    /// not the one this message wants. Usage still belongs to the same emoji;
+    /// the chosen tone applies only to this insertion, not the preference.
+    private func skinToneActions(for entry: CommandBarEntry) -> [RowAction] {
+        // The id carries the emoji itself, untoned, so the base needs no lookup.
+        guard let base = CommandBarPreferences.emojiIdentity(fromRowID: entry.id),
+              CommandBarEmoji.acceptsSkinTone(base) else { return [] }
+        let current = CommandBarPreferences.skinTone(
+            from: UserDefaults.standard.string(forKey: DefaultsKey.commandBarEmojiSkinTone) ?? "")
+        return CommandBarEmoji.SkinTone.allCases.filter { $0 != current }.map { tone in
+            let character = CommandBarEmoji.applying(tone, to: base)
+            return RowAction(id: "emojiSkinTone.\(tone.rawValue)",
+                             title: character,
+                             symbolName: "hand.raised") { [weak self] in
+                guard let self else { return }
+                self.recordUsage(of: entry)
+                self.hide()
+                CommandBarCatalog.typeAtCursor(character)
+            }
+        }
     }
 
     /// Shows a row where it lives instead of running it. An app that was
@@ -2300,13 +2323,15 @@ final class CommandBarService: ObservableObject {
         }
     }
 
-    private func finish(_ entry: CommandBarEntry, value: Int?) {
+    /// Normal insertion and one-off variants share the same learning history.
+    private func recordUsage(of entry: CommandBarEntry) {
         let now = Date().timeIntervalSince1970
         let typedQuery: String
-        if case .argument = mode {
+        switch mode {
+        case .argument, .actions:
             typedQuery = CommandBarCompletion.queryForLearning(
                 current: savedQuery, beforeCompletion: queryBeforeCompletion)
-        } else {
+        default:
             typedQuery = CommandBarCompletion.queryForLearning(
                 current: query, beforeCompletion: queryBeforeCompletion)
         }
@@ -2337,6 +2362,10 @@ final class CommandBarService: ObservableObject {
                                           forKey: DefaultsKey.commandBarQueryHabits)
             }
         }
+    }
+
+    private func finish(_ entry: CommandBarEntry, value: Int?) {
+        recordUsage(of: entry)
         // Handed over before hiding, which wipes the field and the selection.
         queryWhenRun = query
         selectionWhenRun = selectedText

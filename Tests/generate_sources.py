@@ -42,6 +42,15 @@ def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
     uninstall = "Sources/Vorssaint/Services/Uninstall/AppUninstaller.swift"
     bar = "Sources/Vorssaint/Services/CommandBar/CommandBarService.swift"
+    write("CommandBarEmojiBodies.swift", "import Foundation\n"
+          + "extension CommandBarEmojiContract.Catalog {\n"
+          + declaration("Sources/Vorssaint/Services/CommandBar/CommandBarCatalog.swift",
+                        "    static func emojiEntries(")
+          + "}\nextension CommandBarEmojiContract.Service {\n"
+          + "".join(declaration(bar, prefix).replace("private func", "func", 1)
+                    for prefix in ["    struct RowAction:", "    private func skinToneActions(",
+                                   "    private func recordUsage(", "    private func finish("])
+          + "}\n")
     write("UninstallerFlow.swift", "import AppKit\nimport Carbon.HIToolbox\nimport Combine\n"
           + "extension UninstallerFlowTests {\n"
           + declaration(uninstall, "    enum Phase:")
