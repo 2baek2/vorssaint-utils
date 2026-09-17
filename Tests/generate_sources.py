@@ -40,6 +40,16 @@ def availability_declaration(path, prefix):
 
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
+    activator = "Sources/Vorssaint/Services/Switcher/WindowActivator.swift"
+    write("SwitcherActivationBodies.swift", "import AppKit\nimport ApplicationServices\n"
+          + "extension SwitcherActivationTests.Activator {\n"
+          + "".join(declaration(activator, prefix).replace("private static", "static", 1)
+                    for prefix in ["    private static func activateApp(",
+                                   "    private static func activateAppCooperatively(",
+                                   "    private static func activateSource("])
+          + "}\nextension SwitcherActivationTests.Bridge {\n"
+          + declaration("Sources/Vorssaint/Services/Switcher/SpaceWindowBridge.swift",
+                        "    static func frontWindow(") + "}\n")
     uninstall = "Sources/Vorssaint/Services/Uninstall/AppUninstaller.swift"
     bar = "Sources/Vorssaint/Services/CommandBar/CommandBarService.swift"
     write("CommandBarEmojiBodies.swift", "import Foundation\n"
