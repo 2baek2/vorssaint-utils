@@ -7,10 +7,10 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-App Switcher makes multiple windows easier to see with large icons, and the mixer remembers pinned apps and your preferred order. Dynamic Island reduces background work for music bars and lyrics, with better compact spacing, transitions and access to music controls. Panel permission buttons align with the card text.
+App Switcher makes multiple windows easier to see with large icons, the mixer remembers pinned apps and their order, and capture guides reveal the repeat-region shortcut. Dynamic Island reduces background work for music bars and lyrics, improves compact spacing, transitions and access to music controls, while panel permission buttons align with the card text.
 
 ### Added
-- The capture guide now shows the R key for repeating the last capture region, once there is a region to repeat.
+- Capture guides show R to repeat the last selected area, including in Dynamic Island. Thanks to @marcelharinck.
 - Pin and reorder mixer apps, with positions remembered when apps reopen and included in settings backups.
 
 ### Changed
