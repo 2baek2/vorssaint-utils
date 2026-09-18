@@ -114,7 +114,7 @@ extension AppFeature {
                 ? .idle : .mouse
         case .notchNotifications, .notchGestures, .notchTimer, .notchQueue, .notchDownloads: return .idle
         case .notchAccessories: return .periodic
-        case .notch, .notchCalendar, .notchLyrics: return .periodic
+        case .notch, .notchCalendar, .notchLyrics, .notchLiveEqualizer: return .periodic
         case .clipboardHistory, .urlCleaner, .extraBrightness,
              .monitorCPU, .monitorGPU, .monitorMemory,
              .monitorNetwork, .monitorDisk, .monitorPower:

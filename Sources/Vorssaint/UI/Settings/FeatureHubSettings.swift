@@ -773,6 +773,7 @@ extension AppFeature {
         case .notchNotifications: return FeatureStrings.notchNotifications(L10n.shared.language).title
         case .notchLyrics: return FeatureStrings.notchMusicExtras(L10n.shared.language).lyrics
         case .notchQueue: return FeatureStrings.notchMusicExtras(L10n.shared.language).queue
+        case .notchLiveEqualizer: return FeatureStrings.notchMusicExtras(L10n.shared.language).liveEqualizer
         case .notchDownloads: return FeatureStrings.notchFiles(L10n.shared.language).downloadsTitle
         case .notchCalendar: return FeatureStrings.notchCalendar(L10n.shared.language).title
         case .notch: return FeatureStrings.notch(L10n.shared.language).title
@@ -847,6 +848,7 @@ extension AppFeature {
         case .notchNotifications: return FeatureStrings.notchNotifications(L10n.shared.language).description
         case .notchLyrics: return FeatureStrings.notchMusicExtras(L10n.shared.language).lyricsDescription
         case .notchQueue: return FeatureStrings.notchMusicExtras(L10n.shared.language).queueDescription
+        case .notchLiveEqualizer: return FeatureStrings.notchMusicExtras(L10n.shared.language).liveEqualizerDescription
         case .notchDownloads: return FeatureStrings.notchFiles(L10n.shared.language).downloadsDescription
         case .notchCalendar: return FeatureStrings.notchCalendar(L10n.shared.language).description
         case .notch: return FeatureStrings.notch(L10n.shared.language).description
