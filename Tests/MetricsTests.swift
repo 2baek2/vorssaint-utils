@@ -7176,6 +7176,10 @@ struct MetricsTests {
                "moving down-right triggers bottom right")
         expect(WindowDirectionalGestureSupport.action(from: dirOrigin, to: CGPoint(x: 160, y: 160)) == .bottomLeft,
                "moving down-left triggers bottom left")
+        expect(!WindowDirectionalGestureSupport.shouldApplyKeyboardManualOverride(isAutorepeat: true),
+               "auto-repeat never forces a manual maximize/minimize override")
+        expect(WindowDirectionalGestureSupport.shouldApplyKeyboardManualOverride(isAutorepeat: false),
+               "a distinct Space, Return, or Up tap still maximizes while the ring is open")
 
         expect(MediaImageFormat.sanitized("pdf") == .pdf,
                "Image converter accepts the PDF format")
