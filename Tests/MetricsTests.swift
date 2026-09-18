@@ -12914,6 +12914,99 @@ struct MetricsTests {
                                                          targetAppFocusedWindowID: 777,
                                                          ownPID: 99),
                "App Switcher focus retries let go of a window the app opened after the switch")
+        // The guard only reads Accessibility once the cheap window-server list
+        // shows the app gained something. Both lists must therefore be taken
+        // in the same scope: the on-screen list lags a newly opened window,
+        // and comparing it against an all-windows snapshot reported nothing
+        // new in exactly the race the guard exists for. Comments are stripped
+        // first, so the one explaining that lag cannot satisfy the check.
+        let activatorSource = (try? String(
+            contentsOfFile: "Sources/Vorssaint/Services/Switcher/WindowActivator.swift",
+            encoding: .utf8)) ?? ""
+        let activatorCode = activatorSource
+            .components(separatedBy: "\n")
+            .filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix("//") }
+            .joined(separator: "\n")
+        let windowScopes = activatorCode
+            .components(separatedBy: "windowIDs(ownerPID:")
+            .dropFirst()
+            .compactMap { $0.components(separatedBy: ")").first }
+            .filter { $0.contains("options: .") }
+        expect(windowScopes.count >= 2 && windowScopes.allSatisfy { $0.contains(".optionAll") },
+               "the retry's live window list is gathered in the same scope as the snapshot it is compared against")
+        // A switch away from a fullscreen app reaches its target through a hop,
+        // whose arrival pulses raise it for up to a second. They must ask the
+        // same guard before raising, or Command-N in the app just reached is
+        // covered by the target on the next pulse. Comments are stripped, so a
+        // doc comment naming the guard cannot stand in for the call.
+        let hopFocusBody: String = {
+            guard let start = activatorCode.range(of: "static func focusAfterSpaceHop(") else { return "" }
+            let rest = activatorCode[start.upperBound...]
+            let end = rest.range(of: "static func ")?.lowerBound ?? rest.endIndex
+            return String(rest[..<end])
+        }()
+        let hopGuard = hopFocusBody.range(of: "shouldContinueFocusRetry(")
+        // Whatever the pass uses to bring the window forward, the guard comes
+        // first. Naming one of those calls would pin today's spelling and go
+        // red on a refactor that broke nothing.
+        let hopRaise = ["prepareWindowForActivation(", "activateApp(", "focusWindow("]
+            .compactMap { hopFocusBody.range(of: $0)?.lowerBound }
+            .min()
+        expect(hopGuard != nil && hopRaise != nil && hopGuard!.lowerBound < hopRaise!,
+               "the hop's arrival pass consults the retry guard before it raises the target")
+        let spaceHopCode = ((try? String(
+            contentsOfFile: "Sources/Vorssaint/Services/Switcher/SpaceHop.swift",
+            encoding: .utf8)) ?? "")
+            .components(separatedBy: "\n")
+            .filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix("//") }
+            .joined(separator: "\n")
+        expect(spaceHopCode.contains("state: self.focusState")
+               && spaceHopCode.contains("knownWindowIDs: WindowActivator.focusSnapshot(ownerPID:"),
+               "a hop snapshots the app's windows when it begins and hands that state to every pulse")
+        // Review of #1578: a hop across two or more desktops arrives with
+        // whatever tops each desktop it passed in front. Reading that as "the
+        // user moved on" would leave the window they picked behind that app,
+        // so a hop's pass judges the app's own focus instead.
+        expect(SwitcherSupport.shouldContinueFocusRetry(targetPID: 10,
+                                                        sourcePID: 20,
+                                                        frontmostPID: 30,
+                                                        targetIsMinimized: false,
+                                                        targetStartedMinimized: false,
+                                                        knownWindowIDs: [101],
+                                                        targetAppWindowIDs: [101],
+                                                        targetAppFocusedWindowID: 101,
+                                                        ignoresForeground: true,
+                                                        ownPID: 99),
+               "a hop still raises its target when another desktop's app arrived in front")
+        expect(!SwitcherSupport.shouldContinueFocusRetry(targetPID: 10,
+                                                         sourcePID: 20,
+                                                         frontmostPID: 30,
+                                                         targetIsMinimized: false,
+                                                         targetStartedMinimized: false,
+                                                         knownWindowIDs: [101],
+                                                         targetAppWindowIDs: [101, 777],
+                                                         targetAppFocusedWindowID: 777,
+                                                         ignoresForeground: true,
+                                                         ownPID: 99),
+               "a hop still gives up once the app itself moved to a window it opened later")
+        expect(!SwitcherSupport.shouldContinueFocusRetry(targetPID: 10,
+                                                         sourcePID: 20,
+                                                         frontmostPID: 30,
+                                                         targetIsMinimized: false,
+                                                         targetStartedMinimized: false,
+                                                         knownWindowIDs: [101],
+                                                         targetAppWindowIDs: [101],
+                                                         targetAppFocusedWindowID: 101,
+                                                         ownPID: 99),
+               "the ordinary passes still stand down when the user moved to another app")
+        let hopFocusCall: String = {
+            guard let start = activatorCode.range(of: "static func focusAfterSpaceHop(") else { return "" }
+            let rest = activatorCode[start.upperBound...]
+            let end = rest.range(of: "static func ")?.lowerBound ?? rest.endIndex
+            return String(rest[..<end])
+        }()
+        expect(hopFocusCall.contains("ignoresForeground: true"),
+               "the hop's arrival pass asks the guard in the mode that ignores who is in front")
         expect(SwitcherSupport.shouldContinueFocusRetry(targetPID: 10,
                                                         sourcePID: 20,
                                                         frontmostPID: 10,
