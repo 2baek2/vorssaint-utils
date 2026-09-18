@@ -5993,6 +5993,10 @@ struct MetricsTests {
         expect(Defaults.sanitizedMonitorInterval(7) == 2, "invalid monitor interval falls back to default")
         expect(Defaults.sanitizedKeyboardDebounceWindow(80) == 80,
                "valid debounce window is preserved")
+        expect(Defaults.sanitizedKeyboardDebounceWindow(1) == 1,
+               "sub-5 ms keyboard debounce windows are preserved")
+        expect(Defaults.sanitizedKeyboardDebounceWindow(3) == 3,
+               "magnetic-keyboard debounce windows below 5 ms stay available")
         expect(Defaults.sanitizedKeyboardDebounceWindow(999) == Defaults.defaultKeyboardDebounceWindowMs,
                "invalid debounce window falls back to default")
         expect(Defaults.sanitizedMenuBarLabelStyle("classic") == "classic", "valid label style is preserved")
