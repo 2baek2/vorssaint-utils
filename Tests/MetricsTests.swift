@@ -15826,17 +15826,17 @@ struct MetricsTests {
 
         for language in AppLanguage.allCases {
             let strings = FeatureStrings.diskImageInstaller(language)
-            expectFormat(strings.promptBodyFormat, ["@"],
+            expectFormat(strings.promptBodyFormat, ["@", "@"],
                          "\(language.rawValue) installer prompt format")
-            expectFormat(strings.installedBodyFormat, ["@"],
+            expectFormat(strings.installedBodyFormat, ["@", "@"],
                          "\(language.rawValue) installer success format")
-            expectFormat(strings.installedKeepingMountBodyFormat, ["@"],
+            expectFormat(strings.installedKeepingMountBodyFormat, ["@", "@"],
                          "\(language.rawValue) installer mounted-image format")
-            expectFormat(strings.installedKeepingDownloadBodyFormat, ["@"],
+            expectFormat(strings.installedKeepingDownloadBodyFormat, ["@", "@"],
                          "\(language.rawValue) installer kept-download format")
             expectFormat(strings.alreadyInstalledBodyFormat, ["@"],
                          "\(language.rawValue) installer existing-app format")
-            expectFormat(strings.installedKeptDownloadBodyFormat, ["@"],
+            expectFormat(strings.installedKeptDownloadBodyFormat, ["@", "@"],
                          "\(language.rawValue) installer kept-by-choice format")
             expectFormat(strings.installingFormat, ["@"],
                          "\(language.rawValue) installer progress format")
@@ -15870,6 +15870,56 @@ struct MetricsTests {
             applicationsURL: URL(fileURLWithPath: "/Applications", isDirectory: true))?.path
             == "/Applications/Example.app",
             "a top-level app gets one fixed Applications destination")
+        expect(DiskImageInstallerSupport.destinationURL(
+            for: URL(fileURLWithPath: "/Volumes/Installer/Example.app"),
+            applicationsURL: URL(fileURLWithPath: "/Users/test/Applications",
+                                 isDirectory: true))?.path
+            == "/Users/test/Applications/Example.app",
+            "the installer support accepts the current user's Applications directory")
+        expect(DiskImageInstallerSupport.applicationsDomain(useUserApplications: false)
+                == .localDomainMask
+                && DiskImageInstallerSupport.applicationsDomain(useUserApplications: true)
+                == .userDomainMask,
+               "the disk image setting selects the system or user application domain")
+        expect(DiskImageInstallerSupport.collisionDomains(useUserApplications: false)
+                == [.localDomainMask]
+                && DiskImageInstallerSupport.collisionDomains(useUserApplications: true)
+                == [.localDomainMask, .userDomainMask],
+               "only the opt-in installer checks both application domains for collisions")
+        let installerDestinations = DiskImageInstallerSupport.destinationURLs(
+            for: URL(fileURLWithPath: "/Volumes/Installer/Example.app"),
+            applicationsURLs: [
+                URL(fileURLWithPath: "/Applications", isDirectory: true),
+                URL(fileURLWithPath: "/Users/test/Applications", isDirectory: true),
+            ])
+        expect(installerDestinations?.map(\.path) == [
+            "/Applications/Example.app",
+            "/Users/test/Applications/Example.app",
+        ], "the already-installed guard covers both application directories")
+        expect(DiskImageInstallerSupport.destinationURLs(
+            for: URL(fileURLWithPath: "/Volumes/Installer/Example.app"),
+            applicationsURLs: []) == nil,
+            "missing application-domain resolutions fail closed")
+        let installerFixture = FileManager.default.temporaryDirectory
+            .appendingPathComponent("vorss-installer-\(UUID().uuidString)", isDirectory: true)
+        let installerFM = InstallerFileManager(root: installerFixture)
+        let installerApp = URL(fileURLWithPath: "/Volumes/Installer/Example.app")
+        let missingUserDestination = installerFM.userApplications!
+            .appendingPathComponent("Example.app", isDirectory: true)
+        let missingFolderCollisions = DiskImageInstallerSupport.collisionURLs(
+            for: installerApp, useUserApplications: true, fileManager: installerFM)
+        expect(missingFolderCollisions?.contains(missingUserDestination) == true
+                && missingFolderCollisions?.allSatisfy { !installerFM.fileExists(atPath: $0.path) } == true,
+               "a missing home Applications folder still allows an install candidate")
+        expect(!installerFM.fileExists(atPath: installerFixture.path),
+               "detecting an install candidate never creates the home Applications folder")
+        installerFM.userApplications = nil
+        expect(DiskImageInstallerSupport.collisionURLs(
+            for: installerApp, useUserApplications: true, fileManager: installerFM) == nil,
+            "an unavailable user search path fails closed for opted-in installs")
+        expect(DiskImageInstallerSupport.collisionURLs(
+            for: installerApp, useUserApplications: false, fileManager: installerFM)?.count == 1,
+            "default installs do not depend on the user's application search path")
         expect(DiskImageInstallerSupport.destinationURL(
             for: URL(fileURLWithPath: "/Volumes/Installer/.Hidden.app"),
             applicationsURL: URL(fileURLWithPath: "/Applications", isDirectory: true)) == nil,
@@ -22721,6 +22771,10 @@ struct MetricsTests {
         expect(Defaults.registeredDefaults[DefaultsKey.finderPasteImageAsFile] as? Bool == false
                 && backupKeys.contains(DefaultsKey.finderPasteImageAsFile),
                "pasting copied images as files is opt-in and travels with settings backup")
+        expect(Defaults.registeredDefaults[
+            DefaultsKey.diskImageInstallerUseUserApplications] as? Bool == false
+                && backupKeys.contains(DefaultsKey.diskImageInstallerUseUserApplications),
+               "installing disk-image apps for the current user is opt-in and travels with settings backup")
         expect(Defaults.registeredDefaults[DefaultsKey.finderCutPasteShowHUD] as? Bool == true
                 && backupKeys.contains(DefaultsKey.finderCutPasteShowHUD),
                "the Finder cut and paste floating panel default is on and travels with settings backup")
@@ -28172,6 +28226,23 @@ struct MetricsTests {
                     && !unavailable.save(empty)
                     && defaults.data(forKey: DefaultsKey.scratchpadDocument) == originalData,
                    "an unavailable private container never discards stored notes")
+        }
+    }
+
+    private final class InstallerFileManager: FileManager, @unchecked Sendable {
+        let localApplications: URL
+        var userApplications: URL?
+
+        init(root: URL) {
+            localApplications = root.appendingPathComponent("System/Applications", isDirectory: true)
+            userApplications = root.appendingPathComponent("Home/Applications", isDirectory: true)
+            super.init()
+        }
+
+        override func urls(for directory: SearchPathDirectory, in domain: SearchPathDomainMask) -> [URL] {
+            guard directory == .applicationDirectory else { return [] }
+            if domain == .localDomainMask { return [localApplications] }
+            return userApplications.map { [$0] } ?? []
         }
     }
 
