@@ -40,6 +40,17 @@ def availability_declaration(path, prefix):
 
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
+    brightness = "Sources/Vorssaint/Services/Display/BrightnessService.swift"
+    write("DisplayRestoration.swift", "import CoreGraphics\nimport Foundation\n"
+          + "extension DisplayRestorationTests {\nfinal class BrightnessService: Fixture {\n"
+          + declaration(brightness, "    enum DisplayControlFailure:")
+          + "".join(declaration(brightness, prefix).replace("private ", "", 1) for prefix in [
+              "    private static func configureDisplay(", "    private func restoreDisplay(",
+              "    private func syncLidObserver(", "    private func restoreDeferredDisplays(",
+              "    private func restoreManagedDisplays(", "    func restoreDisplaysLeftOff(",
+              "    private func commitDisplayToggle(", "    private func finishDisplayToggle(",
+              "    private func restoreManagedDisplayIfHeadless("])
+          + "}\n}\n")
     activator = "Sources/Vorssaint/Services/Switcher/WindowActivator.swift"
     write("SwitcherActivationBodies.swift", "import AppKit\nimport ApplicationServices\n"
           + "extension SwitcherActivationTests.Activator {\n"
