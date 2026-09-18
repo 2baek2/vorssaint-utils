@@ -98,6 +98,44 @@ struct MetricsTests {
                          file: file, line: line)
         }
 
+        // MARK: Port manager parser
+
+        let lsofFixture = """
+        p123
+        cExample Server
+        PTCP
+        n127.0.0.1:3000
+        n127.0.0.1:3000
+        n[::1]:3000
+        n*:3001
+        p456
+        cOther Server
+        PTCP
+        n*:3000
+        """
+        let parsedPorts = PortManagerSupport.parseLsof(lsofFixture)
+        expect(parsedPorts.map(\.port) == [3000, 3000, 3000, 3001],
+               "port parser keeps every distinct listening endpoint and removes exact duplicates")
+        expect(parsedPorts.filter { $0.pid == 123 }.count == 3,
+               "port parser keeps multiple ports and address families for one process")
+
+        let invalidEndpointFixture = """
+        p789
+        cNo Port Process
+        PTCP
+        n*:4000
+        n127.0.0.1
+        """
+        let parsedInvalid = PortManagerSupport.parseLsof(invalidEndpointFixture)
+        expect(parsedInvalid.count == 1 && parsedInvalid.first?.port == 4000,
+               "port parser ignores address lines that lack a port instead of pairing with previous port")
+
+        for lang in AppLanguage.allCases {
+            let strings = FeatureStrings.portManager(lang)
+            expect(!strings.hubDescription.isEmpty,
+                   "port manager has a non-empty hub description for \(lang)")
+        }
+
         NotchTests.run { expect($0, $1) }
         NotchVolumeKeyTests.run { expect($0, $1) }
         MixerOutputAdjustmentContract.run(suite)
@@ -15516,7 +15554,7 @@ struct MetricsTests {
 
         // MARK: Features hub catalog
 
-        expect(AppFeature.allCases.count == 68, "feature catalog has 68 features")
+        expect(AppFeature.allCases.count == 69, "feature catalog has 69 features")
         expect(Set(AppFeature.allCases.map(\.rawValue)).count == AppFeature.allCases.count,
                "feature ids are unique")
         expect(AppFeature.allCases.map(\.rawValue) == [
@@ -15529,7 +15567,7 @@ struct MetricsTests {
             "keepAwake", "brightness", "extraBrightness", "bluetoothSleep",
             "quickLauncher", "quickToggles", "colorPicker", "screenOCR", "cleaningMode", "mediaTools",
             "cleaner", "uninstaller", "homebrew", "appUpdates", "screenshot", "cameraPreview",
-            "radialMenu", "scratchpad", "commandBar", "screenRecorder", "killProcess", "notch", "notchCalendar", "notchNotifications", "notchGestures", "notchTimer", "notchAccessories", "notchLyrics", "notchQueue", "notchLiveEqualizer", "notchDownloads",
+            "radialMenu", "scratchpad", "commandBar", "screenRecorder", "killProcess", "portManager", "notch", "notchCalendar", "notchNotifications", "notchGestures", "notchTimer", "notchAccessories", "notchLyrics", "notchQueue", "notchLiveEqualizer", "notchDownloads",
             "monitorCPU", "monitorGPU", "monitorMemory", "monitorNetwork", "monitorDisk", "monitorPower",
             "fanControl",
         ], "feature ids are stable (they persist inside availability keys)")
@@ -15654,9 +15692,10 @@ struct MetricsTests {
                 && (AppFeature.availabilityDefaults[AppFeature.diskImageInstaller.availabilityKey] as? Bool) == false
                 && (AppFeature.availabilityDefaults[AppFeature.focusFollowsMouse.availabilityKey] as? Bool) == false
                 && (AppFeature.availabilityDefaults[AppFeature.killProcess.availabilityKey] as? Bool) == false
+                && (AppFeature.availabilityDefaults[AppFeature.portManager.availabilityKey] as? Bool) == false
                 && AppFeature.allCases.filter {
                     $0 != .focusFollowsMouse && $0 != .fanControl && $0 != .diskImageInstaller
-                        && $0 != .killProcess && $0 != .scrollHorizontal
+                        && $0 != .killProcess && $0 != .scrollHorizontal && $0 != .portManager
                 }.allSatisfy {
                     (AppFeature.availabilityDefaults[$0.availabilityKey] as? Bool) == true
                 },
