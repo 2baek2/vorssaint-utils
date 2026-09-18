@@ -7,7 +7,7 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-App Switcher makes multiple windows easier to see and brings selected windows forward without raising siblings. The mixer adds microphone volume; Dynamic Island gets its own Features section and a stopwatch; Command Bar adds emoji skin tones; Keep Awake automation can require every condition, text snippets can sound on expansion, and Window Layout adds a centered two-thirds placement.
+App Switcher makes multiple windows easier to see and brings selected windows forward without raising siblings. The mixer adds microphone volume; Dynamic Island gets its own Features section and a stopwatch; Command Bar adds emoji skin tones; Keep Awake automation can require every condition, text snippets can sound on expansion and explain blocked typing, and Window Layout adds a centered two-thirds placement.
 
 ### Added
 - Uninstalling Dynamic Island offers to uninstall its extensions along with it or to keep them installed.
@@ -19,6 +19,7 @@ App Switcher makes multiple windows easier to see and brings selected windows fo
 - Dynamic Island’s timer page offers a stopwatch that counts up with pause and cancel, keeping its seconds visible beside the camera.
 - Text snippets can play an alert sound of your choice each time a typed trigger expands. Thanks to @tenbux.
 - Keep Awake automation can require every selected condition, ending the session as soon as one stops holding. Thanks to @sarat03.
+- Snippet and Command Bar settings show which app holds secure input when typing is blocked, with a button to bring it forward. Thanks to @tenbux.
 
 ### Changed
 - Features lists Dynamic Island and its extensions in a section of their own instead of among the tools.
