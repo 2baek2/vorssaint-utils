@@ -7,7 +7,7 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-App Switcher makes multiple windows easier to see and keeps a window opened after a switch in front, and shortcut fields can take over macOS keys like the screenshot shortcuts. The mixer adds microphone volume; Dynamic Island gets a Features section, a stopwatch and sound-following bars; Command Bar adds emoji skin tones, a scientific calculator and an ABC layout; the menu bar shows your latest copy; sideways wheel scrolling, stricter Keep Awake automation and snippet sounds round it out.
+App Switcher makes multiple windows easier to see and keeps a window opened after a switch in front, and shortcut fields can take over macOS keys like the screenshot shortcuts. The mixer adds microphone volume; Dynamic Island gets a Features section, a stopwatch and sound-following bars; Command Bar adds emoji skin tones, a scientific calculator and an ABC layout; the menu bar shows your latest copy; a Port Manager tool, arrow styles in the screenshot editor, installing disk image apps in your home folder, sideways wheel scrolling, stricter Keep Awake automation and snippet sounds round it out.
 
 ### Added
 - Uninstalling Dynamic Island offers to uninstall its extensions along with it or to keep them installed.
@@ -27,6 +27,9 @@ App Switcher makes multiple windows easier to see and keeps a window opened afte
 - Command Bar can switch to an ABC layout while open and restore the previous one on close, under More options. Thanks to @iva-zhu.
 - Clipboard History can show the latest copy next to the menu bar icon, with an adjustable length; clicking it opens the history. Thanks to @adnn-alc.
 - Dock Preview can order windows by creation time instead of last use, from More options in its settings. Thanks to @Borisserz.
+- Port Manager, installable from Features, lists the ports your processes are listening on, filters them, and can end a process through Kill Process when that tool is installed. Thanks to @MrDXTR and @Yash121l.
+- The screenshot editor's arrow comes in solid, outline, open, double-ended and scribbly styles, chosen from a menu and remembered for the next capture. Thanks to @kxnstandin.
+- The disk image installer can put the app in the Applications folder inside your home folder, a remembered choice in the install prompt that also names the destination. Thanks to @JashRashne.
 
 ### Changed
 - Features lists Dynamic Island and its extensions in a section of their own instead of among the tools.
@@ -57,6 +60,7 @@ App Switcher makes multiple windows easier to see and keeps a window opened afte
 - Displays whose brightness slider does nothing behind a converter can dim the picture in software instead, from the panel or the Energy page, and return to the monitor's own control when that choice is turned off. Thanks to @sarat03.
 - The built-in display is no longer switched back on while the lid is closed; it comes back when the lid opens, and the panel says to open the lid when a switch has to wait. Thanks to @rkrkrkk.
 - A window opened right after an App Switcher switch, even from a fullscreen app, stays in front. Thanks to @akune.
+- Picking a mark in the screenshot editor shows its own color and thickness, so changing one no longer carries the other over from the last mark. Thanks to @kxnstandin.
 
 ## [3.4.0-beta.2.1] - 2026-09-16
 
