@@ -7,7 +7,7 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-App Switcher shows more window previews, and shortcut fields accept macOS shortcuts. The mixer adds microphone volume; Dynamic Island adds a compact layout, notifications, discovery, a stopwatch, sound bars and embedded Scratchpad; Command Bar expands emoji, calculations and layouts; utilities add Dock visibility holds, clipboard previews, port management, arrow styles, home-folder installs and sideways scrolling, alongside scheduled Keep Awake with stricter automation, snippet sounds, menu recovery and redesigned settings with back and forward navigation.
+App Switcher shows more window previews, and shortcut fields accept macOS shortcuts. The mixer adds microphone volume; Dynamic Island adds a compact layout, notifications, discovery, a stopwatch, sound bars and embedded Scratchpad; Command Bar expands emoji, calculations and layouts; utilities add Dock visibility holds, clipboard previews, port management, arrow styles, home-folder installs and sideways scrolling, alongside scheduled Keep Awake with stricter automation and restored lid sleep, snippet sounds, menu recovery and redesigned settings with back and forward navigation.
 
 ### Added
 - Dock Preview can experimentally keep the Dock visible while previews are open, off by default under More options.
@@ -55,6 +55,7 @@ App Switcher shows more window previews, and shortcut fields accept macOS shortc
 - The media tools describe each compression level under the Low, Medium and High buttons. Thanks to @samanyudas.
 
 ### Fixed
+- Keep Awake restores lid sleep after a timer or battery cutoff, respecting macOS sleep protections. Thanks to @NongKnot.
 - Dynamic Island shows a video playing in a browser even when a music app is open but stopped. Thanks to @ruvelro.
 - Stopping Music from opening on its own again catches launches from headphones connecting or their buttons, and no longer needs Accessibility.
 - Muting every microphone now releases a headset that connected while muted, and one unplugged during the mute once it returns.
