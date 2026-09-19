@@ -7,7 +7,7 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-App Switcher improves multi-window browsing and keeps newly opened windows in front, while shortcut fields can take over macOS shortcuts. The mixer adds microphone volume; Dynamic Island gains notification previews, discovery, a stopwatch and sound-following bars; Command Bar expands emoji, calculations and keyboard layouts; utilities add clipboard previews, port management, arrow styles, home-folder installs and sideways scrolling, alongside stricter Keep Awake automation, snippet sounds and menu panel recovery.
+App Switcher improves multi-window browsing and keeps newly opened windows in front, while shortcut fields can take over macOS shortcuts. The mixer adds microphone volume; Dynamic Island gains notification previews, discovery, a stopwatch and sound-following bars; Command Bar expands emoji, calculations and keyboard layouts; utilities add clipboard previews, port management, arrow styles, home-folder installs and sideways scrolling, alongside stricter Keep Awake automation, snippet sounds, menu panel recovery and redesigned settings.
 
 ### Added
 - Uninstalling Dynamic Island offers to uninstall its extensions along with it or to keep them installed.
@@ -33,6 +33,8 @@ App Switcher improves multi-window browsing and keeps newly opened windows in fr
 - The disk image installer can put the app in the Applications folder inside your home folder, a remembered choice in the install prompt that also names the destination. Thanks to @JashRashne.
 
 ### Changed
+- Settings use visual choices, cards and switches across the main pages, with live previews for the menu bar and panel.
+- Settings search highlights the selected section, and Mouse & Trackpad offers direct links to each available feature.
 - Features lists Dynamic Island and its extensions in a section of their own instead of among the tools.
 - Dynamic Island animates music bars without continuously redrawing them in the app and stops their animation when hidden.
 - Synchronized lyrics update when each verse starts, avoiding constant checks between verses and while playback is paused.
