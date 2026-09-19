@@ -66,6 +66,7 @@ App Switcher improves multi-window browsing and keeps newly opened windows in fr
 - The recording editor keeps its saving indicator on one line in narrow windows. Thanks to @Yahddyyp.
 - After an in-app update, search no longer lists the app as “Vorssaint.app.update-new”. Thanks to @Yahddyyp.
 - The window layout ring keeps the aimed direction while its default shortcut is held, instead of flashing back to maximize on every key repeat. Thanks to @Borisserz.
+- Focus follows mouse no longer makes the arriving desktop slide in a second time when the pointer settles during a desktop switch.
 - External monitors that answer brightness readings only when asked twice now show their real level instead of a guessed one, and a monitor written off earlier is checked again. Thanks to @PathGao.
 - Displays whose brightness slider does nothing behind a converter can dim the picture in software instead, from the panel or the Energy page, and return to the monitor's own control when that choice is turned off. Thanks to @sarat03.
 - The built-in display is no longer switched back on while the lid is closed; it comes back when the lid opens, and the panel says to open the lid when a switch has to wait. Thanks to @rkrkrkk.
