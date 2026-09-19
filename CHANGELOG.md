@@ -7,9 +7,10 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-App Switcher improves multi-window browsing and keeps newly opened windows in front, while shortcut fields can take over macOS shortcuts. The mixer adds microphone volume; Dynamic Island gains notification previews, discovery, a stopwatch, sound-following bars and a Scratchpad shortcut; Command Bar expands emoji, calculations and keyboard layouts; utilities add clipboard previews, port management, arrow styles, home-folder installs and sideways scrolling, alongside Keep Awake until a chosen time with stricter automation, snippet sounds, menu panel recovery, Settings back and forward, and redesigned settings.
+App Switcher improves window browsing, and shortcut fields accept macOS shortcuts. The mixer adds microphone volume; Dynamic Island gains notifications, discovery, a stopwatch, sound bars and Scratchpad access; Command Bar expands emoji, calculations and layouts; utilities add Dock visibility holds, clipboard previews, port management, arrow styles, home-folder installs and sideways scrolling, alongside scheduled Keep Awake with stricter automation, snippet sounds, menu recovery and redesigned settings with back and forward navigation.
 
 ### Added
+- Dock Preview can experimentally keep the Dock visible while previews are open, off by default under More options.
 - Uninstalling Dynamic Island offers to uninstall its extensions along with it or to keep them installed.
 - Adjust microphone input volume from the mixer, with an editable percentage on supported devices. Thanks to @GolamRafi27oo.
 - Window Layout can center a window at two-thirds of the screen width in one action. Thanks to @Borisserz.
