@@ -18,7 +18,7 @@ enum NotchActivityTests {
         accessoryContracts(suite)
         PeripheralBatteryLifecycleTests.run(suite)
         gateContracts(suite)
-     }
+    }
 
     private static func alertContracts(_ suite: TestSuite) {
         let domain = "com.vorssaint.tests.timer-alert"
@@ -168,9 +168,11 @@ enum NotchActivityTests {
                                              layout: .custom, customWidth: width, customHeight: 400)
                 let setup = geometry.expandedSize(module: .timer)
                 let active = geometry.expandedSize(module: .timer, timerHasSession: true)
-                suite.expect(geometry.contentSize(for: setup).height >= 208
-                        && geometry.contentSize(for: active).height >= 96 && active.height < setup.height,
-                        "timer setup has room for its mode pill and ruler; active controls use a shorter horizontal surface")
+                suite.expect(geometry.contentSize(for: setup).height
+                       == NotchLayout.timer(mode: .timer, hasSession: false, width: geometry.contentWidth, height: geometry.contentBudget)
+                       && geometry.contentSize(for: setup).height >= NotchLayout.timerTopRowHeight + NotchLayout.timerRowSpacing + NotchLayout.timerMinimumRulerHeight
+                       && geometry.contentSize(for: active).height >= 96 && active.height < setup.height,
+                       "timer setup has room for its mode row, ruler and start row; active controls use a shorter horizontal surface")
                 suite.expect(screen.contains(geometry.frame(for: setup)) && screen.contains(geometry.frame(for: active))
                        && geometry.frame(for: setup).maxY == geometry.frame(for: active).maxY,
                        "starting a timer preserves the screen's top edge and keeps both sizes on screen")
@@ -275,165 +277,185 @@ enum NotchActivityTests {
         let geometry = NotchGeometry(screen: CGRect(x: 0, y: 0, width: 1470, height: 956), safeAreaTop: 32, cameraWidth: 180)
         let setup = geometry.expandedSize(module: .timer, timerMode: .pomodoro)
         let active = geometry.expandedSize(module: .timer, timerHasSession: true, timerMode: .pomodoro)
-        suite.expect(geometry.contentSize(for: setup).height >= 376 && geometry.contentSize(for: active).height >= 118,
-               "the Pomodoro setup and progress row receive their own content budget")
-     }
+        suite.expect(geometry.contentSize(for: setup).height
+               == NotchLayout.timer(mode: .pomodoro, hasSession: false, width: geometry.contentWidth, height: geometry.contentBudget)
+               && geometry.contentSize(for: setup).height <= geometry.contentBudget
+               && geometry.contentSize(for: active).height >= 118,
+               "the Pomodoro setup fits the strip with its readouts under the ruler, and the progress row keeps its own budget")
+    }
 
-     private static func stopwatchContracts(_ suite: TestSuite) {
-         var session = NotchTimerSession()
-         suite.expect(session.reading(at: 5) == 300 && !session.countsUp, "an idle page still previews the countdown it would start")
-         session.start(mode: .stopwatch, minutes: 15, now: 100)
-         suite.expect(session.countsUp && session.phase == .stopwatch && session.isRunning && session.deadline == nil
-                 && session.duration == 0, "a stopwatch runs from zero with no deadline or preset duration")
-         suite.expect(session.reading(at: 100) == 0 && session.reading(at: 161.25) == 61.25,
-                 "elapsed time grows from the anchor, including fractional seconds")
-         suite.expect(session.reading(at: 99) == 0, "a clock that reads before its anchor never shows negative time")
-         suite.expect(!session.finishIfDue(at: 1_000_000) && session.isRunning && !session.completed,
-                 "a stopwatch never completes on its own, however long it runs")
-         session.start(mode: .timer, minutes: 5, now: 200)
-         suite.expect(session.countsUp && session.anchor == 100, "starting twice cannot replace a running stopwatch")
-         session.pause(at: 160)
-         suite.expect(session.isPaused && !session.isRunning && session.reading(at: 10_000) == 60,
-                 "pausing holds the elapsed reading across sleep")
-         session.pause(at: 170)
-         suite.expect(session.reading(at: 10_000) == 60, "pausing a paused stopwatch changes nothing")
-         session.resume(at: 10_000)
-         suite.expect(session.isRunning && session.reading(at: 10_040.5) == 100.5,
-                 "resuming continues from the held reading, never from the wall clock gap")
-         session.resume(at: 20_000)
-         suite.expect(session.reading(at: 20_000) == 10_060, "resuming a running stopwatch changes nothing")
-         session.pause(at: .nan)
-         suite.expect(session.isRunning, "an invalid clock cannot pause a stopwatch")
-         session.cancel()
-         suite.expect(!session.hasSession && session.reading(at: 0) == 300 && !session.countsUp,
-                 "cancel discards the stopwatch and returns the page to its countdown preview")
+    private static func stopwatchContracts(_ suite: TestSuite) {
+        var session = NotchTimerSession()
+        suite.expect(session.reading(at: 5) == 300 && !session.countsUp, "an idle page still previews the countdown it would start")
+        session.start(mode: .stopwatch, minutes: 15, now: 100)
+        suite.expect(session.countsUp && session.phase == .stopwatch && session.isRunning && session.deadline == nil
+               && session.duration == 0, "a stopwatch runs from zero with no deadline or preset duration")
+        suite.expect(session.reading(at: 100) == 0 && session.reading(at: 161.25) == 61.25,
+               "elapsed time grows from the anchor, including fractional seconds")
+        suite.expect(session.reading(at: 99) == 0, "a clock that reads before its anchor never shows negative time")
+        suite.expect(!session.finishIfDue(at: 1_000_000) && session.isRunning && !session.completed,
+               "a stopwatch never completes on its own, however long it runs")
+        session.start(mode: .timer, minutes: 5, now: 200)
+        suite.expect(session.countsUp && session.anchor == 100, "starting twice cannot replace a running stopwatch")
+        session.pause(at: 160)
+        suite.expect(session.isPaused && !session.isRunning && session.reading(at: 10_000) == 60,
+               "pausing holds the elapsed reading across sleep")
+        session.pause(at: 170)
+        suite.expect(session.reading(at: 10_000) == 60, "pausing a paused stopwatch changes nothing")
+        session.resume(at: 10_000)
+        suite.expect(session.isRunning && session.reading(at: 10_040.5) == 100.5,
+               "resuming continues from the held reading, never from the wall clock gap")
+        session.resume(at: 20_000)
+        suite.expect(session.reading(at: 20_000) == 10_060, "resuming a running stopwatch changes nothing")
+        session.pause(at: .nan)
+        suite.expect(session.isRunning, "an invalid clock cannot pause a stopwatch")
+        session.cancel()
+        suite.expect(!session.hasSession && session.reading(at: 0) == 300 && !session.countsUp,
+               "cancel discards the stopwatch and returns the page to its countdown preview")
 
-         var countdown = NotchTimerSession()
-         countdown.start(mode: .timer, minutes: 1, now: 0)
-         for (elapsed, expected) in [(0.0, 1.0), (0.25, 0.75), (0.999, 0.001)] {
-             let offset = NotchTimerSupport.secondBoundaryOffset(for: countdown, at: elapsed)
-             suite.expect(abs(offset - expected) < 1e-9, "countdown ticks align to whole remaining seconds: \(elapsed)")
-          }
-         var stopwatch = NotchTimerSession()
-         stopwatch.start(mode: .stopwatch, minutes: 1, now: 0)
-         for (elapsed, expected) in [(0.0, 1.0), (0.25, 0.75), (61.999, 0.001)] {
-             let offset = NotchTimerSupport.secondBoundaryOffset(for: stopwatch, at: elapsed)
-             suite.expect(abs(offset - expected) < 1e-9, "stopwatch ticks align to whole elapsed seconds: \(elapsed)")
-          }
-         for (session, name) in [(countdown, "countdown"), (stopwatch, "stopwatch")] {
-             for now in stride(from: 0.0, through: 59.0, by: 0.37) {
-                 let offset = NotchTimerSupport.secondBoundaryOffset(for: session, at: now)
-                 let before = NotchTimerSupport.clockText(for: session, at: now + offset - 0.001)
-                 let after = NotchTimerSupport.clockText(for: session, at: now + offset + 0.001)
-                 suite.expect(offset > 0 && offset <= 1 && before != after,
-                         "the next tick lands just after the \(name) reading changes: \(now)")
-              }
-          }
-         suite.expect(NotchTimerSupport.secondBoundaryOffset(for: countdown, at: -.infinity) == 0,
-                 "an unreadable clock schedules an immediate tick instead of an invalid date")
-          // A timeline renders the first entry of its schedule at once and wakes
-          // only at the next one, so the boundary ahead has to be the second
-          // entry, with the first already behind now.
-         let reference = Date()
-         for (session, name) in [(countdown, "countdown"), (stopwatch, "stopwatch")] {
-             for now in stride(from: 0.0, through: 3.0, by: 0.23) {
-                 let boundary = NotchTimerSupport.secondBoundaryOffset(for: session, at: now)
-                 let start = reference.addingTimeInterval(NotchTimerSupport.tickScheduleOffset(for: session, at: now))
-                 var entries = PeriodicTimelineSchedule(from: start, by: 1).entries(from: reference, mode: .normal).makeIterator()
-                 let first = entries.next()?.timeIntervalSince(reference) ?? .nan
-                 let second = entries.next()?.timeIntervalSince(reference) ?? .nan
-                 let third = entries.next()?.timeIntervalSince(reference) ?? .nan
-                 suite.expect(first <= 0 && first > -1 && abs(second - boundary) < 1e-6 && abs(third - boundary - 1) < 1e-6,
-                         "the clock's schedule starts behind now, so its first wake lands on the \(name) boundary "
-                         + "instead of skipping it: \(now)")
-              }
-          }
+        var countdown = NotchTimerSession()
+        countdown.start(mode: .timer, minutes: 1, now: 0)
+        for (elapsed, expected) in [(0.0, 1.0), (0.25, 0.75), (0.999, 0.001)] {
+            let offset = NotchTimerSupport.secondBoundaryOffset(for: countdown, at: elapsed)
+            suite.expect(abs(offset - expected) < 1e-9, "countdown ticks align to whole remaining seconds: \(elapsed)")
+        }
+        var stopwatch = NotchTimerSession()
+        stopwatch.start(mode: .stopwatch, minutes: 1, now: 0)
+        for (elapsed, expected) in [(0.0, 1.0), (0.25, 0.75), (61.999, 0.001)] {
+            let offset = NotchTimerSupport.secondBoundaryOffset(for: stopwatch, at: elapsed)
+            suite.expect(abs(offset - expected) < 1e-9, "stopwatch ticks align to whole elapsed seconds: \(elapsed)")
+        }
+        for (session, name) in [(countdown, "countdown"), (stopwatch, "stopwatch")] {
+            for now in stride(from: 0.0, through: 59.0, by: 0.37) {
+                let offset = NotchTimerSupport.secondBoundaryOffset(for: session, at: now)
+                let before = NotchTimerSupport.clockText(for: session, at: now + offset - 0.001)
+                let after = NotchTimerSupport.clockText(for: session, at: now + offset + 0.001)
+                suite.expect(offset > 0 && offset <= 1 && before != after,
+                       "the next tick lands just after the \(name) reading changes: \(now)")
+            }
+        }
+        suite.expect(NotchTimerSupport.secondBoundaryOffset(for: countdown, at: -.infinity) == 0,
+               "an unreadable clock schedules an immediate tick instead of an invalid date")
+        // A timeline renders the first entry of its schedule at once and wakes
+        // only at the next one, so the boundary ahead has to be the second
+        // entry, with the first already behind now.
+        let reference = Date()
+        for (session, name) in [(countdown, "countdown"), (stopwatch, "stopwatch")] {
+            for now in stride(from: 0.0, through: 3.0, by: 0.23) {
+                let boundary = NotchTimerSupport.secondBoundaryOffset(for: session, at: now)
+                let start = reference.addingTimeInterval(NotchTimerSupport.tickScheduleOffset(for: session, at: now))
+                var entries = PeriodicTimelineSchedule(from: start, by: 1).entries(from: reference, mode: .normal).makeIterator()
+                let first = entries.next()?.timeIntervalSince(reference) ?? .nan
+                let second = entries.next()?.timeIntervalSince(reference) ?? .nan
+                let third = entries.next()?.timeIntervalSince(reference) ?? .nan
+                suite.expect(first <= 0 && first > -1 && abs(second - boundary) < 1e-6 && abs(third - boundary - 1) < 1e-6,
+                       "the clock's schedule starts behind now, so its first wake lands on the \(name) boundary "
+                       + "instead of skipping it: \(now)")
+            }
+        }
 
-         let stopwatchCases: [(TimeInterval, String)] = [
-              (0, "00:00"), (0.999, "00:00"), (1, "00:01"), (59.9, "00:59"), (60, "01:00"),
-              (3599.99, "59:59"), (3600, "1:00:00"), (3661, "1:01:01"), (10_800, "3:00:00"),
-              (86_399, "23:59:59"), (359_999, "99:59:59"), (400_000, "99:59:59"),
-              (.greatestFiniteMagnitude, "99:59:59"), (-1, "00:00"), (.nan, "00:00"), (.infinity, "00:00")
-          ]
-         for (seconds, expected) in stopwatchCases {
-             suite.expect(NotchTimerSupport.stopwatchText(seconds) == expected,
-                     "elapsed clocks round down, grow past the timer's three hours and saturate safely: \(seconds)")
-          }
-         let compactStopwatchCases: [(TimeInterval, String)] = [
-              (0, "00:00"), (42.7, "00:42"), (599, "09:59"), (754, "12:34"), (3599.9, "59:59"),
-              (3600, "1h00"), (3720, "1h02"), (5700, "1h35"), (36_000, "10h00"),
-              (.greatestFiniteMagnitude, "99h59"), (-1, "00:00"), (.nan, "00:00")
-          ]
-         for (seconds, expected) in compactStopwatchCases {
-             suite.expect(NotchTimerSupport.compactStopwatchText(seconds) == expected,
-                     "the compact strip keeps a stopwatch's seconds until hours take their place: \(seconds)")
-          }
-         let locale = Locale(identifier: "en_US")
-         suite.expect(NotchTimerSupport.clockText(for: stopwatch, at: 61.9) == "01:01"
-                 && NotchTimerSupport.clockText(for: countdown, at: 0.1) == "01:00",
-                 "session clocks read elapsed time up and remaining time down")
-         suite.expect(NotchTimerSupport.compactText(for: stopwatch, at: 61.9, locale: locale) == "01:01"
-                 && NotchTimerSupport.compactText(for: countdown, at: 0.1, locale: locale) == "1m",
-                 "compact session readings keep each mode's own notation")
-         var hours = NotchTimerSession()
-         hours.start(mode: .timer, minutes: 120, now: 0)
-         suite.expect(NotchTimerSupport.compactText(for: hours, at: 1, locale: locale) == "1h59"
-                 && NotchTimerSupport.compactText(for: hours, at: 3600, locale: locale) == "1h00"
-                 && NotchTimerSupport.compactText(for: hours, at: 3601, locale: locale) == "59m",
-                 "compact countdowns still switch from hours to minutes at the hour boundary")
+        let stopwatchCases: [(TimeInterval, String)] = [
+            (0, "00:00"), (0.999, "00:00"), (1, "00:01"), (59.9, "00:59"), (60, "01:00"),
+            (3599.99, "59:59"), (3600, "1:00:00"), (3661, "1:01:01"), (10_800, "3:00:00"),
+            (86_399, "23:59:59"), (359_999, "99:59:59"), (400_000, "99:59:59"),
+            (.greatestFiniteMagnitude, "99:59:59"), (-1, "00:00"), (.nan, "00:00"), (.infinity, "00:00")
+        ]
+        for (seconds, expected) in stopwatchCases {
+            suite.expect(NotchTimerSupport.stopwatchText(seconds) == expected,
+                   "elapsed clocks round down, grow past the timer's three hours and saturate safely: \(seconds)")
+        }
+        let compactStopwatchCases: [(TimeInterval, String)] = [
+            (0, "00:00"), (42.7, "00:42"), (599, "09:59"), (754, "12:34"), (3599.9, "59:59"),
+            (3600, "1h00"), (3720, "1h02"), (5700, "1h35"), (36_000, "10h00"),
+            (.greatestFiniteMagnitude, "99h59"), (-1, "00:00"), (.nan, "00:00")
+        ]
+        for (seconds, expected) in compactStopwatchCases {
+            suite.expect(NotchTimerSupport.compactStopwatchText(seconds) == expected,
+                   "the compact strip keeps a stopwatch's seconds until hours take their place: \(seconds)")
+        }
+        let locale = Locale(identifier: "en_US")
+        suite.expect(NotchTimerSupport.clockText(for: stopwatch, at: 61.9) == "01:01"
+               && NotchTimerSupport.clockText(for: countdown, at: 0.1) == "01:00",
+               "session clocks read elapsed time up and remaining time down")
+        suite.expect(NotchTimerSupport.compactText(for: stopwatch, at: 61.9, locale: locale) == "01:01"
+               && NotchTimerSupport.compactText(for: countdown, at: 0.1, locale: locale) == "1m",
+               "compact session readings keep each mode's own notation")
+        var hours = NotchTimerSession()
+        hours.start(mode: .timer, minutes: 120, now: 0)
+        suite.expect(NotchTimerSupport.compactText(for: hours, at: 1, locale: locale) == "1h59"
+               && NotchTimerSupport.compactText(for: hours, at: 3600, locale: locale) == "1h00"
+               && NotchTimerSupport.compactText(for: hours, at: 3601, locale: locale) == "59m",
+               "compact countdowns still switch from hours to minutes at the hour boundary")
 
-         let timerModeDomain = "com.vorssaint.tests.timer-mode"
-         let defaults = UserDefaults(suiteName: timerModeDomain)!
-         defaults.removePersistentDomain(forName: timerModeDomain)
-         defer { defaults.removePersistentDomain(forName: timerModeDomain) }
-         suite.expect(NotchTimerSupport.savedMode(in: defaults) == .timer, "a fresh install opens the countdown")
-         for mode in NotchTimerMode.allCases {
-             defaults.set(mode.rawValue, forKey: DefaultsKey.notchTimerMode)
-             suite.expect(NotchTimerSupport.savedMode(in: defaults) == mode, "the chosen mode survives reload: \(mode)")
-          }
-         defaults.set("countdown", forKey: DefaultsKey.notchTimerMode)
-         suite.expect(NotchTimerSupport.savedMode(in: defaults) == .timer, "an unknown saved mode falls back to the countdown")
-         suite.expect(NotchTimerMode.allCases.last == .stopwatch && NotchTimerMode.allCases.first == .timer,
-                 "the stopwatch joins the pill after the existing modes, keeping their positions")
+        let domain = "com.vorssaint.tests.timer-mode"
+        let defaults = UserDefaults(suiteName: domain)!
+        defaults.removePersistentDomain(forName: domain)
+        defer { defaults.removePersistentDomain(forName: domain) }
+        suite.expect(NotchTimerSupport.savedMode(in: defaults) == .timer, "a fresh install opens the countdown")
+        for mode in NotchTimerMode.allCases {
+            defaults.set(mode.rawValue, forKey: DefaultsKey.notchTimerMode)
+            suite.expect(NotchTimerSupport.savedMode(in: defaults) == mode, "the chosen mode survives reload: \(mode)")
+        }
+        defaults.set("countdown", forKey: DefaultsKey.notchTimerMode)
+        suite.expect(NotchTimerSupport.savedMode(in: defaults) == .timer, "an unknown saved mode falls back to the countdown")
+        suite.expect(NotchTimerMode.allCases.last == .stopwatch && NotchTimerMode.allCases.first == .timer,
+               "the stopwatch joins the mode row after the existing modes, keeping their positions")
 
-         for width: CGFloat in [360, 480, 560] {
-             let geometry = NotchGeometry(screen: CGRect(x: 0, y: 0, width: 1470, height: 956), safeAreaTop: 32,
-                                          cameraWidth: 180, layout: .custom, customWidth: width, customHeight: 400)
-             let setup = geometry.expandedSize(module: .timer, timerMode: .stopwatch)
-             let active = geometry.expandedSize(module: .timer, timerHasSession: true, timerMode: .stopwatch)
-             suite.expect(geometry.contentSize(for: setup).height >= 114
-                     && setup.height < geometry.expandedSize(module: .timer).height,
-                     "a stopwatch has no ruler, so its page is shorter than the countdown's")
-             suite.expect(active == geometry.expandedSize(module: .timer, timerHasSession: true),
-                     "a running stopwatch shares the countdown's control row")
-          }
-      }
+        for width: CGFloat in [360, 480, 560] {
+            let geometry = NotchGeometry(screen: CGRect(x: 0, y: 0, width: 1470, height: 956), safeAreaTop: 32,
+                                         cameraWidth: 180, layout: .custom, customWidth: width, customHeight: 400)
+            let setup = geometry.expandedSize(module: .timer, timerMode: .stopwatch)
+            let active = geometry.expandedSize(module: .timer, timerHasSession: true, timerMode: .stopwatch)
+            suite.expect(geometry.contentSize(for: setup).height
+                   == NotchLayout.timer(mode: .stopwatch, hasSession: false, width: geometry.contentWidth, height: geometry.contentBudget)
+                   && setup.height == geometry.expandedSize(module: .timer).height,
+                   "the stopwatch keeps its clock in the countdown's ruler row, so switching between them never resizes the island")
+            suite.expect(active == geometry.expandedSize(module: .timer, timerHasSession: true),
+                   "a running stopwatch shares the countdown's control row")
+        }
+    }
 
-     /// The pill sizes each label to its word. Its contract is that the three
-     /// translated modes fit the narrowest island, with a legacy scroll bar.
-     private static func modePickerContracts(_ suite: TestSuite) {
-         let layout = NotchTimerSupport.ModePicker.self
-         let font = NSFont.systemFont(ofSize: layout.labelSize, weight: .medium)
-         let geometry = NotchGeometry(screen: CGRect(x: 0, y: 0, width: 1470, height: 956), safeAreaTop: 32,
-                                      cameraWidth: 180, layout: .custom, customWidth: NotchSize.widthRange.lowerBound,
-                                      customHeight: NotchSize.heightRange.lowerBound)
-         let available = geometry.contentSize(for: geometry.expandedSize(module: .timer)).width
-              - NSScroller.scrollerWidth(for: .regular, scrollerStyle: .legacy)
-         suite.expect(layout.height > layout.inset * 2 + layout.labelSize && layout.labelPadding > 0,
-                 "every mode label keeps room around its text inside the pill")
-         for language in AppLanguage.allCases {
-             let text = FeatureStrings.notchActivities(language)
-             let labels = [text.timer, text.pomodoro, text.stopwatch]
-             suite.expect(Set(labels).count == 3 && labels.allSatisfy { !$0.isEmpty },
-                     "each mode has its own name: \(language)")
-             let width = labels.reduce(0) { $0 + ($1 as NSString).size(withAttributes: [.font: font]).width + layout.labelPadding * 2 }
-                  + layout.spacing * CGFloat(labels.count - 1) + layout.inset * 2
-             suite.expect(width <= available, "the three modes fit the narrowest island in \(language): \(Int(width)) of \(Int(available))")
-          }
-      }
+    /// The mode row sizes each label to its word. Its contract is that the
+    /// three translated modes fit the narrowest island, with a legacy scroll bar.
+    private static func modePickerContracts(_ suite: TestSuite) {
+        let layout = NotchTimerSupport.ModePicker.self
+        let font = NSFont.systemFont(ofSize: layout.labelSize, weight: .medium)
+        let geometry = NotchGeometry(screen: CGRect(x: 0, y: 0, width: 1470, height: 956), safeAreaTop: 32,
+                                     cameraWidth: 180, layout: .custom, customWidth: NotchSize.widthRange.lowerBound,
+                                     customHeight: NotchSize.heightRange.lowerBound)
+        let available = geometry.contentSize(for: geometry.expandedSize(module: .timer)).width
+            - NSScroller.scrollerWidth(for: .regular, scrollerStyle: .legacy)
+        suite.expect(layout.height > layout.labelSize + 2 && layout.labelPadding > 0,
+               "every mode label keeps room for its underline and around its text")
+        for language in AppLanguage.allCases {
+            let text = FeatureStrings.notchActivities(language)
+            let labels = [text.timer, text.pomodoro, text.stopwatch]
+            suite.expect(Set(labels).count == 3 && labels.allSatisfy { !$0.isEmpty },
+                   "each mode has its own name: \(language)")
+            let width = labels.reduce(0) { $0 + ($1 as NSString).size(withAttributes: [.font: font]).width + layout.labelPadding * 2 }
+                + layout.spacing * CGFloat(labels.count - 1)
+            suite.expect(width <= available, "the three modes fit the narrowest island in \(language): \(Int(width)) of \(Int(available))")
+            let startFont = NSFont.systemFont(ofSize: NotchTimerSupport.StartButton.labelSize, weight: .semibold)
+            let start = (text.start as NSString).size(withAttributes: [.font: startFont]).width + NotchTimerSupport.StartButton.padding * 2
+            suite.expect(width + 12 + start <= NotchLayout.timerWideWidth,
+                   "Start sits beside the mode row from the wide layout's width on in \(language): \(Int(width + 12 + start)) of \(Int(NotchLayout.timerWideWidth))")
+        }
+        suite.expect(NotchPomodoroOption.focus.range == 1...180
+                     && NotchPomodoroOption.shortBreak.range == 1...60
+                     && NotchPomodoroOption.longBreak.range == 1...60
+                     && NotchPomodoroOption.longBreakInterval.range == 1...24
+                     && NotchPomodoroOption.totalSessions.range == 1...24,
+                     "Pomodoro menus preserve every minute and session count accepted by the saved configuration")
+        let defaults = NotchPomodoroConfiguration()
+        suite.expect(NotchPomodoroOption.focus.range.contains(defaults.focusMinutes)
+               && NotchPomodoroOption.shortBreak.range.contains(defaults.shortBreakMinutes)
+               && NotchPomodoroOption.longBreak.range.contains(defaults.longBreakMinutes)
+               && NotchPomodoroOption.longBreakInterval.range.contains(defaults.longBreakInterval)
+               && NotchPomodoroOption.totalSessions.range.contains(defaults.totalSessions),
+               "the default cycle is always on the menus")
+    }
 
-     private static func rulerContracts(_ suite: TestSuite) {
-
+    private static func rulerContracts(_ suite: TestSuite) {
         for (minute, expected) in [(1, "1"), (55, "55"), (60, "1h00"), (65, "1h05"),
                                    (140, "2h20"), (143, "2h23"), (180, "3h00")] {
             suite.expect(NotchTimerRulerScale.label(for: minute) == expected,

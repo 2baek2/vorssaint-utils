@@ -132,8 +132,8 @@ enum NotchDestinationContract {
                "removing the last system family selects an available module without keeping its old detail")
         defaults.set(true, forKey: AppFeature.fanControl.availabilityKey)
         service.open(.system, metric: .fan)
-        suite.expect(!service.modules.contains(.system) && service.selectedMetric == .fan,
-               "a separately installed fan feature retains its direct detail without other system modules")
+        suite.expect(service.modules.contains(.system) && service.selectedMetric == .fan,
+               "a separately installed fan feature exposes System and retains its direct detail")
 
         QuickLauncherService.shared = QuickLauncherContract.Launcher()
         let launcher = QuickLauncherService.shared
@@ -143,7 +143,7 @@ enum NotchDestinationContract {
                "opening Tools inside the island prepares keyboard selection on its first presentation")
         QuickLauncherContract.events.removeAll()
         let enter = QuickLauncherContract.NSEvent(keyCode: UInt16(kVK_Return))
-        suite.expect(launcher.handlePanelKey(enter, columns: NotchSupport.toolColumns) == nil
+        suite.expect(launcher.handlePanelKey(enter, flow: .columns(rows: 2)) == nil
                && QuickLauncherContract.events == ["keepAwake.toggle"],
                "Return works immediately after the island opens Tools")
         let unchangedPresentation = launcher.presentationID
