@@ -29,7 +29,10 @@ struct MetricsTests {
                 MixerFeatureTests.run(suite)
             }),
             ("shelf", { ShelfFeatureTests.run(suite) }),
-            ("updates", { UpdateFeatureTests.run(suite) }),
+            ("updates", {
+                UpdateFeatureTests.run(suite)
+                PostUpdateStatusItemRecoveryTests.run(suite)
+            }),
             ("repository", { RepositoryFeatureTests.run(suite) }),
             ("screenshots", {
                 ScreenshotWatermarkTests.run(suite)

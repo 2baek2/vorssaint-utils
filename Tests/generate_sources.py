@@ -48,6 +48,13 @@ def availability_declaration(path, prefix):
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
     panel = "Sources/Vorssaint/App/AppDelegate.swift"
+    write("PostUpdateStatusItemRecovery.swift", "import AppKit\nimport Foundation\n"
+          + "extension PostUpdateStatusItemRecoveryTests {\nfinal class Host: Fixture {\n"
+          + "".join(declaration(panel, prefix).replace("private ", "") for prefix in [
+              "    private func recoverStatusItemAfterUpdate(",
+              "    private func verifyPostUpdateStatusItem(",
+              "    private func iconIsOnScreen("])
+          + "}\n}\n")
     write("MenuPanelRecovery.swift", "import AppKit\nimport Foundation\n"
           + "extension MenuPanelRecoveryTests {\nfinal class Host: Fixture {\n"
           + "".join(declaration(panel, prefix).replace("private ", "") for prefix in [
