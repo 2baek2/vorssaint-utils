@@ -7,9 +7,11 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-App Switcher shows more window previews, and shortcut fields accept macOS shortcuts. The mixer adds microphone volume; Dynamic Island adds a compact layout, notifications, discovery, a stopwatch, sound bars and embedded Scratchpad; Command Bar expands emoji, calculations and layouts; utilities add Dock visibility holds, clipboard previews, port management, arrow styles, home-folder installs and sideways scrolling, alongside scheduled Keep Awake with stricter automation and restored lid sleep, snippet sounds, menu recovery and redesigned settings with back and forward navigation.
+App Switcher shows more window previews, and shortcut fields accept macOS shortcuts. The mixer adds microphone volume; Dynamic Island adds compact layout, notifications, discovery, a stopwatch, sound bars and embedded Scratchpad; Command Bar expands emoji, calculations and layouts; utilities add Dock visibility holds, clipboard previews, port management, local IP, quit protection progress, arrow styles, home-folder installs and sideways scrolling, alongside scheduled Keep Awake with stricter automation and restored lid sleep, snippet sounds, menu recovery and redesigned settings with history navigation.
 
 ### Added
+- The Network card shows the Mac's local IPv4 address with the connection name, copyable and hideable like the other blocks. Thanks to @muskecan.
+- Holding ⌘Q or ⌘W shows a progress bar in the confirmation prompt, which now names only the action being confirmed. Thanks to @ywu73.
 - Dock Preview can experimentally keep the Dock visible while previews are open, off by default under More options.
 - Uninstalling Dynamic Island offers to uninstall its extensions along with it or to keep them installed.
 - Adjust microphone input volume from the mixer, with an editable percentage on supported devices. Thanks to @GolamRafi27oo.
@@ -55,6 +57,7 @@ App Switcher shows more window previews, and shortcut fields accept macOS shortc
 - The media tools describe each compression level under the Low, Medium and High buttons. Thanks to @samanyudas.
 
 ### Fixed
+- App Switcher keeps an app's windows listed after Q until it really quits, including one that stops at a save prompt. Thanks to @PathGao.
 - Keep Awake restores lid sleep after a timer or battery cutoff, respecting macOS sleep protections. Thanks to @NongKnot.
 - Dynamic Island shows a video playing in a browser even when a music app is open but stopped. Thanks to @ruvelro.
 - Stopping Music from opening on its own again catches launches from headphones connecting or their buttons, and no longer needs Accessibility.
