@@ -247,9 +247,7 @@ struct NotchView: View {
         }
         .frame(height: NotchLayout.headerHeight)
         .contentShape(Rectangle())
-        .onHover { hovering in
-            withAnimation(reduceMotion ? nil : .easeOut(duration: 0.15)) { headerHovered = hovering }
-        }
+        .onHover { headerHovered = $0 }
         .onAppear { UpdateService.shared.checkIfStale() }
         // Collapsing under the pointer takes the row away without a final
         // hover(false); the next opening starts with the actions out of sight.
@@ -259,6 +257,8 @@ struct NotchView: View {
     /// The header's actions keep their room but stay out of sight until the
     /// pointer reaches the row: a title, not a toolbar. An available update
     /// leaves a dot so it is never missed, and a download stays in view.
+    /// The fade follows the value instead of the hover callback's transaction,
+    /// which reached the screen without its animation once the island was key.
     private func headerActions(quickActions: [NotchQuickAction]) -> some View {
         let updating = updates.state.isInProgress
         let revealed = headerHovered || updating
@@ -308,6 +308,7 @@ struct NotchView: View {
                 .accessibilityHidden(true)
             }
         }
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.15), value: revealed)
     }
 
     private var navigation: some View {
