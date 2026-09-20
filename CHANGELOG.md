@@ -7,88 +7,33 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-Screen recordings gain custom export speed. App Switcher shows more previews, and shortcut fields accept macOS shortcuts. The mixer adds microphone volume; Dynamic Island adds compact layouts, notifications, discovery, a stopwatch, sound bars, Scratchpad and optional menu overlap; Command Bar expands emoji, calculations and keyboard switching and no longer accesses Keychain for query learning; utilities add clipboard previews, safer port management, local IP, quit protection progress, arrow styles, home-folder installs and sideways scrolling, alongside safer music blocking, clearer Keep Awake scheduling and automation, restored lid sleep, snippet sounds, menu recovery after updates and settings history.
-
-### Added
-- Screen recordings export video, GIFs and shared links at 0.25×–4×, with custom speeds, pitch-preserving audio and aligned privacy effects. The editing preview stays at 1×.
-- Dynamic Island can show compact activity over menus, off by default under At rest in settings.
-- The Network card shows the Mac's local IPv4 address with the connection name, copyable and hideable like the other blocks. Thanks to @muskecan.
-- Holding ⌘Q or ⌘W shows a progress bar in the confirmation prompt, which now names only the action being confirmed. Thanks to @ywu73.
-- Dock Preview can experimentally keep the Dock visible during previews while preserving window sizes, off by default under More options.
-- Uninstalling Dynamic Island offers to uninstall its extensions along with it or to keep them installed.
-- Adjust microphone input volume from the mixer, with an editable percentage on supported devices. Thanks to @GolamRafi27oo.
-- Window Layout can center a window at two-thirds of the screen width in one action. Thanks to @Borisserz.
-- Command Bar offers a default emoji skin tone and one-off alternatives from each emoji's actions. Thanks to @justin-chiam.
-- Capture guides show R to repeat the last selected area, including in Dynamic Island. Thanks to @marcelharinck.
-- Pin and reorder mixer apps, with positions remembered when apps reopen and included in settings backups.
-- Dynamic Island's timer page offers a stopwatch that counts up with pause and cancel, keeping its seconds visible beside the camera.
-- Text snippets can play an alert sound of your choice each time a typed trigger expands. Thanks to @tenbux.
-- Keep Awake automation can require every selected condition, ending the session as soon as one stops holding. Thanks to @sarat03.
-- Snippet and Command Bar settings show which app holds secure input when typing is blocked, with a button to bring it forward. Thanks to @tenbux.
-- Command Bar's calculator completes missing brackets, adds scientific functions, constants and notation, and Tab continues from the answer. Thanks to @DarkEden-coding.
-- Scroll sideways in any app by holding a chosen key while turning the mouse wheel, installable from Features. Thanks to @cjscld.
-- Dynamic Island's optional music bars follow actual playback, recover after restarting and need system audio permission. Thanks to @ruvelro.
-- Dynamic Island holds notifications under the pointer and previews messages on hover, with actions to open, dismiss or browse the inbox.
-- Clicking an appointment in Dynamic Island's calendar opens it in Calendar, the way album art opens the player.
-- Shortcut fields offer to take over a macOS key, such as ⌘⇧3, while the app runs and the feature is on. Thanks to @owendaw.
-- Command Bar optionally borrows ABC, preserving the original keyboard through quick reopenings and restoring it on close or quit. Thanks to @iva-zhu.
-- Clipboard History optionally shows the latest copied content beside the menu bar icon, with adjustable length. Thanks to @adnn-alc.
-- Dock Preview can order windows by creation time instead of last use, from More options in its settings. Thanks to @Borisserz.
-- Port Manager lists listening ports, handles failed refreshes and verifies process identity before offering termination through Kill Process. Thanks to @MrDXTR and @Yash121l.
-- The screenshot editor's arrow offers solid, outline, open, double-ended and scribbly styles, remembered for the next capture. Thanks to @kxnstandin.
-- The disk image installer can put apps in your home folder's Applications, a remembered choice that names the destination. Thanks to @JashRashne.
-- Keep Awake offers separate Duration and Until modes, with a compact hour/minute grid, exact keyboard entry and the ending day. Both Start and the main switch use the selected mode; a time already past today counts for tomorrow. Thanks to @EdenRochmanSharabi.
-- Settings goes back and forward through visited pages with the mouse side buttons, a Go menu or ⌘[ and ⌘]. Thanks to @pergioa.
-- Dynamic Island's controls can show a Scratchpad shortcut that opens the pad in one click, enabled under Content in its settings. Thanks to @sarat03.
-- The Uninstaller can list and remove apps from the Command Bar, including the one selected in Finder, once enabled in its settings. Thanks to @naveenkrdy.
+This beta focuses on Dynamic Island, with a horizontal layout in place of the vertical stack and updated music, notifications, timers and controls. Dock Preview also gains an experimental option to keep an auto-hidden Dock visible while you browse previews.
 
 ### Changed
-- Music blocking preserves launches without a detected playback button and shows when Accessibility is needed.
-- App Switcher uses available space to show more previews when cycling through the current app's windows. Thanks to @EugeneCarldotme.
-- App Switcher shows two window previews side by side when space allows, even with only one app in the icon row.
-- Settings use visual choices, cards and switches, with live menu bar previews and shortcut hints that update when changed.
-- Settings search highlights the selected section, and Mouse & Trackpad offers direct links to each available feature.
-- Features lists Dynamic Island and its extensions in a section of their own instead of among the tools.
-- Dynamic Island animates music bars without continuously redrawing them in the app and stops their animation when hidden.
-- Synchronized lyrics update when each verse starts, avoiding constant checks between verses and while playback is paused.
-- Compact music, timer and download indicators keep clear of Dynamic Island's curved edges, with readable percentages in narrow spaces. Thanks to @ruvelro.
-- Dynamic Island opens and closes smoothly at the top edge when set to hide until hover.
-- Dynamic Island aligns volume and brightness controls, with fading header buttons for Keep open and Settings when their floating buttons are absent.
-- Dynamic Island adds sideways cards, accessible mixer faders, compact calendar and timer controls, and embedded Scratchpad with export dialogs attached to the island.
-- Dynamic Island's custom height goes down to 260 points, so the island can stay small; the pages adapt their rows to the chosen height.
-- Opening Dynamic Island while it shows music, a timer, a download or a notification goes to that activity; the reopening preference applies only at rest.
-- Dismissing the original system banner now waits briefly, allowing short alert sounds to finish.
-- Keyboard debounce windows adjust in 1 ms steps, reaching values below 5 ms for magnetic keyboards. Thanks to @Borisserz.
-- The media tools describe each compression level under the Low, Medium and High buttons. Thanks to @samanyudas.
+- Dynamic Island adopts a horizontal layout, with side-by-side cards, a redesigned mixer, compact calendar and timer controls, and an embedded Scratchpad.
+- Dynamic Island can be shorter, down to 260 points, with content that adapts to the available space. Opening it during music, a timer, a download or a notification goes straight to that activity.
+- App Switcher shows more window previews when space allows, including two side by side.
+
+### Added
+- Dynamic Island previews notification messages on hover, with actions to open, dismiss or browse the inbox.
+- Dynamic Island gains a stopwatch and optional music bars that follow playback. Music bars require system audio permission.
+- Dynamic Island can show compact activity over menu bar items, off by default under At rest in settings.
+- Dock Preview can experimentally keep an auto-hidden Dock visible while you browse window previews. Enable it under More options; it is off by default.
+- Screen recordings export video, GIFs and shared links at custom speeds from 0.25× to 4×, with pitch-preserving audio.
+- The mixer adds microphone volume control on supported devices, plus pinned apps and a saved custom order.
+- Command Bar adds scientific calculations and emoji skin tones.
+- Keep Awake offers separate Duration and Until modes and can require all selected automation conditions to remain active.
+- Clipboard History can show the latest copied content beside the menu bar icon.
 
 ### Fixed
-- Command Bar no longer requests Keychain access for query learning. Query-specific learning lasts until the app quits, while general usage ranking remains saved.
-- After an update, a missing menu bar icon gets one automatic recovery attempt that preserves its saved position and respects hidden menu bars.
-- App Switcher keeps an app's windows listed after Q until it really quits, including one that stops at a save prompt. Thanks to @PathGao.
-- Keep Awake restores lid sleep after timers, battery cutoffs and quitting, respecting system protections and pending changes. Thanks to @NongKnot.
-- Dynamic Island shows a video playing in a browser even when a music app is open but stopped. Thanks to @ruvelro.
-- Muting every microphone now releases a headset that connected while muted, and one unplugged during the mute once it returns.
-- Automatic link cleaning now handles links copied from browsers and messaging apps along with their formatting, while leaving pictures and files alone.
-- App Switcher brings the selected window forward while preserving focus recovery and the correct app menus. Thanks to @shlok1806.
-- Recent captures appear promptly when opened from another app and close when switching apps. Thanks to @iltonandrew.
-- Command Bar offers all Keep Awake durations without turning unsupported times into indefinite sessions. Thanks to @tuttopassastudios and @brandom.
-- Panel permission and recent capture buttons align with the card text. Thanks to @COMEBACKISREAL.
-- Dynamic Island offers playback controls when a music app is recognized and updates them after permission is granted.
-- Dynamic Island is no longer listed as a window by tiling window managers, which showed a ghost window on the current desktop. Thanks to @Yahddyyp.
-- On screens without a camera cutout, Dynamic Island no longer blinks when you switch apps or hides while a launcher has focus. Thanks to @Yahddyyp.
-- Now Playing in Dynamic Island no longer says nothing is playing while it fetches the current track. Thanks to @Yahddyyp.
-- File dialogs opened from the media tools inside Dynamic Island attach to it instead of opening behind it. Thanks to @Yahddyyp.
-- The recording editor keeps its saving indicator on one line in narrow windows. Thanks to @Yahddyyp.
-- After an in-app update, search no longer lists the app as “Vorssaint.app.update-new”. Thanks to @Yahddyyp.
-- The window layout ring keeps the aimed direction while its default shortcut is held, without flashing back to maximize on key repeats. Thanks to @Borisserz.
-- Focus follows mouse no longer makes the arriving desktop slide in a second time when the pointer settles during a desktop switch.
-- External monitors that answer brightness readings only when asked twice now show their real level, and monitors dismissed earlier are checked again. Thanks to @PathGao.
-- Displays whose brightness slider does nothing behind a converter can dim the picture in software from the panel or the Energy page. Thanks to @sarat03.
-- Switching the built-in display back on waits for the lid to open, and the panel says so meanwhile. Thanks to @rkrkrkk.
-- A window opened right after an App Switcher switch, even from a fullscreen app, stays in front. Thanks to @akune.
-- Picking a mark in the screenshot editor shows its own color and thickness instead of the last mark's. Thanks to @kxnstandin.
-- The menu bar panel can recover an unexpected close during a click inside it while preserving its position.
-- Clearing all permissions now also stops the text snippet, quit protection and brightness key listeners first, so input no longer freezes. Thanks to @dajiaohuang.
+- Dynamic Island more reliably identifies playing media, avoids flickering on displays without a camera cutout, and stays out of tiling window managers.
+- Keep Awake restores lid sleep after timers, battery cutoffs and quitting.
+- Command Bar no longer requests Keychain access for query learning. Query-specific learning now lasts only until the app quits; general usage ranking remains saved.
+- A missing menu bar icon can recover automatically after an update.
+- Clearing permissions now stops input listeners, preventing keyboard freezes.
+
+### Contributors
+Thanks to @muskecan, @ywu73, @GolamRafi27oo, @Borisserz, @justin-chiam, @marcelharinck, @tenbux, @sarat03, @DarkEden-coding, @cjscld, @ruvelro, @owendaw, @iva-zhu, @adnn-alc, @MrDXTR, @Yash121l, @kxnstandin, @JashRashne, @EdenRochmanSharabi, @pergioa, @naveenkrdy, @EugeneCarldotme, @samanyudas, @PathGao, @NongKnot, @shlok1806, @iltonandrew, @tuttopassastudios, @brandom, @COMEBACKISREAL, @Yahddyyp, @rkrkrkk, @akune and @dajiaohuang.
 
 ## [3.4.0-beta.2.1] - 2026-09-16
 
