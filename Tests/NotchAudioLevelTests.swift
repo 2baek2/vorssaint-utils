@@ -226,12 +226,60 @@ enum NotchAudioLevelLifecycleContract {
         expect(Reader.instances.count == afterSilence + 1,
                "pausing and playing rearms the same track after silence")
         guard let resumed = Reader.instances.last else { return }
-        resumed.onUnavailable()
+        music.playback = playback(playing: false)
+        drain()
+        resumed.onSilence()
+        drain()
+        let afterPausedSilence = Reader.instances.count
+        music.playback = playback()
+        drain()
+        expect(resumed.stopped && Reader.instances.count == afterPausedSilence + 1,
+               "silence heard during the pause grace does not write the next play off")
+        guard let replayed = Reader.instances.last else { return }
+        replayed.onUnavailable()
         drain()
         let afterFailure = Reader.instances.count
         music.playback = playback()
         drain()
-        expect(resumed.stopped && Reader.instances.count == afterFailure + 1,
+        expect(replayed.stopped && Reader.instances.count == afterFailure + 1,
                "a current device failure releases the reader but permits the next playback update to retry")
+
+        guard let waiting = Reader.instances.last else { return }
+        music.playback = playback(playing: false)
+        drain()
+        music.playback = playback()
+        drain()
+        guard let fresh = Reader.instances.last else { return }
+        let afterResume = Reader.instances.count
+        expect(waiting.stopped && fresh !== waiting && !fresh.stopped,
+               "resuming before any sound gives the new play a fresh reader")
+        waiting.onSilence()
+        waiting.onUnavailable()
+        waiting.onProcessesLeft()
+        waiting.onLevels([0.1])
+        drain()
+        expect(!fresh.stopped && Reader.instances.count == afterResume && service.levels == nil,
+               "a delayed silence report from the pause cannot write off the resumed play")
+        fresh.onSilence()
+        drain()
+        music.playback = playback()
+        drain()
+        expect(fresh.stopped && Reader.instances.count == afterResume,
+               "the resumed play can still give up once if its fresh reader also stays silent")
+
+        music.playback = playback(playing: false)
+        drain()
+        music.playback = playback()
+        drain()
+        guard let audible = Reader.instances.last else { return }
+        audible.onLevels([0.8])
+        drain()
+        let beforeAudiblePause = Reader.instances.count
+        music.playback = playback(playing: false)
+        drain()
+        music.playback = playback()
+        drain()
+        expect(!audible.stopped && Reader.instances.count == beforeAudiblePause && service.levels == [0.8],
+               "a short pause preserves a reader that already delivered sound")
     }
 }
