@@ -264,6 +264,7 @@ final class NotchService: ObservableObject {
         let signature = NotchEvent.allCases.map { String(NotchSupport.routes($0)) }.joined()
             + NotchSupport.idleContent().rawValue + String(NotchSupport.watchesMusicActivity())
             + modules.map(\.rawValue).joined()
+            + String(AppFeature.fanControl.isAvailable)
             + String(NotchSupport.routesShelf()) + String(NotchSupport.revealsShelfDrag())
             + String(NotchSupport.routesCaptureControls())
         if signature != settingsSignature {
@@ -1622,6 +1623,17 @@ final class NotchService: ObservableObject {
                 .dropFirst(3).receive(on: DispatchQueue.main)
                 .sink { [weak self] in
                     guard let self, self.expanded, self.selected == .tools, !self.showingAppPanel, !self.showingSections else { return }
+                    self.refreshPresentation()
+                }.store(in: &subscriptions)
+        }
+        if modules.contains(.system), AppFeature.fanControl.isAvailable {
+            // The fan card only exists once the page's first sample lands; the
+            // strip that was sized without it reserves its row again.
+            SystemMonitor.shared.$snapshot.map { $0.fanSpeeds.isEmpty }.removeDuplicates().dropFirst()
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] _ in
+                    guard let self, self.expanded, self.selected == .system, self.selectedMetric == nil,
+                          !self.showingAppPanel, !self.showingSections else { return }
                     self.refreshPresentation()
                 }.store(in: &subscriptions)
         }

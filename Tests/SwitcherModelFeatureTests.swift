@@ -145,6 +145,49 @@ enum SwitcherModelFeatureTests {
                    == ["display|port"],
                    "the recheck runs once and keeps later verdicts")
 
+            migrationDefaults.set("microphone,panel", forKey: DefaultsKey.notchHiddenControls)
+            Defaults.hideScratchpadControlOnce(in: migrationDefaults)
+            suite.expect(migrationDefaults.string(forKey: DefaultsKey.notchHiddenControls)
+                   == "microphone,panel,scratchpad"
+                   && migrationDefaults.bool(forKey: DefaultsKey.notchScratchpadControlHidden),
+                   "a hidden-controls list saved before the Scratchpad tile existed hides it once")
+            migrationDefaults.set("microphone,panel", forKey: DefaultsKey.notchHiddenControls)
+            Defaults.hideScratchpadControlOnce(in: migrationDefaults)
+            suite.expect(migrationDefaults.string(forKey: DefaultsKey.notchHiddenControls) == "microphone,panel",
+                   "showing the Scratchpad tile afterwards is kept")
+            migrationDefaults.removeObject(forKey: DefaultsKey.notchScratchpadControlHidden)
+            migrationDefaults.removeObject(forKey: DefaultsKey.notchHiddenControls)
+            Defaults.hideScratchpadControlOnce(in: migrationDefaults)
+            suite.expect(migrationDefaults.object(forKey: DefaultsKey.notchHiddenControls) == nil
+                   && migrationDefaults.bool(forKey: DefaultsKey.notchScratchpadControlHidden),
+                   "a setup that never customized the controls keeps the registered default")
+            let hiddenControlsKey = DefaultsKey.notchHiddenControls
+            let scratchpadMigrationKey = DefaultsKey.notchScratchpadControlHidden
+            suite.expect(SettingsBackupSupport.exportKeys().contains(scratchpadMigrationKey),
+                   "the migration marker travels with a later choice to show the Scratchpad tile")
+            suite.expect(!SettingsBackupSupport.valueLooksRight(scratchpadMigrationKey, "true"),
+                   "an imported migration marker must be a boolean")
+            for shown in [false, true] {
+                migrationDefaults.set(shown ? "microphone,panel" : "microphone,panel,scratchpad",
+                                      forKey: hiddenControlsKey)
+                let backup = SettingsBackupSupport.payload(appVersion: "3.4.0") {
+                    migrationDefaults.object(forKey: $0)
+                }
+                let restored = SettingsBackupSupport.sanitizedSettings(from: backup) ?? [:]
+                for key in SettingsBackupSupport.exportKeys() { migrationDefaults.removeObject(forKey: key) }
+                for (key, value) in restored { migrationDefaults.set(value, forKey: key) }
+                Defaults.hideScratchpadControlOnce(in: migrationDefaults)
+                suite.expect(migrationDefaults.string(forKey: hiddenControlsKey)?.contains("scratchpad") == !shown,
+                       "restoring a current backup preserves the explicit Scratchpad visibility choice")
+            }
+            // A restore clears every exportable key before applying the backup.
+            // Old backups have a controls list but no migration marker.
+            for key in SettingsBackupSupport.exportKeys() { migrationDefaults.removeObject(forKey: key) }
+            migrationDefaults.set("microphone,panel", forKey: hiddenControlsKey)
+            Defaults.hideScratchpadControlOnce(in: migrationDefaults)
+            suite.expect(migrationDefaults.string(forKey: hiddenControlsKey) == "microphone,panel,scratchpad",
+                   "an old backup restored after the first launch still hides the new Scratchpad tile")
+
             migrationDefaults.removeObject(
                 forKey: DefaultsKey.unifiedScreenCaptureShortcutMigrated)
             migrationDefaults.set(false, forKey: DefaultsKey.screenshotShortcutEnabled)
@@ -2210,6 +2253,8 @@ enum SwitcherModelFeatureTests {
                "disk monitor graph is shown by default")
         suite.expect(registeredDefaults[DefaultsKey.monitorNetApps] as? Bool == true,
                "network app usage block is shown by default")
+        suite.expect(registeredDefaults[DefaultsKey.monitorNetAddresses] as? Bool == true,
+               "local address block is shown by default and travels in backups")
         suite.expect(registeredDefaults[DefaultsKey.monitorDiskUsage] as? Bool == true,
                "disk usage block is shown by default")
         suite.expect(registeredDefaults[DefaultsKey.monitorDiskActivity] as? Bool == true,

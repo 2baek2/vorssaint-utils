@@ -124,6 +124,14 @@ enum CommandBarFeatureTests {
         }
         suite.expect(mathValue("1,5e-3*2", decimal: ",", grouping: ".") == 0.003,
                "scientific mantissas respect decimal-comma locales")
+        for (expression, expected) in [("sin(1e-13)*1e13", 1.0),
+                                       ("tan(1e-13)*1e13", 1.0),
+                                       ("sin(-1e-13)*1e13", -1.0),
+                                       ("1/sin(1e-13)", 1e13),
+                                       ("cos(pi/2+1e-13)/cos(pi/2+1e-13)", 1.0)] {
+            suite.expect(mathValue(expression) == expected,
+                   "small trigonometric values remain available to the rest of the calculation: \(expression)")
+        }
         for expression in ["0.1+0.2", "1/3", "-2^2", "1e-9+0", "2^100"] {
             if let result = CommandBarMath.evaluate(expression,
                                                      decimalSeparator: ".",
