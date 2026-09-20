@@ -38,7 +38,11 @@ struct MetricsTests {
                 ScreenshotWatermarkTests.run(suite)
                 ScreenshotFeatureTests.run(suite)
             }),
-            ("recorder", { RecorderFeatureTests.run(suite) }),
+            ("recorder", {
+                RecorderFeatureTests.run(suite)
+                RecorderExportSpeedTests.run(suite)
+                RecorderExportRenderingTests.run(suite)
+            }),
             ("command-bar", { CommandBarFeatureTests.run(suite) }),
             ("notch", {
                 NotchTests.run(suite)
