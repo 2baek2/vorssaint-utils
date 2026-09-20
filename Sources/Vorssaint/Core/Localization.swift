@@ -849,6 +849,8 @@ struct Strings {
 
     // MARK: Panel — network
     let networkSection: String
+    let networkIPAddresses: String
+    let networkLocalIP: String
     let networkDownload: String
     let networkUpload: String
     let networkThisSession: String
@@ -1898,6 +1900,8 @@ extension Strings {
         betaFeatureWarning: "Beta. Você pode encontrar alguns bugs.",
 
         networkSection: "Rede",
+        networkIPAddresses: "Endereços IP",
+        networkLocalIP: "IPv4 local",
         networkDownload: "Download",
         networkUpload: "Upload",
         networkThisSession: "Nesta sessão",
@@ -2935,6 +2939,8 @@ extension Strings {
         betaFeatureWarning: "Beta. You may run into some bugs.",
 
         networkSection: "Network",
+        networkIPAddresses: "IP addresses",
+        networkLocalIP: "Local IPv4",
         networkDownload: "Download",
         networkUpload: "Upload",
         networkThisSession: "This session",
