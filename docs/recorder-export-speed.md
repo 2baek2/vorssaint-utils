@@ -18,13 +18,13 @@ Run on a supported Mac:
 ./build/VorssaintDeveloper --selftest
 ```
 
-`RecorderExportSpeedTests` is registered in the recorder suite and covers legacy decoding, custom-speed persistence, invalid values and bounds, inverse clock conversion, trim/cut ordering, unchanged preview timing, visual presets and GIF budgets. These pure checks do not prove rendered audio/video synchronization or native control layout.
+`RecorderExportSpeedTests` is registered in the recorder suite and covers legacy decoding, custom-speed persistence, invalid values and bounds, inverse clock conversion, trim/cut ordering, unchanged preview timing, visual presets and GIF budgets. The recorder suite also runs `RecorderExportRenderingTests` through the production AVFoundation exporter. Synthetic video and two audio tracks cover fractional and endpoint speeds, trim and cut boundaries, blur coverage and clear frames, duration, delayed microphone, silence, pitch, gain, mute, GIF frame count and cancellation. These checks do not exercise native control layout or physical capture hardware.
 
-## macOS smoke checks before merge
+## Manual macOS smoke checks
 
 - Record a visible timer with system audio and microphone cues. Export at 1×, 1.25×, 0.5×, 1.37× and the 0.25×/4× endpoints. Check duration against edited duration / speed within encoder frame granularity, synchronization at the start and end, pitch and each track's mute/gain settings. Include a source with no audio and one with a delayed audio start.
 - Trim both ends, cut a middle interval and place zoom, cursor clicks, text, images and privacy blurs on either side. Check the exported frames across the cut and throughout each blur; the output must not lose or delay privacy effects.
 - Export a 10-second GIF at 12 fps and 2×: expect 60 sampled frames and approximately 5 seconds. Check slower GIFs against the frame budget and verify cancellation leaves any previous destination intact. Exercise normal save, Save As, copy and sharing.
 - Check the speed control in English and Portuguese at the editor's minimum width, with a cut selected. Verify 1.25× / 1,25× labels, 0.01× steps, the duration display, Done, Cancel, undo/redo and disabled controls during export. Changing export speed must not speed up the editing preview or change the master.
 
-These runtime and UI checks require macOS and have not been completed in the Linux development environment used for this change.
+Automated export regressions, the installed Developer build, selftest and strict signature verification were validated on macOS during integration. The optimized build and its selftest also passed. Manual control layout and physical capture hardware remain separate smoke checks.

@@ -7,9 +7,10 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-App Switcher shows more previews, and shortcut fields accept macOS shortcuts. The mixer adds microphone volume; Dynamic Island adds compact layouts, notifications, discovery, a stopwatch, sound bars, Scratchpad and optional menu overlap; Command Bar expands emoji, calculations and keyboard switching; utilities add clipboard previews, safer port management, local IP, quit protection progress, arrow styles, home-folder installs and sideways scrolling, alongside safer music blocking, Keep Awake automation, restored lid sleep, snippet sounds, menu recovery after updates and settings history.
+Screen recordings gain custom export speed. App Switcher shows more previews, and shortcut fields accept macOS shortcuts. The mixer adds microphone volume; Dynamic Island adds compact layouts, notifications, discovery, a stopwatch, sound bars, Scratchpad and optional menu overlap; Command Bar expands emoji, calculations and keyboard switching; utilities add clipboard previews, safer port management, local IP, quit protection progress, arrow styles, home-folder installs and sideways scrolling, alongside safer music blocking, Keep Awake automation, restored lid sleep, snippet sounds, menu recovery after updates and settings history.
 
 ### Added
+- Screen recordings export video, GIFs and shared links at 0.25×–4×, with custom speeds, pitch-preserving audio and aligned privacy effects. The editing preview stays at 1×.
 - Dynamic Island can show compact activity over menus, off by default under At rest in settings.
 - The Network card shows the Mac's local IPv4 address with the connection name, copyable and hideable like the other blocks. Thanks to @muskecan.
 - Holding ⌘Q or ⌘W shows a progress bar in the confirmation prompt, which now names only the action being confirmed. Thanks to @ywu73.
