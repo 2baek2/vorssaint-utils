@@ -7,10 +7,10 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-App Switcher shows more previews, and shortcut fields accept macOS shortcuts. The mixer adds microphone volume; Dynamic Island adds compact layout, notifications, discovery, a stopwatch, sound bars and Scratchpad; Command Bar expands emoji, calculations and layouts; utilities add Dock holds preserving window sizes, clipboard previews, port management, local IP, quit protection progress, arrow styles, home-folder installs and sideways scrolling, alongside scheduled Keep Awake with stricter automation and restored lid sleep, snippet sounds, menu recovery and redesigned settings with history navigation.
+App Switcher shows more previews, and shortcut fields accept macOS shortcuts. The mixer adds microphone volume; Dynamic Island adds compact layouts, notifications, discovery, a stopwatch, sound bars, Scratchpad and optional menu overlap; Command Bar expands emoji, calculations and layouts; utilities add Dock holds preserving window sizes, clipboard previews, port management, local IP, quit protection progress, arrow styles, home-folder installs and sideways scrolling, alongside Keep Awake automation, restored lid sleep, snippet sounds, menu recovery and settings history.
 
 ### Added
-- Dynamic Island can keep its timer, music and other compact activity on screen over the menus when the menu bar has no room, off by default under At rest in its settings.
+- Dynamic Island can show compact activity over menus, off by default under At rest in settings.
 - The Network card shows the Mac's local IPv4 address with the connection name, copyable and hideable like the other blocks. Thanks to @muskecan.
 - Holding ⌘Q or ⌘W shows a progress bar in the confirmation prompt, which now names only the action being confirmed. Thanks to @ywu73.
 - Dock Preview can experimentally keep the Dock visible during previews while preserving window sizes, off by default under More options.
@@ -51,7 +51,7 @@ App Switcher shows more previews, and shortcut fields accept macOS shortcuts. Th
 - Synchronized lyrics update when each verse starts, avoiding constant checks between verses and while playback is paused.
 - Compact music, timer and download indicators keep clear of Dynamic Island's curved edges, with readable percentages in narrow spaces. Thanks to @ruvelro.
 - Dynamic Island opens and closes smoothly at the top edge when set to hide until hover.
-- Dynamic Island shows Keep open directly in its header, and Settings appears there when its floating button is removed.
+- Dynamic Island aligns volume and brightness controls, with fading header buttons for Keep open and Settings when their floating buttons are absent.
 - Dynamic Island opens as a wide strip with sideways cards, mixer faders, compact calendar and timer controls, and an embedded Scratchpad.
 - Dynamic Island's custom height goes down to 260 points, so the island can stay small; the pages adapt their rows to the chosen height.
 - Opening Dynamic Island while it shows music, a timer, a download or a notification goes to that activity; the reopening preference applies only at rest.
@@ -60,7 +60,6 @@ App Switcher shows more previews, and shortcut fields accept macOS shortcuts. Th
 - The media tools describe each compression level under the Low, Medium and High buttons. Thanks to @samanyudas.
 
 ### Fixed
-- Dynamic Island's volume and brightness rows share one layout, so their sliders and readouts line up, and the header's actions fade in on hover while the island is focused too.
 - App Switcher keeps an app's windows listed after Q until it really quits, including one that stops at a save prompt. Thanks to @PathGao.
 - Keep Awake restores lid sleep after a timer or battery cutoff, respecting macOS sleep protections. Thanks to @NongKnot.
 - Dynamic Island shows a video playing in a browser even when a music app is open but stopped. Thanks to @ruvelro.
