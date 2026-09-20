@@ -63,6 +63,7 @@ struct MetricsTests {
                 StorageFeatureTests.run(suite)
                 ScratchpadStoreContractTests.run(suite)
             }),
+            ("quit-protection", { QuitProtectionHUD.progressChecks(suite) }),
             ("recording", {
                 RecorderSampleTimingTests.run(suite)
                 RecorderWriterTests.run(suite)
