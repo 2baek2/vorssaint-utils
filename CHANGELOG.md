@@ -7,9 +7,13 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-Dynamic Island improves list readability and compact controls, preserves persistent notification alerts, shows files saved directly to Downloads, and keeps screenshot actions within reach.
+Dynamic Island improves list readability and playback controls, can hide in full screen, preserves persistent notification alerts, shows files saved directly to Downloads, and keeps screenshot actions within reach.
+
+### Added
+- Dynamic Island can hide while an app is in full screen on its selected display. The option is off by default.
 
 ### Changed
+- Dynamic Island shows a dedicated pause button during compact playback and keeps expanded playback controls visible while player access is being set up.
 - Dynamic Island restores vertical calendar and clipboard lists and a vertical Explore grid with matching keyboard navigation. Long event titles can wrap. The mixer aligns its faders, enlarges volume controls and click targets, and shows the output device name above the controls.
 - Dynamic Island lists visible files and folders from the selected Downloads folder, newest first, including images saved directly from a browser.
 
