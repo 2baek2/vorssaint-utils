@@ -188,6 +188,11 @@ final class NotchService: ObservableObject {
                                         ? NotchTimerService.shared.session.mode : NotchTimerSupport.savedMode())
     }
     var contentSize: CGSize { geometry.contentSize(for: expandedSize) }
+    var usesGlassSurface: Bool {
+        expanded || peeking || dragPlaceholder || noticeExpanded
+            || (captureControls != nil && !captureControlsCollapsed)
+    }
+
     var surfaceSize: CGSize {
         if let captureControls {
             if captureControlsCollapsed {
@@ -1151,7 +1156,8 @@ final class NotchService: ObservableObject {
                             quickAccess: expanded && captureControls == nil && !access.buttons.isEmpty ? access : nil,
                             revealFromHidden: captureControls == nil
                                 && UserDefaults.standard.bool(forKey: DefaultsKey.notchHideUntilHover)
-                                && UserDefaults.standard.bool(forKey: DefaultsKey.notchOpenOnHover))
+                                && UserDefaults.standard.bool(forKey: DefaultsKey.notchOpenOnHover),
+                            usesGlass: usesGlassSurface)
         let activationRect: CGRect
         if captureControls != nil {
             activationRect = captureControlsCollapsed ? CGRect(origin: .zero, size: size) : .zero
@@ -1388,6 +1394,7 @@ final class NotchService: ObservableObject {
         if next != geometry { menuSpaceGeneration += 1; geometry = next }
         if windowHost == nil {
             windowHost = NotchWindowHost(content: AnyView(NotchView(service: self)), geometry: geometry, size: surfaceSize,
+                                        background: { AnyView(NotchWindowBackground(presentation: $0)) },
                                         quickAccess: { AnyView(NotchQuickAccessView(service: self, motion: $0)) })
             windowHost?.setHoverHandler { [weak self] in self?.hover($0) }
             panel?.title = FeatureStrings.notch(L10n.shared.language).title

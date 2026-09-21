@@ -59,10 +59,12 @@ enum NotchPresentationRefreshContract {
         func containsHover(_ point: CGPoint) -> Bool { frame.contains(point) }
         func contains(_ point: CGPoint) -> Bool { (animatingFrame ?? frame).contains(point) }
         var onPresent: ((CGSize) -> Void)?
+        var usesGlass = false
         var revealFromHidden = false
         func present(size: CGSize, geometry: NotchGeometry, animated: Bool,
                      transitionContent: NotchContentTransition, quickAccess: NotchQuickAccessConfiguration?,
-                     revealFromHidden: Bool) {
+                     revealFromHidden: Bool, usesGlass: Bool) {
+            self.usesGlass = usesGlass
             self.revealFromHidden = revealFromHidden
             onPresent?(size)
             targetSize = size
@@ -91,6 +93,7 @@ enum NotchPresentationRefreshContract {
         var showingSections = false
         var expanded = true
         var peeking = false, dragPlaceholder = false, compactActivityIsVisible = false
+        var noticeExpanded = false
         var notice: Bool?
         var captureControls: CaptureOptions?
         var captureControlsCollapsed = false, captureSelectionInProgress = false
@@ -140,6 +143,25 @@ enum NotchPresentationRefreshContract {
         fullscreen.refreshPresentation()
         suite.expect(fullscreen.panel?.isVisible == true && fullscreen.acceptsSystemFeedback,
                      "leaving fullscreen restores the island and feedback routing")
+
+        let material = Service()
+        material.expanded = false
+        material.geometry = NotchGeometry(screen: material.geometry.screen, safeAreaTop: 38,
+                                          cameraWidth: 210, compactSideRoom: 0)
+        material.refreshPresentation(animated: false)
+        suite.expect(!material.usesGlassSurface && material.windowHost?.usesGlass == false,
+                     "compact presentation remains opaque regardless of camera or footer height")
+        material.peeking = true
+        material.refreshPresentation(animated: false)
+        suite.expect(material.windowHost?.usesGlass == true, "peek requests the glass backdrop")
+        material.peeking = false
+        material.expanded = true
+        material.refreshPresentation(animated: false)
+        suite.expect(material.windowHost?.usesGlass == true, "expanded content requests the glass backdrop")
+        material.expanded = false
+        material.noticeExpanded = true
+        material.refreshPresentation(animated: false)
+        suite.expect(material.windowHost?.usesGlass == true, "expanded notification requests the glass backdrop")
 
         let service = Service()
         var contentSize = service.surfaceSize

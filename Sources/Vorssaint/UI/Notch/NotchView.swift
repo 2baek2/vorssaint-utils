@@ -22,13 +22,13 @@ struct NotchView: View {
             .frame(width: service.surfaceSize.width, height: service.surfaceSize.height, alignment: .top)
             .foregroundStyle(.white)
             .contentShape(shape)
+            .onChange(of: reduceTransparency) {
+                DispatchQueue.main.async { service.refreshPresentation(animated: false) }
+            }
             .onChange(of: contrast) {
                 DispatchQueue.main.async { service.refreshPresentation(animated: false) }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            // Fill the animation's reserved canvas, not just the destination
-            // size, so shrinking the island never exposes an empty background.
-            .background { NotchSurfaceBackground(glass: usesGlassSurface) }
             .environment(\.colorScheme, .dark)
             .environment(\.notchPresentation, true)
             .environment(\.notchGlassSurface, usesGlassSurface)
@@ -41,9 +41,7 @@ struct NotchView: View {
         if #available(macOS 26, *), glass, !reduceTransparency {
             // Resting wings, compact activities and small status notices keep
             // blending into the physical camera cutout.
-            return service.expanded || service.peeking || service.dragPlaceholder
-                || service.noticeExpanded
-                || (service.captureControls != nil && !service.captureControlsCollapsed)
+            return service.usesGlassSurface
         }
 #endif
         return false

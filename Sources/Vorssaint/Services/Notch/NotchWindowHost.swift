@@ -29,19 +29,21 @@ final class NotchWindowHost: NSObject, CAAnimationDelegate {
     private var animationGeneration = 0
     private var isAnimating = false
     private var hidesWhenSettled = false
+    private var targetUsesGlass = false
     private var mouseEventsBeforeHide: Bool?
     private var settledActions: [() -> Void] = []
     private(set) var targetSize: CGSize
     private(set) var resizeCount = 0
 
     init(content: AnyView, geometry: NotchGeometry, size: CGSize,
+         background: (NotchBackdropPresentation) -> AnyView = { _ in AnyView(Color.black) },
          quickAccess: ((NotchQuickAccessMotion) -> AnyView)? = nil) {
         targetSize = size
         currentGeometry = geometry
         panel = NotchPanel(contentRect: geometry.frame(for: size),
                            styleMask: [.borderless, .nonactivatingPanel],
                            backing: .buffered, defer: false)
-        let mainCanvas = NotchCanvas(content: content, size: size)
+        let mainCanvas = NotchCanvas(content: content, background: background, size: size)
         canvas = mainCanvas
         quickAccessContainer = quickAccess.map { NotchQuickAccessContainer(canvas: mainCanvas, content: $0) }
         super.init()
@@ -71,7 +73,7 @@ final class NotchWindowHost: NSObject, CAAnimationDelegate {
 
     func present(size: CGSize, geometry: NotchGeometry, animated: Bool, transitionContent: NotchContentTransition = .none,
                  quickAccess: NotchQuickAccessConfiguration? = nil, revealFromHidden: Bool = false,
-                 hideWhenSettled: Bool = false) {
+                 hideWhenSettled: Bool = false, usesGlass: Bool = false) {
         hidesWhenSettled = hideWhenSettled
         if hideWhenSettled {
             if mouseEventsBeforeHide == nil { mouseEventsBeforeHide = panel.ignoresMouseEvents }
@@ -98,6 +100,8 @@ final class NotchWindowHost: NSObject, CAAnimationDelegate {
         let frame = geometry.frame(for: CGSize(width: size.width + gutter * 2, height: size.height + bottom))
         let changesFrame = revealing || (hideWhenSettled && !canAnimate) || size != targetSize
             || frame != previousFrame || (!isAnimating && panel.frame != appliedFrame)
+        targetUsesGlass = usesGlass
+        canvas.setUsesGlass(usesGlass || (canAnimate && (changesFrame || isAnimating) && canvas.usesGlass))
         guard changesFrame || transitionContent != .none else {
             currentGeometry = geometry
             configureQuickAccess()
@@ -158,7 +162,7 @@ final class NotchWindowHost: NSObject, CAAnimationDelegate {
         animation.delegate = self
         animation.setValue(generation, forKey: "notchGeneration")
         isAnimating = true
-        canvas.animate(animation)
+        canvas.animate(animation, from: from)
         CATransaction.commit()
     }
 
@@ -174,6 +178,7 @@ final class NotchWindowHost: NSObject, CAAnimationDelegate {
         let generation = animationGeneration
         isAnimating = false
         canvas.stopMotion()
+        canvas.setUsesGlass(targetUsesGlass)
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         canvas.setContentSize(targetSize)
@@ -278,6 +283,19 @@ final class NotchWindowHost: NSObject, CAAnimationDelegate {
         container.layoutSubtreeIfNeeded()
         return backingReady
     }
+
+    var contentProbeOpacity: Float { canvas.contentProbeOpacity }
+    var contentProbeAnimating: Bool { canvas.contentProbeAnimating }
+    var contentProbeAlpha: CGFloat { canvas.contentProbeAlpha }
+    var contentProbeReplacing: Bool { canvas.contentProbeReplacing }
+    var backdropProbeFrame: CGRect { canvas.backdropProbeFrame }
+    var backdropProbeIndependent: Bool { canvas.backdropProbeIndependent }
+    var backdropProbePath: CGPath { canvas.backdropPresentation.contour.cgPath }
+    var silhouetteProbePath: CGPath? { canvas.visiblePath }
+    var backdropProbeUsesGlass: Bool { canvas.usesGlass }
+    var backdropProbeScheduled: Bool { canvas.backdropDisplayLink != nil }
+    var backdropProbeTicks: Int { canvas.backdropTicks }
+    func synchronizeBackdropProbe() { canvas.synchronizeBackdrop() }
 
     var quickAccessProbeTrackingAreas: Int { quickAccessContainer?.trackingAreas.count ?? 0 }
     var quickAccessProbeInteractive: Bool { quickAccessContainer?.motion.interactive == true }
@@ -421,23 +439,40 @@ private final class NotchQuickAccessContainer: NSView {
     }
 }
 
+/// CADisplayLink retains its target; the weak forwarding object lets an ordered
+/// out or destroyed canvas release its scheduler even mid-animation.
+private final class NotchBackdropTick: NSObject {
+    weak var canvas: NotchCanvas?
+    init(canvas: NotchCanvas) { self.canvas = canvas }
+    @objc func fire(_ sender: CADisplayLink) { canvas?.advanceBackdrop() }
+}
+
 private final class NotchCanvas: NSView {
     private let host: NotchHostingView
+    private let backdrop: NotchHostingView
+    let backdropPresentation = NotchBackdropPresentation()
+    private(set) var backdropDisplayLink: CADisplayLink?
+    private lazy var backdropTick = NotchBackdropTick(canvas: self)
+    private(set) var backdropTicks = 0
     private let activationButton = NotchActivationButton()
     private var activationRect = CGRect.zero
     private var hoverTrackingArea: NSTrackingArea?
     var hoverChanged: ((Bool) -> Void)?
     private let silhouette = CAShapeLayer()
     private let edge = CAShapeLayer()
-    private let contentCover = CALayer()
+    private let contentVisibility = CALayer()
     private var dropActions: NotchFileDropActions?
     private var acceptingDrag = false
     private var contentSize: CGSize
     override var isFlipped: Bool { true }
     override var isOpaque: Bool { false }
 
-    init(content: AnyView, size: CGSize) {
+    init(content: AnyView, background: (NotchBackdropPresentation) -> AnyView, size: CGSize) {
         contentSize = size
+        backdrop = NotchHostingView(rootView: background(backdropPresentation))
+        backdrop.sizingOptions = []
+        backdrop.wantsLayer = true
+        backdrop.autoresizingMask = []
         host = NotchHostingView(rootView: content)
         host.sizingOptions = []
         host.wantsLayer = true
@@ -445,11 +480,12 @@ private final class NotchCanvas: NSView {
         super.init(frame: CGRect(origin: .zero, size: size))
         autoresizesSubviews = false
         wantsLayer = true
-        // NotchView paints the entire reserved canvas, including during a
-        // resize. An opaque backing here would hide the glass's backdrop.
+        // The backdrop stays independent of the content fade and follows the
+        // animated silhouette, keeping its glass lip visible while closing.
         layer?.backgroundColor = NSColor.clear.cgColor
         layer?.masksToBounds = true
         layer?.mask = silhouette
+        addSubview(backdrop)
         addSubview(host)
         activationButton.isTransparent = true
         activationButton.isHidden = true
@@ -462,11 +498,10 @@ private final class NotchCanvas: NSView {
         edge.lineWidth = 0.5
         edge.zPosition = 2
         layer?.addSublayer(edge)
-        contentCover.name = "notch.contentCover"
-        contentCover.backgroundColor = NSColor.black.cgColor
-        contentCover.opacity = 0
-        contentCover.zPosition = 1
-        layer?.addSublayer(contentCover)
+        contentVisibility.name = "notch.contentVisibility"
+        contentVisibility.backgroundColor = NSColor.black.cgColor
+        contentVisibility.opacity = 1
+        host.layer?.mask = contentVisibility
         setContentSize(size)
     }
 
@@ -490,7 +525,7 @@ private final class NotchCanvas: NSView {
 
     func updateContrast() {
         let color = NSColor.white.withAlphaComponent(
-            NSWorkspace.shared.accessibilityDisplayShouldIncreaseContrast ? 0.45 : 0.12).cgColor
+            NSWorkspace.shared.accessibilityDisplayShouldIncreaseContrast ? 0.45 : 0).cgColor
         guard edge.strokeColor != color else { return }
         CATransaction.begin()
         CATransaction.setDisableActions(true)
@@ -554,6 +589,18 @@ private final class NotchCanvas: NSView {
         return finishDrop(sender.draggingPasteboard)
     }
 
+#if VORSSAINT_DEVELOPMENT
+    var contentProbeOpacity: Float { contentVisibility.presentation()?.opacity ?? contentVisibility.opacity }
+    var contentProbeAnimating: Bool { contentVisibility.animation(forKey: "notch.opacity") != nil }
+    var contentProbeAlpha: CGFloat { host.alphaValue }
+    var contentProbeReplacing: Bool { host.layer?.animation(forKey: kCATransition) != nil }
+    var backdropProbeFrame: CGRect { backdropPresentation.contour.boundingRect }
+    var backdropProbeIndependent: Bool {
+        host.layer?.mask === contentVisibility && backdrop.layer?.mask == nil
+            && (backdrop.layer?.presentation()?.opacity ?? backdrop.layer?.opacity) == 1
+    }
+#endif
+
     var hostedSize: CGSize { host.frame.size }
     var contentTopInWindow: CGPoint { host.convert(.zero, to: nil) }
 
@@ -578,8 +625,14 @@ private final class NotchCanvas: NSView {
         else { super.mouseExited(with: event) }
     }
 
-    func animate(_ animation: CAAnimation) {
+    func animate(_ animation: CASpringAnimation, from: CGPath?) {
         silhouette.add(animation, forKey: Self.motionKey)
+        if let from { setBackdropContour(from) }
+        // Only the material follows the display link; content layout and the
+        // native window remain fixed for the duration of the animation.
+        let link = displayLink(target: backdropTick, selector: #selector(NotchBackdropTick.fire(_:)))
+        backdropDisplayLink = link
+        link.add(to: .main, forMode: .common)
         if let borderAnimation = animation.copy() as? CAAnimation {
             borderAnimation.delegate = nil
             edge.add(borderAnimation, forKey: Self.motionKey)
@@ -588,36 +641,68 @@ private final class NotchCanvas: NSView {
     func stopMotion() {
         silhouette.removeAnimation(forKey: Self.motionKey)
         edge.removeAnimation(forKey: Self.motionKey)
+        backdropDisplayLink?.invalidate()
+        backdropDisplayLink = nil
     }
+
+    var usesGlass: Bool { backdropPresentation.usesGlass }
+
+    func setUsesGlass(_ enabled: Bool) {
+        guard usesGlass != enabled else { return }
+        backdropPresentation.usesGlass = enabled
+    }
+
+    fileprivate func advanceBackdrop() {
+        backdropTicks += 1
+        synchronizeBackdrop()
+    }
+
+    fileprivate func synchronizeBackdrop() {
+        // Immediately use the final model path after stopping the scheduler;
+        // the presentation layer can still describe the preceding frame until
+        // Core Animation commits this transaction.
+        let path = backdropDisplayLink == nil ? silhouette.path : visiblePath
+        if let path { setBackdropContour(path) }
+    }
+
+    private func setBackdropContour(_ path: CGPath) {
+        let contour = Path(path)
+        guard backdropPresentation.contour != contour else { return }
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) { backdropPresentation.contour = contour }
+    }
+
+    deinit { backdropDisplayLink?.invalidate() }
 
     func transitionContent(_ kind: NotchContentTransition) {
         guard kind != .none else { return }
-        let currentOpacity = contentCover.presentation()?.opacity ?? contentCover.opacity
-        contentCover.removeAnimation(forKey: "notch.opacity")
+        let currentOpacity = contentVisibility.presentation()?.opacity ?? contentVisibility.opacity
+        contentVisibility.removeAnimation(forKey: "notch.opacity")
         host.layer?.removeAnimation(forKey: kCATransition)
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         if kind == .replace {
-            contentCover.opacity = 0
+            contentVisibility.opacity = 1
             let transition = CATransition()
             transition.type = .fade
             transition.duration = 0.18
             transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
             host.layer?.add(transition, forKey: kCATransition)
         } else {
-            // Fade the pixels, not the hosting view: making that view
-            // transparent also removes the compact button's AX/hit frame.
+            // Mask only the content pixels. A black overlay would obscure the
+            // glass; alphaValue would remove the hosting view's AX/hit frame.
             let animation = CAKeyframeAnimation(keyPath: "opacity")
-            let start: Float = kind == .dismiss || currentOpacity == 0 ? 1 : currentOpacity
+            let start: Float = kind == .dismiss || currentOpacity == 1 ? 0 : currentOpacity
             // Give the silhouette a head start before revealing full-width
             // content. Reversals continue from the opacity already on screen.
-            animation.values = [start, start, 0]
+            animation.values = [start, start, 1]
             animation.keyTimes = kind == .dismiss ? [0, 0.65, 1] : [0, 0.625, 1]
             animation.duration = 0.40
             animation.calculationMode = .linear
             animation.timingFunctions = [CAMediaTimingFunction(name: .linear), CAMediaTimingFunction(name: .easeOut)]
-            contentCover.opacity = 0
-            contentCover.add(animation, forKey: "notch.opacity")
+            contentVisibility.opacity = 1
+            contentVisibility.add(animation, forKey: "notch.opacity")
         }
         CATransaction.commit()
     }
@@ -625,8 +710,8 @@ private final class NotchCanvas: NSView {
     func restoreContent() {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
-        contentCover.removeAnimation(forKey: "notch.opacity")
-        contentCover.opacity = 0
+        contentVisibility.removeAnimation(forKey: "notch.opacity")
+        contentVisibility.opacity = 1
         host.layer?.removeAnimation(forKey: kCATransition)
         CATransaction.commit()
     }
@@ -646,15 +731,17 @@ private final class NotchCanvas: NSView {
         CATransaction.setDisableActions(true)
         silhouette.frame = bounds
         edge.frame = bounds
-        contentCover.frame = bounds
+        contentVisibility.frame = bounds
         var translation = CGAffineTransform(translationX: (bounds.width - contentSize.width) / 2, y: 0)
         silhouette.path = NotchShape(attached: true, radius: NotchLayout.surfaceRadius(height: contentSize.height))
             .path(in: CGRect(origin: .zero, size: contentSize)).cgPath.copy(using: &translation)
         edge.path = silhouette.path
         edge.opacity = contentSize.height > 64 ? 1 : 0
-        // Render the entire reveal area once; changing only the layer mask
-        // then exposes cached pixels without redrawing SwiftUI every frame.
+        // Keep foreground layout fixed inside the reserved reveal area. Only
+        // the separate backdrop's contour changes on animation frames.
         if host.frame != bounds { host.frame = bounds }
+        if backdrop.frame != bounds { backdrop.frame = bounds }
+        synchronizeBackdrop()
         activationButton.frame = activationRect.offsetBy(dx: (bounds.width - contentSize.width) / 2, dy: 0)
         let hoverRect = CGRect(x: (bounds.width - contentSize.width) / 2, y: 0, width: contentSize.width, height: contentSize.height)
         if hoverTrackingArea?.rect != hoverRect {

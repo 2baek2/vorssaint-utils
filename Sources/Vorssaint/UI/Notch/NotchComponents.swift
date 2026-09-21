@@ -237,41 +237,55 @@ extension EnvironmentValues {
     }
 }
 
-/// Clear glass preserves the desktop's detail and edge refraction. A separate
-/// smoke gradient anchors the top to the camera and opens up toward the lip;
-/// a uniform regular material would frost the entire island into a grey slab.
+/// The native host publishes the same path used by its animated mask. Keeping
+/// this in canvas coordinates avoids scaling the glass's corners independently.
+final class NotchBackdropPresentation: ObservableObject {
+    @Published var contour = Path()
+    @Published var usesGlass = false
+}
+
+struct NotchBackdropShape: Shape {
+    var contour: Path
+    func path(in rect: CGRect) -> Path { contour }
+}
+
+struct NotchWindowBackground: View {
+    @ObservedObject var presentation: NotchBackdropPresentation
+    @AppStorage(DefaultsKey.liquidGlassEnabled) private var glass = false
+
+    var body: some View {
+        NotchSurfaceBackground(presentation: presentation, glass: glass)
+    }
+}
+
+/// Keep the upper content dark and open the lower surface into a refractive lip.
 struct NotchSurfaceBackground: View {
+    @ObservedObject var presentation: NotchBackdropPresentation
     let glass: Bool
     @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     var body: some View {
         Group {
 #if compiler(>=6.2)
-            if #available(macOS 26, *), glass {
-                GeometryReader { proxy in
-                    let shape = NotchShape(attached: true,
-                                           radius: NotchLayout.surfaceRadius(height: proxy.size.height))
-                    Color.clear
-                        .glassEffect(.clear, in: shape)
-                        .overlay {
-                            shape.fill(LinearGradient(stops: [
-                                .init(color: .black, location: 0),
-                                .init(color: .black, location: 0.24),
-                                .init(color: .black.opacity(0.96), location: 0.46),
-                                .init(color: .black.opacity(contrast == .increased ? 0.90 : 0.82), location: 0.64),
-                                .init(color: .black.opacity(contrast == .increased ? 0.82 : 0.58), location: 0.82),
-                                .init(color: .black.opacity(contrast == .increased ? 0.72 : 0.12), location: 1)
-                            ], startPoint: .top, endPoint: .bottom))
+            if #available(macOS 26, *), glass, presentation.usesGlass, !reduceTransparency {
+                let shape = NotchBackdropShape(contour: presentation.contour)
+                Color.clear
+                    .glassEffect(.clear, in: shape)
+                    .environment(\.appearsActive, true)
+                    .materialActiveAppearance(.active)
+                    .overlay {
+                        let stops = (0...64).map { index in
+                            let t = Double(index) / 64
+                            return Gradient.Stop(
+                                color: .black.opacity(1 - (contrast == .increased ? 0.10 : 0.45) * pow(t, 2.5)),
+                                location: t)
                         }
-                        .overlay {
-                            shape.stroke(LinearGradient(stops: [
-                                .init(color: .clear, location: 0),
-                                .init(color: .white.opacity(0.04), location: 0.55),
-                                .init(color: .white.opacity(0.16), location: 0.84),
-                                .init(color: .white.opacity(0.62), location: 1)
-                            ], startPoint: .top, endPoint: .bottom), lineWidth: 0.75)
-                        }
-                }
+                        LinearGradient(stops: stops, startPoint: .top, endPoint: .bottom)
+                            .frame(height: presentation.contour.boundingRect.height)
+                            .frame(maxHeight: .infinity, alignment: .top)
+                            .mask(shape)
+                    }
             } else {
                 Color.black
             }
@@ -279,6 +293,7 @@ struct NotchSurfaceBackground: View {
             Color.black
 #endif
         }
+        .environment(\.colorScheme, .dark)
         .allowsHitTesting(false)
         .accessibilityHidden(true)
     }
