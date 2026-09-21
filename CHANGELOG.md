@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Summary
+This update improves the resting battery display in Dynamic Island.
+
+### Fixed
+- Dynamic Island keeps the battery icon and percentage clear of its curved edges, including the full `100%` label.
+
 ## [3.4.0-beta.3] - 2026-09-20
 
 ### Summary
