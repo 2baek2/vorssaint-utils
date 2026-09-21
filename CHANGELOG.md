@@ -10,7 +10,7 @@ All notable changes to this project are documented here. The format follows
 Dynamic Island improves list readability and compact controls, preserves persistent notification alerts, shows files saved directly to Downloads, and keeps screenshot actions within reach.
 
 ### Changed
-- Dynamic Island restores vertical calendar and clipboard lists and a vertical Explore grid with matching keyboard navigation. Long event titles can wrap, and the mixer uses slimmer faders with actions above app icons.
+- Dynamic Island restores vertical calendar and clipboard lists and a vertical Explore grid with matching keyboard navigation. Long event titles can wrap. The mixer aligns its faders, enlarges volume controls and click targets, and shows the output device name above the controls.
 - Dynamic Island lists visible files and folders from the selected Downloads folder, newest first, including images saved directly from a browser.
 
 ### Fixed
