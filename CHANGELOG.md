@@ -7,9 +7,15 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-This update improves the resting battery display in Dynamic Island.
+Dynamic Island preserves persistent notification alerts, shows files saved directly to Downloads, and keeps screenshot actions within reach.
+
+### Changed
+- Dynamic Island lists visible files and folders from the selected Downloads folder, newest first, including images saved directly from a browser.
 
 ### Fixed
+- Dynamic Island leaves persistent native alerts open when replacing notifications, so mirroring an alarm does not dismiss it.
+- Screenshot preview actions stay in the Dynamic Island header above the image, including at smaller heights.
+- Dynamic Island animates its dismissal on displays without a camera cutout when there is no safe resting space in the menu bar.
 - Dynamic Island keeps the battery icon and percentage clear of its curved edges, including the full `100%` label.
 
 ## [3.4.0-beta.3] - 2026-09-20
