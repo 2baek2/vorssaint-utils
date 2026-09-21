@@ -27,6 +27,7 @@ This beta focuses on Dynamic Island, with a horizontal layout in place of the ve
 
 ### Fixed
 - Dynamic Island more reliably identifies playing media, avoids flickering on displays without a camera cutout, and stays out of tiling window managers.
+- Dynamic Island uses clear on/off switches for Mac sound and microphone when selecting a screen recording.
 - Keep Awake restores lid sleep after timers, battery cutoffs and quitting.
 - Command Bar no longer requests Keychain access for query learning. Query-specific learning now lasts only until the app quits; general usage ranking remains saved.
 - A missing menu bar icon can recover automatically after an update. Manual recovery points to Allow in the Menu Bar in macOS settings when the app is blocked.

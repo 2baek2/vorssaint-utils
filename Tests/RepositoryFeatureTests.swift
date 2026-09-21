@@ -452,9 +452,23 @@ enum RepositoryFeatureTests {
         expectEqual(HomebrewAnalytics.url(kind: .cask).absoluteString,
                     "https://formulae.brew.sh/api/analytics/cask-install/homebrew-cask/30d.json",
                     "Homebrew cask popularity uses cask install analytics")
-        expectEqual(HomebrewAnalytics.compactCount(999), "999", "Homebrew popularity under 1K stays plain")
-        expectEqual(HomebrewAnalytics.compactCount(1_250), "1.2K", "Homebrew popularity compacts thousands")
-        expectEqual(HomebrewAnalytics.compactCount(1_200_000), "1.2M", "Homebrew popularity compacts millions")
+        do {
+            let originalLocale = MetricFormat.locale
+            defer { MetricFormat.locale = originalLocale }
+            // Run independently of both the Mac's region and other suites.
+            for (region, thousands, millions) in [
+                ("en_US_POSIX", "1.2K", "1.2M"),
+                ("pt_BR", "1,2K", "1,2M"),
+            ] {
+                MetricFormat.locale = Locale(identifier: region)
+                expectEqual(HomebrewAnalytics.compactCount(999), "999",
+                            "Homebrew popularity under 1K stays plain in \(region)")
+                expectEqual(HomebrewAnalytics.compactCount(1_250), thousands,
+                            "Homebrew popularity compacts thousands in \(region)")
+                expectEqual(HomebrewAnalytics.compactCount(1_200_000), millions,
+                            "Homebrew popularity compacts millions in \(region)")
+            }
+        }
         let shellSetupCommand = HomebrewCommandBuilder.shellConfigCommand(brewPath: brewPath,
                                                                           homeDirectory: "/Users/test",
                                                                           shellPath: "/bin/zsh")
