@@ -13,11 +13,12 @@ Dynamic Island improves list readability and playback controls, can hide in full
 - Dynamic Island can hide while an app is in full screen on its selected display. The option is off by default.
 
 ### Changed
-- Dynamic Island shows a dedicated pause button during compact playback and keeps expanded playback controls visible while player access is being set up.
+- Dynamic Island keeps expanded playback controls visible while player access is being set up.
 - Dynamic Island restores vertical calendar and clipboard lists and a vertical Explore grid with matching keyboard navigation. Long event titles can wrap. The mixer aligns its faders, enlarges volume controls and click targets, and shows the output device name above the controls.
 - Dynamic Island lists visible files and folders from the selected Downloads folder, newest first, including images saved directly from a browser.
 
 ### Fixed
+- Dynamic Island restores the Beta 3 music display at rest, with artwork on the left and the equalizer on the right. Clicking it opens the music controls.
 - Dynamic Island fills System with balanced rows of metrics that adapt to its width and scroll vertically when needed.
 - Dynamic Island keeps clipboard and mixer actions visible in short layouts and fits the camera mirror at 4:3 with room for its stop button. Horizontal scrollbars no longer cover controls.
 - Dynamic Island leaves persistent native alerts open when replacing notifications, so mirroring an alarm does not dismiss it.
