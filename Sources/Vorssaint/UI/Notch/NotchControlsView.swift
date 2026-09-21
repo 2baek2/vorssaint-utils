@@ -49,7 +49,7 @@ struct NotchControlsView: View {
             ScrollView(.horizontal) {
                 cardRow(levels: levels, music: music, height: height).frame(width: required)
             }
-            .scrollIndicators(.hidden)
+            .scrollIndicators(.never)
             .frame(height: height)
         } else {
             cardRow(levels: levels, music: music, height: height)

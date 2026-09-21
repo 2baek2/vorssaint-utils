@@ -208,9 +208,10 @@ struct NotchView: View {
                               + NotchLayout.clipboardCardHeight)
         case .camera:
             // Keep permission and error messages, and the stop button, reachable.
-            size.height = max(size.height, 180)
+            size.height = max(size.height, 144)
         case .mixer:
-            size.height = max(size.height, 180)
+            // Shorten the tracks before pushing mute and level controls offscreen.
+            size.height = max(size.height, 144)
         case .music:
             let controlsRow = AppFeature.mixer.isAvailable || NotchLyricsSupport.isEnabled() || NotchQueueSupport.isEnabled()
                 ? NotchLayout.musicControlsRowHeight + NotchLayout.rowSpacing : 0

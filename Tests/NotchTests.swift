@@ -21,6 +21,22 @@ enum NotchTests {
                      && NotchSupport.systemCardCount(hasBattery: false, fans: 0, in: defaults) == 0,
                      "System remains reachable while waiting for the first fan sample")
 
+        suite.expect(NotchLayout.systemRowRanges(count: 7, width: 504) == [0..<3, 3..<5, 5..<7],
+                     "seven System metrics fill balanced rows instead of leaving a nearly empty column")
+        suite.expect(NotchLayout.systemRowRanges(count: 7, width: 304) == [0..<2, 2..<4, 4..<6, 6..<7],
+                     "narrow System rows keep readable cards and a full-width last card")
+        for width: CGFloat in [20, 304, 424, 504, 744] {
+            for count in 0...8 {
+                let rows = NotchLayout.systemRowRanges(count: count, width: width)
+                suite.expect(rows.flatMap { Array($0) } == Array(0..<count),
+                             "System preserves every metric exactly once in reading order")
+                let capacity = NotchLayout.railCapacity(width: width, itemWidth: NotchLayout.systemCardWidth,
+                                                       spacing: NotchLayout.rowSpacing)
+                suite.expect(rows.allSatisfy { !$0.isEmpty && $0.count <= capacity },
+                             "System rows fit the available width for every combination of enabled metrics")
+            }
+        }
+
         suite.expect(NotchLayout.railCapacity(width: 424, itemWidth: 76, spacing: 8) == 5
                && NotchLayout.railCapacity(width: 304, itemWidth: 76, spacing: 8) == 3
                && NotchLayout.railCapacity(width: 20, itemWidth: 76, spacing: 8) == 1

@@ -203,7 +203,7 @@ struct NotchRail<Item: Identifiable, Content: View>: View {
                         ForEach(starts, id: \.self) { start in column(start).frame(width: itemWidth).id(start) }
                     }
                 }
-                .scrollIndicators(.hidden)
+                .scrollIndicators(.never)
                 .onAppear {
                     if let targetColumn { proxy.scrollTo(targetColumn, anchor: .center) }
                 }

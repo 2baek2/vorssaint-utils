@@ -23,7 +23,7 @@ struct NotchMixerView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private static let masterWidth: CGFloat = 72
     private static let columnWidth: CGFloat = 96
-    private var faderHeight: CGFloat { max(140, size.height - 40) }
+    private var faderHeight: CGFloat { max(104, size.height - 40) }
 
     private var arrangement: MixerAppArrangement { MixerAppArrangement(rawValue: arrangementValue) }
 
@@ -215,7 +215,7 @@ private struct NotchMasterFader: View {
 /// Both the output and app columns reserve the same header, gaps and footer.
 private enum NotchMixerFaderLayout {
     static func trackHeight(in height: CGFloat) -> CGFloat {
-        min(160, max(56, height - 32 - 28 - 6 * 2))
+        min(160, max(32, height - 32 - 28 - 6 * 2))
     }
 }
 

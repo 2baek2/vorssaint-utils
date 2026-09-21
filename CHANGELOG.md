@@ -18,9 +18,10 @@ Dynamic Island improves list readability and playback controls, can hide in full
 - Dynamic Island lists visible files and folders from the selected Downloads folder, newest first, including images saved directly from a browser.
 
 ### Fixed
-- Dynamic Island keeps clipboard actions reachable in short layouts and fits the camera mirror at 4:3 with room for its stop button.
+- Dynamic Island fills System with balanced rows of metrics that adapt to its width and scroll vertically when needed.
+- Dynamic Island keeps clipboard and mixer actions visible in short layouts and fits the camera mirror at 4:3 with room for its stop button. Horizontal scrollbars no longer cover controls.
 - Dynamic Island leaves persistent native alerts open when replacing notifications, so mirroring an alarm does not dismiss it.
-- Screenshot preview actions stay in the Dynamic Island header above the image, including at smaller heights.
+- Screenshot preview actions stay in the Dynamic Island header above the image, with compact buttons that leave room for the title at smaller widths.
 - Dynamic Island animates its dismissal on displays without a camera cutout when there is no safe resting space in the menu bar.
 - Dynamic Island keeps the battery icon and percentage clear of its curved edges, including the full `100%` label.
 

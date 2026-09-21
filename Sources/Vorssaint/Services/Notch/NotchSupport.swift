@@ -122,7 +122,7 @@ enum NotchLayout {
     static let sectionTileWidth: CGFloat = 92
     static let sectionSpacing: CGFloat = 8
     static let clipboardSearchHeight: CGFloat = 36
-    static let clipboardCardHeight: CGFloat = 112
+    static let clipboardCardHeight: CGFloat = 104
     static let emptyHeight: CGFloat = 140
     static let musicControlsRowHeight: CGFloat = 32
     static let musicIdleHeight: CGFloat = 84
@@ -174,6 +174,20 @@ enum NotchLayout {
         case .compact: return 42 + chromeHeight + compactContentHeight
         case .spacious: return 42 + chromeHeight + spaciousContentHeight
         case .custom: return custom
+        }
+    }
+
+    /// Balance complete rows across the available width, keeping reading order
+    /// left to right and allowing each row to fill its width without empty cells.
+    static func systemRowRanges(count: Int, width: CGFloat) -> [Range<Int>] {
+        guard count > 0 else { return [] }
+        let columns = railCapacity(width: width, itemWidth: systemCardWidth, spacing: rowSpacing)
+        let rows = (count + columns - 1) / columns
+        let base = count / rows
+        let remainder = count % rows
+        return (0..<rows).map { row in
+            let start = row * base + min(row, remainder)
+            return start..<(start + base + (row < remainder ? 1 : 0))
         }
     }
 
@@ -1005,9 +1019,7 @@ struct NotchGeometry: Equatable {
     var musicExtrasHeight: CGFloat { layout == .custom ? min(216, contentBudget) : 216 }
 
     func systemRows(cards: Int) -> Int {
-        NotchLayout.railRows(count: cards,
-                             perRow: NotchLayout.railCapacity(width: contentWidth, itemWidth: NotchLayout.systemCardWidth, spacing: NotchLayout.rowSpacing),
-                             rowHeight: NotchLayout.systemCardHeight, spacing: NotchLayout.rowSpacing, height: contentBudget)
+        NotchLayout.systemRowRanges(count: cards, width: contentWidth).count
     }
 
     func toolRows(count: Int) -> Int {

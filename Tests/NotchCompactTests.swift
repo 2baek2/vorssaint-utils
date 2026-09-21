@@ -344,7 +344,11 @@ enum NotchCompactTests {
                                  + NotchLayout.clipboardCardHeight,
                                  "a short clipboard page keeps the search field and a complete card reachable")
                 } else if module == .camera || module == .mixer {
-                    suite.expect(layout.height >= 180, "camera and mixer controls keep a usable height in a short island")
+                    suite.expect(layout.height >= 144, "camera and mixer controls keep a usable height in a short island")
+                    if page.service.contentSize.height >= 144 {
+                        suite.expect(layout.height == page.service.contentSize.height,
+                                     "camera and mixer actions fit without outer scrolling in a short island")
+                    }
                 }
             }
         }
