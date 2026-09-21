@@ -7,7 +7,7 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-Dynamic Island improves list readability and playback controls, can hide in full screen, preserves persistent notification alerts, shows files saved directly to Downloads, and keeps screenshot actions within reach.
+Dynamic Island improves list readability and playback controls, can hide in full screen, preserves persistent notification alerts, shows files saved directly to Downloads, keeps screenshot actions within reach, and wears clear glass when Liquid Glass is enabled.
 
 ### Added
 - Dynamic Island can hide while an app is in full screen on its selected display. The option is off by default.
@@ -18,6 +18,7 @@ Dynamic Island improves list readability and playback controls, can hide in full
 - Dynamic Island lists visible files and folders from the selected Downloads folder, newest first, including images saved directly from a browser.
 - Dynamic Island shows the volume mixer with a speaker icon, so its floating button no longer looks like a second settings button.
 - The Dynamic Island layout editor previews the real home page at scale, with the cards and shortcuts you have configured.
+- With Liquid Glass enabled, the expanded Dynamic Island uses clear glass with a dark top that fades toward the lower edge, keeping the desktop's detail and refraction visible. Resting and compact strips stay black, and Reduce Transparency keeps the solid surface.
 
 ### Fixed
 - Dynamic Island keeps the artist visible in Now Playing while a song plays; the music bars no longer push that line out.
