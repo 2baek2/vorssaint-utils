@@ -7,14 +7,14 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-Dynamic Island improves list readability and playback controls, keeps artwork steady during playback changes, shows volume and brightness while open, tightens spacing around the camera, clarifies its settings, can hide in full screen, preserves persistent notification alerts, shows files saved directly to Downloads, keeps screenshot actions within reach, and wears clear glass when Liquid Glass is enabled. App Switcher and Dock Preview bring windows forward without resizing them. Captures skip JankyBorders overlays, and the recording editor shows the full picture when choosing a zoom focus.
+Dynamic Island improves list readability and playback controls, keeps artwork steady during playback changes, shows volume and brightness while open, tightens spacing around the camera, improves click and scroll handling, clarifies its settings, can hide in full screen, preserves persistent notification alerts, shows files saved directly to Downloads, keeps screenshot actions within reach, and wears clear glass when Liquid Glass is enabled. App Switcher and Dock Preview bring windows forward without resizing them. Captures skip JankyBorders overlays, and the recording editor shows the full picture when choosing a zoom focus.
 
 ### Added
 - Dynamic Island can hide while an app is in full screen on its selected display. The option is off by default.
 
 ### Changed
 - Dynamic Island shows compact activity over crowded menus by default, preserving an explicitly saved preference. Thanks to @Yahddyyp.
-- Dynamic Island uses tighter compact strips and places navigation beside the camera when there is room. Update controls adapt to narrow headers in every language. Thanks to Pinea for the feedback.
+- Dynamic Island uses tighter compact strips and places navigation and titles beside the camera when there is room. Update controls adapt to narrow headers in every language. Thanks to Pinea for the feedback.
 - Dynamic Island explains unavailable indicators, distinguishes app-panel opening from hover preview, spaces custom-size sliders clearly, and adds Scratchpad to the choice of opening destinations.
 - Dynamic Island keeps expanded playback controls visible while player access is being set up.
 - Dynamic Island restores vertical calendar and clipboard lists and a vertical Explore grid with matching keyboard navigation. Long event titles can wrap. The mixer aligns its faders, enlarges volume controls and click targets, and shows the output device name above the controls.
@@ -26,6 +26,7 @@ Dynamic Island improves list readability and playback controls, keeps artwork st
 - With Liquid Glass enabled, the expanded Dynamic Island uses clear glass with a dark top that fades toward the lower edge, keeping the desktop's detail and refraction visible. Resting and compact strips stay black, and Reduce Transparency keeps the solid surface.
 
 ### Fixed
+- Dynamic Island keeps floating buttons clear of the menu bar and inside short windows. Empty areas between controls accept clicks and scrolling, and clicks inside the island no longer dismiss it unexpectedly.
 - Dynamic Island retains artwork through play/pause updates and briefly while the next track's cover loads, shows volume and brightness in its open header, and gives battery alerts more horizontal padding. Thanks to @Yahddyyp.
 - Window captures skip JankyBorders decorations to select the underlying window, and the recording editor temporarily removes zoom and framing while choosing a focus point. Thanks to @Yahddyyp.
 - Dynamic Island's calendar respects the system's regional date and 12/24-hour time preferences.
