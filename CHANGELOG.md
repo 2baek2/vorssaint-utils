@@ -17,6 +17,7 @@ Dynamic Island improves list readability and playback controls, tightens spacing
 - Dynamic Island explains unavailable indicators, distinguishes app-panel opening from hover preview, spaces custom-size sliders clearly, and adds Scratchpad to the choice of opening destinations.
 - Dynamic Island keeps expanded playback controls visible while player access is being set up.
 - Dynamic Island restores vertical calendar and clipboard lists and a vertical Explore grid with matching keyboard navigation. Long event titles can wrap. The mixer aligns its faders, enlarges volume controls and click targets, and shows the output device name above the controls.
+- Dynamic Island's Explore shows three rows of sections in the Compact and Spacious layouts, so most sections are in view at once. Scrolling steps whole rows and always rests aligned, one row per flick or wheel notch, and dots beside the grid show the remaining rows and jump to them.
 - Dynamic Island lists visible files and folders from the selected Downloads folder, newest first, including images saved directly from a browser.
 - Dynamic Island shows the volume mixer with a speaker icon, so its floating button no longer looks like a second settings button.
 - The Dynamic Island layout editor previews the real home page at scale, with the cards and shortcuts you have configured.
