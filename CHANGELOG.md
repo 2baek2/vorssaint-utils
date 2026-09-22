@@ -7,12 +7,14 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-Dynamic Island improves list readability and playback controls, keeps artwork steady during playback changes, shows volume and brightness while open, tightens spacing around the camera, improves click and scroll handling, clarifies its settings, can hide in full screen, preserves persistent notification alerts, shows files saved directly to Downloads, keeps screenshot actions within reach, and wears clear glass when Liquid Glass is enabled. App Switcher and Dock Preview bring windows forward without resizing them. Captures skip JankyBorders overlays, and the recording editor shows the full picture when choosing a zoom focus.
+Dynamic Island improves list readability and playback controls, adds a playback source chooser, keeps artwork steady during playback changes, shows volume and brightness while open, narrows its feedback indicators, tightens spacing around the camera, improves click and scroll handling, clarifies its settings, can hide in full screen, preserves persistent notification alerts, shows files saved directly to Downloads, keeps screenshot actions within reach, and wears clear glass when Liquid Glass is enabled. App Switcher and Dock Preview bring windows forward without resizing them. Captures skip JankyBorders overlays, and the recording editor shows the full picture when choosing a zoom focus.
 
 ### Added
+- Dynamic Island lets you choose the playback source, including a browser while a music app is playing, or return to Automatic. Safari appears under its own name.
 - Dynamic Island can hide while an app is in full screen on its selected display. The option is off by default.
 
 ### Changed
+- Dynamic Island uses narrower volume, display brightness and keyboard backlight indicators while keeping percentages readable and the camera clear.
 - Dynamic Island shows compact activity over crowded menus by default, preserving an explicitly saved preference. Thanks to @Yahddyyp.
 - Dynamic Island uses tighter compact strips and places navigation and titles beside the camera when there is room. Update controls adapt to narrow headers in every language. Thanks to Pinea for the feedback.
 - Dynamic Island explains unavailable indicators, distinguishes app-panel opening from hover preview, spaces custom-size sliders clearly, and adds Scratchpad to the choice of opening destinations.
