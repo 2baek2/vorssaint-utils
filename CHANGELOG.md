@@ -7,7 +7,12 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-Settings search keeps every typed letter in the search field.
+Clipboard History images open in the Screenshot Editor, the capture preview can pin a screenshot directly, and Settings adds Back and Forward buttons. Settings search keeps every typed letter in the search field.
+
+### Added
+- Clipboard History images, including older ones, open in the Screenshot Editor from a pencil beside Copy in the history window, Dynamic Island and menu panel, without replacing the current clipboard. Thanks to @samanyudas.
+- The screenshot preview can pin a capture above other windows without opening the editor. Thanks to @samanyudas.
+- Settings shows Back and Forward buttons in its toolbar. Thanks to @samanyudas.
 
 ### Fixed
 - Settings search keeps focus while you type, instead of accepting only the first letter and beeping for the rest. Thanks to @overstock718.
