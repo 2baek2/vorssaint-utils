@@ -7,7 +7,7 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-Clipboard History images open in the Screenshot Editor, the capture preview can pin a screenshot directly, and Settings adds Back and Forward buttons. Window Layout adds quarter rows, quarter columns and vertical thirds, smooth scrolling gains an adjustable coast, and the menu panel opens with the native macOS animation. Settings search keeps every typed letter in the search field.
+Clipboard History images open in the Screenshot Editor, the capture preview can pin a screenshot directly, and Settings adds Back and Forward buttons. Window Layout adds quarter rows, quarter columns and vertical thirds, smooth scrolling gains an adjustable coast, and the menu panel opens with the native macOS animation. Repeating Top Half or Bottom Half moves a window to a stacked display, the menu bar disk reading can show available or used space, and App Switcher separates apps without open windows. Settings search keeps every typed letter in the search field.
 
 ### Added
 - Clipboard History images, including older ones, open in the Screenshot Editor from a pencil beside Copy in the history window, Dynamic Island and menu panel, without replacing the current clipboard. Thanks to @samanyudas.
@@ -15,12 +15,16 @@ Clipboard History images open in the Screenshot Editor, the capture preview can 
 - Settings shows Back and Forward buttons in its toolbar. Thanks to @samanyudas.
 - Window Layout splits the screen into four full-width rows for tall displays or four full-height columns for wide ones, and adds top, middle and bottom thirds with top and bottom two-thirds. New placements start without a shortcut. Thanks to @DocEmmetBrown and @samueljim.
 - Smooth scrolling offers a Coast slider under More options that lengthens the end of each glide while keeping its start. It is off by default. Thanks to @celltower.
+- Repeating Top Half or Bottom Half moves the window to the opposite half of the display above or below. Without a display there, Top Half still maximizes. Thanks to @ethanbeau.
+- The menu bar Disk Usage reading can show available space or used space instead of the used percentage, chosen under Disk display in Monitor settings. Thanks to @maodijim.
+- App Switcher's icon row separates apps with open windows from apps without any. Thanks to @samanyudas.
 
 ### Changed
 - The menu panel opens and closes with the native macOS popover animation. Thanks to @archieamas11.
 
 ### Fixed
 - Settings search keeps focus while you type, instead of accepting only the first letter and beeping for the rest. Thanks to @overstock718.
+- App Switcher keeps the right order after quick app switches, instead of falling back to older windows when an app has not reported its focused window yet. Thanks to @MaximilianMauroner.
 
 ## [3.4.0-beta.4] - 2026-09-23
 
