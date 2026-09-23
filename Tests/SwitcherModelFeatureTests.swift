@@ -4197,16 +4197,16 @@ enum SwitcherModelFeatureTests {
         suite.expect(groupedIconLayout.previewFitsWithoutScrolling(cardCount: 2),
                "App Switcher shows a pair of windows even with a short icon row")
         do {
-            let savedPreviewSize = UserDefaults.standard.object(forKey: DefaultsKey.previewSize)
+            let savedPreviewSize = UserDefaults.standard.object(forKey: DefaultsKey.switcherPreviewSize)
             defer {
                 if let savedPreviewSize {
-                    UserDefaults.standard.set(savedPreviewSize, forKey: DefaultsKey.previewSize)
+                    UserDefaults.standard.set(savedPreviewSize, forKey: DefaultsKey.switcherPreviewSize)
                 } else {
-                    UserDefaults.standard.removeObject(forKey: DefaultsKey.previewSize)
+                    UserDefaults.standard.removeObject(forKey: DefaultsKey.switcherPreviewSize)
                 }
             }
             for size in Defaults.allowedPreviewSizes {
-                UserDefaults.standard.set(size, forKey: DefaultsKey.previewSize)
+                UserDefaults.standard.set(size, forKey: DefaultsKey.switcherPreviewSize)
                 for width in [640.0, 800.0, 1440.0] {
                     for hints in [false, true] {
                         let frame = CGRect(x: 0, y: 0, width: width, height: 900)
