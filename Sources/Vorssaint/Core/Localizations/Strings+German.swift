@@ -1035,6 +1035,7 @@ extension Strings {
         switcherCurrentDisplayOnly: "Nur den aktuellen Bildschirm anzeigen",
         switcherCurrentDisplayOnlyCaption: "Zeigt nur Fenster auf dem Bildschirm unter dem Mauszeiger. Hat dieser Bildschirm keine Fenster, öffnet sich der Umschalter nicht.",
         smoothScrollResponseLabel: "Reaktion",
+        smoothScrollCoastLabel: "Auslauf",
         mouseAccelerationName: "Mausbeschleunigung deaktivieren",
         mouseAccelerationCaption: "Deaktiviert die Zeigerbeschleunigung für angeschlossene Mäuse. Die vorherige Einstellung wird beim Ausschalten oder Beenden von Vorssaint wiederhergestellt.",
         shelfClearOnClose: "Beim Schließen leeren",

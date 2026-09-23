@@ -1035,6 +1035,7 @@ extension Strings {
         switcherCurrentDisplayOnly: "Mostra solo lo schermo attuale",
         switcherCurrentDisplayOnlyCaption: "Mostra solo le finestre sullo schermo sotto il puntatore. Se lo schermo non contiene finestre, il commutatore non si apre.",
         smoothScrollResponseLabel: "Reattività",
+        smoothScrollCoastLabel: "Inerzia",
         mouseAccelerationName: "Disattiva l’accelerazione del mouse",
         mouseAccelerationCaption: "Rimuove l’accelerazione del puntatore per i mouse collegati. L’impostazione precedente viene ripristinata quando disattivi l’opzione o chiudi Vorssaint.",
         shelfClearOnClose: "Svuota alla chiusura",

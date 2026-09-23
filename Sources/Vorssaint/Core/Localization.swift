@@ -1204,6 +1204,7 @@ struct Strings {
     let switcherCurrentDisplayOnly: String
     let switcherCurrentDisplayOnlyCaption: String
     let smoothScrollResponseLabel: String
+    let smoothScrollCoastLabel: String
     let mouseAccelerationName: String
     let mouseAccelerationCaption: String
     let shelfClearOnClose: String
@@ -2244,6 +2245,7 @@ extension Strings {
         switcherCurrentDisplayOnly: "Mostrar só a tela atual",
         switcherCurrentDisplayOnlyCaption: "Mostra apenas as janelas da tela sob o cursor. Se essa tela não tiver janelas, o alternador não abre.",
         smoothScrollResponseLabel: "Resposta",
+        smoothScrollCoastLabel: "Inércia",
         mouseAccelerationName: "Desativar aceleração do mouse",
         mouseAccelerationCaption: "Remove a aceleração do cursor para os mouses conectados. A configuração anterior volta ao desligar esta opção ou sair do Vorssaint.",
         shelfClearOnClose: "Limpar ao fechar",
@@ -3285,6 +3287,7 @@ extension Strings {
         switcherCurrentDisplayOnly: "Show only the current display",
         switcherCurrentDisplayOnlyCaption: "Lists only windows on the display under the pointer. If that display has no windows, the switcher does not open.",
         smoothScrollResponseLabel: "Response",
+        smoothScrollCoastLabel: "Coast",
         mouseAccelerationName: "Disable mouse acceleration",
         mouseAccelerationCaption: "Removes pointer acceleration for connected mice. Your previous setting returns when this is turned off or Vorssaint quits.",
         shelfClearOnClose: "Clear when closed",
