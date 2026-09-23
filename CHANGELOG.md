@@ -7,7 +7,7 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-Dynamic Island improves list readability and playback controls, adds a playback source chooser, keeps artwork steady during playback changes, shows volume and brightness while open, narrows its feedback indicators, tightens spacing around the camera, improves click and scroll handling, clarifies its settings, can hide in full screen, preserves persistent notification alerts, shows files saved directly to Downloads, keeps screenshot actions within reach, and wears clear glass when Liquid Glass is enabled. App Switcher and Dock Preview bring windows forward without resizing them. Captures skip JankyBorders overlays, and the recording editor shows the full picture when choosing a zoom focus.
+Dynamic Island improves list readability and playback controls, adds a playback source chooser, keeps artwork steady during playback changes, shows volume and brightness while open, narrows its feedback indicators, tightens spacing around the camera, improves click and scroll handling, clarifies its settings, can hide in full screen, preserves persistent notification alerts, shows files saved directly to Downloads, keeps screenshot actions within reach, and wears clear glass when Liquid Glass is enabled. App Switcher and Dock Preview bring windows forward without resizing them. Captures skip JankyBorders overlays, and the recording editor shows the full picture when choosing a zoom focus. Cleaning Mode waits for held mouse buttons to be released before closing.
 
 ### Added
 - Dynamic Island lets you choose the playback source, including a browser while a music app is playing, or return to Automatic. Safari appears under its own name.
@@ -48,6 +48,7 @@ Dynamic Island improves list readability and playback controls, adds a playback 
 - Dynamic Island animates its dismissal on displays without a camera cutout when there is no safe resting space in the menu bar.
 - Dynamic Island keeps the battery icon and percentage clear of its curved edges, including the full `100%` label.
 - Dynamic Island opens and closes cleanly inside Mission Control, instead of its closed shape briefly stretching over the area it occupied while open.
+- Cleaning Mode waits for mouse buttons held during unlock to be released before closing. Thanks to @bebricoOOOOOOf.
 
 ## [3.4.0-beta.3] - 2026-09-20
 
