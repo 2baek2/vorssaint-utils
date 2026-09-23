@@ -76,6 +76,26 @@ struct SettingsView: View {
             }
         }
         .navigationSplitViewStyle(.balanced)
+        .toolbar {
+            ToolbarItemGroup(placement: .navigation) {
+                let strings = SettingsNavigationStrings.localized(l10n.language)
+                Button {
+                    router.goBack(isPageVisible: isPageVisible)
+                } label: {
+                    Label(strings.back, systemImage: "chevron.backward")
+                }
+                .disabled(!router.canGoBack(isPageVisible: isPageVisible))
+                .help(strings.back)
+
+                Button {
+                    router.goForward(isPageVisible: isPageVisible)
+                } label: {
+                    Label(strings.forward, systemImage: "chevron.forward")
+                }
+                .disabled(!router.canGoForward(isPageVisible: isPageVisible))
+                .help(strings.forward)
+            }
+        }
         .frame(minWidth: 772, maxWidth: .infinity, minHeight: 528, maxHeight: .infinity)
         .onAppear { ensureVisiblePage() }
         .onChange(of: features.revision) { _, _ in ensureVisiblePage() }
@@ -360,9 +380,13 @@ struct SettingsView: View {
     /// switched off in the hub; fall back to the hub itself, where the
     /// feature can be brought back.
     private func ensureVisiblePage() {
-        if !FeatureVisibilitySupport.isPageVisible(router.page, isAvailable: { $0.isAvailable }) {
+        if !isPageVisible(router.page) {
             router.page = .features
         }
+    }
+
+    private func isPageVisible(_ page: SettingsPage) -> Bool {
+        FeatureVisibilitySupport.isPageVisible(page, isAvailable: { $0.isAvailable })
     }
 
     @ViewBuilder
