@@ -7,12 +7,17 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-Clipboard History images open in the Screenshot Editor, the capture preview can pin a screenshot directly, and Settings adds Back and Forward buttons. Settings search keeps every typed letter in the search field.
+Clipboard History images open in the Screenshot Editor, the capture preview can pin a screenshot directly, and Settings adds Back and Forward buttons. Window Layout adds quarter rows, quarter columns and vertical thirds, smooth scrolling gains an adjustable coast, and the menu panel opens with the native macOS animation. Settings search keeps every typed letter in the search field.
 
 ### Added
 - Clipboard History images, including older ones, open in the Screenshot Editor from a pencil beside Copy in the history window, Dynamic Island and menu panel, without replacing the current clipboard. Thanks to @samanyudas.
 - The screenshot preview can pin a capture above other windows without opening the editor. Thanks to @samanyudas.
 - Settings shows Back and Forward buttons in its toolbar. Thanks to @samanyudas.
+- Window Layout splits the screen into four full-width rows for tall displays or four full-height columns for wide ones, and adds top, middle and bottom thirds with top and bottom two-thirds. New placements start without a shortcut. Thanks to @DocEmmetBrown and @samueljim.
+- Smooth scrolling offers a Coast slider under More options that lengthens the end of each glide while keeping its start. It is off by default. Thanks to @celltower.
+
+### Changed
+- The menu panel opens and closes with the native macOS popover animation. Thanks to @archieamas11.
 
 ### Fixed
 - Settings search keeps focus while you type, instead of accepting only the first letter and beeping for the rest. Thanks to @overstock718.
