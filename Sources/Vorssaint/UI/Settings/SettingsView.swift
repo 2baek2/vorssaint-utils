@@ -148,12 +148,28 @@ struct SettingsView: View {
                     withAnimation(.easeInOut(duration: 0.2)) { proxy.scrollTo(id) }
                 }
             }
+            .onChange(of: hasSearchQuery) { _, searching in
+                // The list stays in place across a search so the field keeps
+                // focus, which also keeps the results' scroll offset. Centering
+                // the first page clamps the pages back to the very top, where a
+                // fresh list starts; a top anchor leaves the list's inset hidden.
+                guard !searching else { return }
+                DispatchQueue.main.async {
+                    if let first = firstSidebarPage { proxy.scrollTo(first, anchor: .center) }
+                }
+            }
             .background {
                 SearchKeyMonitor(customSearchFocused: sidebarSearchFocused) { keyCode in
                     handleSearchKey(keyCode, searchResults: searchResults.items)
                 }
             }
         }
+    }
+
+    private var firstSidebarPage: SettingsPage? {
+        sidebarSections.lazy.flatMap(\.items)
+            .first { FeatureVisibilitySupport.isPageVisible($0.page) { $0.isAvailable } }?
+            .page
     }
 
     @ViewBuilder
