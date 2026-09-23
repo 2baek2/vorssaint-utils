@@ -130,51 +130,12 @@ struct SettingsView: View {
 
     @ViewBuilder
     private func sidebarList(searchResults: SearchResultsSnapshot) -> some View {
-        if hasSearchQuery {
-            searchResultsList(searchResults)
-        } else {
-            normalSidebarList
-        }
-    }
-
-    private var normalSidebarList: some View {
-        List(selection: $router.page) {
-            ForEach(sidebarSections, id: \.title) { section in
-                let items = section.items.filter {
-                    FeatureVisibilitySupport.isPageVisible($0.page) { $0.isAvailable }
-                        && SettingsSearchSupport.matches(query: searchQuery, title: $0.title,
-                                                         keywords: $0.keywords)
-                }
-                if !items.isEmpty {
-                    Section(section.title) {
-                        ForEach(items) { item in
-                            Label {
-                                Text(item.title)
-                            } icon: {
-                                Image(systemName: item.icon)
-                                    // The sidebar's automatic icon tint can briefly disappear
-                                    // while the window activates. Resolve it in the icon itself.
-                                    .foregroundStyle(router.page == item.page
-                                        ? AnyShapeStyle(.primary) : AnyShapeStyle(.tint))
-                            }
-                            .tag(item.page)
-                        }
-                    }
-                }
-            }
-        }
-        .listStyle(.sidebar)
-    }
-
-    @ViewBuilder
-    private func searchResultsList(_ searchResults: SearchResultsSnapshot) -> some View {
         ScrollViewReader { proxy in
-            List {
-                ForEach(searchResults.groups) { group in
-                    searchPageRow(group, searchResults: searchResults)
-                    ForEach(group.suggestions) { suggestion in
-                        searchSuggestionRow(suggestion, searchResults: searchResults)
-                    }
+            List(selection: $router.page) {
+                if hasSearchQuery {
+                    searchResultRows(searchResults)
+                } else {
+                    normalSidebarRows
                 }
             }
             .listStyle(.sidebar)
@@ -191,6 +152,43 @@ struct SettingsView: View {
                 SearchKeyMonitor(customSearchFocused: sidebarSearchFocused) { keyCode in
                     handleSearchKey(keyCode, searchResults: searchResults.items)
                 }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var normalSidebarRows: some View {
+        ForEach(sidebarSections, id: \.title) { section in
+            let items = section.items.filter {
+                FeatureVisibilitySupport.isPageVisible($0.page) { $0.isAvailable }
+                    && SettingsSearchSupport.matches(query: searchQuery, title: $0.title,
+                                                     keywords: $0.keywords)
+            }
+            if !items.isEmpty {
+                Section(section.title) {
+                    ForEach(items) { item in
+                        Label {
+                            Text(item.title)
+                        } icon: {
+                            Image(systemName: item.icon)
+                                // The sidebar's automatic icon tint can briefly disappear
+                                // while the window activates. Resolve it in the icon itself.
+                                .foregroundStyle(router.page == item.page
+                                    ? AnyShapeStyle(.primary) : AnyShapeStyle(.tint))
+                        }
+                        .tag(item.page)
+                    }
+                }
+            }
+        }   
+    }
+
+    @ViewBuilder
+    private func searchResultRows(_ searchResults: SearchResultsSnapshot) -> some View {
+        ForEach(searchResults.groups, id: \.parentSuggestion.id) { group in
+            searchPageRow(group, searchResults: searchResults)
+            ForEach(group.suggestions) { suggestion in
+                searchSuggestionRow(suggestion, searchResults: searchResults)
             }
         }
     }
