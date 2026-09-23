@@ -7,13 +7,15 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-Dynamic Island improves list readability and playback controls, adds a playback source chooser, keeps artwork steady during playback changes, shows volume and brightness while open, narrows its feedback indicators, tightens spacing around the camera, improves click and scroll handling, clarifies its settings, can hide in full screen, preserves persistent notification alerts, shows files saved directly to Downloads, keeps screenshot actions within reach, and wears clear glass when Liquid Glass is enabled. App Switcher and Dock Preview bring windows forward without resizing them. Captures skip JankyBorders overlays, and the recording editor shows the full picture when choosing a zoom focus. Cleaning Mode waits for held mouse buttons to be released before closing.
+Dynamic Island follows Claude Code and Codex in a new AI Agents section, improves list readability and playback controls, adds a playback source chooser, keeps artwork steady during playback changes, shows volume and brightness while open, narrows its feedback indicators, tightens spacing around the camera, improves click and scroll handling, clarifies its settings, can hide in full screen, preserves persistent notification alerts, shows files saved directly to Downloads, keeps screenshot actions within reach, and wears clear glass when Liquid Glass is enabled. App Switcher and Dock Preview bring windows forward without resizing them. Captures skip JankyBorders overlays, and the recording editor shows the full picture when choosing a zoom focus. Cleaning Mode waits for held mouse buttons to be released before closing.
 
 ### Added
+- Dynamic Island adds an AI Agents section that follows Claude Code and Codex from the logs they keep on this Mac: plan limits and when they renew, API value, live work, models, projects and a 13-week activity map. The closed island can show a working agent beside the camera, and notices report long tasks finishing and limits running low or renewing. Prices come from a public list that ships with the app and can refresh daily. The section is off by default, and nothing is sent.
 - Dynamic Island lets you choose the playback source, including a browser while a music app is playing, or return to Automatic. Safari appears under its own name.
 - Dynamic Island can hide while an app is in full screen on its selected display. The option is off by default.
 
 ### Changed
+- Dynamic Island's Content settings list sections with checkboxes and drag to reorder, show the chosen section's options, and preview the island live.
 - Dynamic Island uses narrower volume, display brightness and keyboard backlight indicators while keeping percentages readable and the camera clear.
 - Dynamic Island shows compact activity over crowded menus by default, preserving an explicitly saved preference. Thanks to @Yahddyyp.
 - Dynamic Island uses tighter compact strips and places navigation and titles beside the camera when there is room. Update controls adapt to narrow headers in every language. Thanks to Pinea for the feedback.
@@ -28,6 +30,7 @@ Dynamic Island improves list readability and playback controls, adds a playback 
 - With Liquid Glass enabled, the expanded Dynamic Island uses clear glass with a dark top that fades toward the lower edge, keeping the desktop's detail and refraction visible. Resting and compact strips stay black, and Reduce Transparency keeps the solid surface.
 
 ### Fixed
+- With Liquid Glass enabled, Dynamic Island's glass looks active as soon as hover opens it, instead of staying dull until clicked.
 - Dynamic Island opens on the first hover after closing under the pointer, such as after pressing Escape or clicking its header, so the activation time no longer seems longer than set.
 - Dynamic Island's clipboard page focuses its search field, so typing filters the history right away.
 - The Now Playing artwork glow and hover growth fade into the island's margins instead of being cut off at the page edge.
