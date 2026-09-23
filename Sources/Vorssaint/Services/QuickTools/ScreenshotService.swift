@@ -433,6 +433,9 @@ final class ScreenshotService: ObservableObject {
                 case .edit:
                     self.openEditor(with: capture)
                     return [.edit]
+                case .pin:
+                    ScreenshotPinController.shared.pin(image: capture.image, scale: capture.scale)
+                    return [.pin]
                 case .copy:
                     return self.copyDirect(capture) ? [.copy] : []
                 case .save:
