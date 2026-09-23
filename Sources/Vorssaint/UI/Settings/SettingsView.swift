@@ -180,7 +180,7 @@ struct SettingsView: View {
                     }
                 }
             }
-        }   
+        }
     }
 
     @ViewBuilder

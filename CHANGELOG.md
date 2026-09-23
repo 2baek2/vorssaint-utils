@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Summary
+Settings search keeps every typed letter in the search field.
+
+### Fixed
+- Settings search keeps focus while you type, instead of accepting only the first letter and beeping for the rest. Thanks to @overstock718.
+
 ## [3.4.0-beta.4] - 2026-09-23
 
 ### Summary
