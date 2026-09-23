@@ -47,6 +47,14 @@ def availability_declaration(path, prefix):
 
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
+    write("ClipboardHistoryImageEditor.swift", "import AppKit\n"
+          + "extension ClipboardHistoryImageEditorTests {\nfinal class Host: Fixture {\n"
+          + declaration("Sources/Vorssaint/Services/Clipboard/ClipboardHistoryService.swift",
+                        "    func editImage(")
+          + "}\n}\nextension ClipboardHistoryImageEditorTests.ScreenshotService {\n"
+          + declaration("Sources/Vorssaint/Services/QuickTools/ScreenshotService.swift",
+                        "    static func imageCapture(")
+          + "}\n")
     panel = "Sources/Vorssaint/App/AppDelegate.swift"
     write("PostUpdateStatusItemRecovery.swift", "import AppKit\nimport Foundation\n"
           + "extension PostUpdateStatusItemRecoveryTests {\nfinal class Host: Fixture {\n"
