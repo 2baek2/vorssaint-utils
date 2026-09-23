@@ -4,7 +4,7 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [3.4.0-beta.4] - 2026-09-23
 
 ### Summary
 Dynamic Island adds an AI Agents section for Claude Code and Codex, lets you choose the playback source and can hide in full screen, with clearer lists, controls and settings. App Switcher and Dock Preview no longer resize the windows they bring forward.
