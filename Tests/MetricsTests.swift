@@ -19,7 +19,10 @@ struct MetricsTests {
                 ProcessNameContract.run(suite)
             }),
             ("clipboard", { ClipboardFeatureTests.run(suite) }),
-            ("pointer-input", { PointerInputFeatureTests.run(suite) }),
+            ("pointer-input", {
+                PointerInputFeatureTests.run(suite)
+                SuperKeyTapContract.run(suite)
+            }),
             ("scroll-modifier", { ScrollHorizontalModifierTests.run(suite) }),
             ("preferences", { PreferencesFeatureTests.run(suite) }),
             ("app-management", { AppManagementFeatureTests.run(suite) }),
