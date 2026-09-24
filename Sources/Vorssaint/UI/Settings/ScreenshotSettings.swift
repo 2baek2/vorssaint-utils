@@ -229,9 +229,11 @@ struct ScreenshotCaptureSettings: View {
     private var defaultActionRow: some View {
         VStack(alignment: .leading, spacing: 4) {
             ScreenshotDefaultActionPicker(strings: strings, selection: $defaultActionRaw)
-            Text(strings.defaultActionCaption)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            if defaultActionRaw != ScreenshotDefaultAction.edit.rawValue {
+                Text(strings.defaultActionCaption)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 
