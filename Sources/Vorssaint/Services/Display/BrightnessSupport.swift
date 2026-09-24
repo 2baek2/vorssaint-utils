@@ -397,6 +397,19 @@ enum BrightnessSupport {
         return true
     }
 
+    /// Plain brightness key presses reach the system unless this app answers
+    /// them: to follow the pointer, or to show its own overlay or the island
+    /// in place of the system's. Only then is their keystroke tap worth it.
+    static func answersPlainBrightnessKeys(followsPointer: Bool, overlayReplacesNative: Bool) -> Bool {
+        followsPointer || overlayReplacesNative
+    }
+
+    /// The display a plain brightness key moves: the one under the pointer
+    /// when the pointer decides, otherwise the one the system's keys move.
+    static func plainKeyTarget(followsPointer: Bool, pointerDisplay: UInt32?, systemTarget: UInt32?) -> UInt32? {
+        followsPointer ? pointerDisplay : systemTarget
+    }
+
     static func shortcutDisplay(followsPointer: Bool, pointerDisplay: UInt32?,
                                 primaryDisplay: UInt32, eligible: Set<UInt32>) -> UInt32? {
         let target = followsPointer ? pointerDisplay : primaryDisplay

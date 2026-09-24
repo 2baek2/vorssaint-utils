@@ -2314,6 +2314,17 @@ enum FeatureCatalogTests {
                                                           displayIsBuiltIn: false,
                                                           overlayReplacesNative: true),
                "with the overlay on, the system target is stepped here so only one OSD draws")
+        // An external keyboard's plain brightness keys must reach the island
+        // or the overlay too, not only the pointer routing (beta feedback).
+        suite.expect(BrightnessSupport.answersPlainBrightnessKeys(followsPointer: false, overlayReplacesNative: true)
+                && BrightnessSupport.answersPlainBrightnessKeys(followsPointer: true, overlayReplacesNative: false)
+                && !BrightnessSupport.answersPlainBrightnessKeys(followsPointer: false, overlayReplacesNative: false),
+               "plain brightness keys are answered here whenever the app replaces the system's handling")
+        suite.expect(BrightnessSupport.plainKeyTarget(followsPointer: false, pointerDisplay: 2, systemTarget: 1) == 1
+                && BrightnessSupport.plainKeyTarget(followsPointer: true, pointerDisplay: 2, systemTarget: 1) == 2
+                && BrightnessSupport.plainKeyTarget(followsPointer: true, pointerDisplay: nil, systemTarget: 1) == nil
+                && BrightnessSupport.plainKeyTarget(followsPointer: false, pointerDisplay: 2, systemTarget: nil) == nil,
+               "without pointer routing a plain key moves the system's own target, never the pointer's display")
         suite.expect(BrightnessSupport.filledBrightnessSegments(0) == 0
                 && BrightnessSupport.filledBrightnessSegments(0.01) == 1
                 && BrightnessSupport.filledBrightnessSegments(0.5) == 8
