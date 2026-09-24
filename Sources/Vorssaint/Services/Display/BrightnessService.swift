@@ -1951,11 +1951,13 @@ final class BrightnessService: ObservableObject {
 
     private func invalidateDisplayLinkRoute(id: CGDirectDisplayID,
                                             persistentDisplayID: String?) {
-        guard let persistentDisplayID else { return }
-        DisplayLinkControl.shared.markUnavailable(persistentDisplayID: persistentDisplayID)
+        if let persistentDisplayID {
+            DisplayLinkControl.shared.markUnavailable(persistentDisplayID: persistentDisplayID)
+        }
         stateLock.lock()
         guard self.routes[id]?.method == .displayLink,
-              self.routes[id]?.displayLinkPersistentID == persistentDisplayID else {
+              persistentDisplayID == nil
+                || self.routes[id]?.displayLinkPersistentID == persistentDisplayID else {
             stateLock.unlock()
             return
         }
