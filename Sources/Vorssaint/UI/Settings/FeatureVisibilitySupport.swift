@@ -49,6 +49,7 @@ enum SettingsSectionAnchor: String, CaseIterable, Hashable {
     case cleaningMode
     case soundOutputSwitcher
     case fanControl
+    case windowMaximizer
 
     var page: SettingsPage {
         switch self {
@@ -67,6 +68,7 @@ enum SettingsSectionAnchor: String, CaseIterable, Hashable {
             return .screenshot
         case .soundOutputSwitcher: return .shortcuts
         case .fanControl: return .monitor
+        case .windowMaximizer: return .windowLayout
         }
     }
 }
@@ -220,7 +222,7 @@ extension AppFeature {
         case .dockPreview: return FeatureSettingsDestination(.dock, sectionAnchor: .dock)
         case .dockClick: return FeatureSettingsDestination(.dock, sectionAnchor: .dockClick)
         case .windowMaximizer:
-            return FeatureSettingsDestination(.general, sectionAnchor: .panelConfiguration)
+            return FeatureSettingsDestination(.windowLayout, sectionAnchor: .windowMaximizer)
         case .windowLayout: return FeatureSettingsDestination(.windowLayout)
         case .autoQuit: return FeatureSettingsDestination(.autoQuit)
         case .quitWindowProtection: return FeatureSettingsDestination(.quitProtection)
@@ -330,7 +332,7 @@ enum FeatureVisibilitySupport {
                              .middleClick, .mouseClickDebounce]
         case .switcher: return [.switcher]
         case .dock: return [.dockPreview, .dockClick]
-        case .windowLayout: return [.windowLayout]
+        case .windowLayout: return [.windowLayout, .windowMaximizer]
         case .autoQuit: return [.autoQuit]
         case .quitProtection: return [.quitWindowProtection]
         case .clipboard: return [.clipboardHistory, .pastePlain, .finderCutPaste]

@@ -1692,6 +1692,13 @@ enum SwitcherModelFeatureTests {
                "URL cleaner clipboard watching is opt-in")
         suite.expect(registeredDefaults[DefaultsKey.windowMaximizeEnabled] as? Bool == false,
                "green button maximize override is opt-in")
+        suite.expect(WindowMaximizerSupport.excludes(bundleIdentifier: "com.example.game",
+                                                     excludedBundleIdentifiers: [" com.example.game "])
+                && !WindowMaximizerSupport.excludes(bundleIdentifier: "com.example.editor",
+                                                    excludedBundleIdentifiers: ["com.example.game"])
+                && !WindowMaximizerSupport.excludes(bundleIdentifier: nil,
+                                                    excludedBundleIdentifiers: ["com.example.game"]),
+               "only apps on the exception list keep the native green button")
         suite.expect(registeredDefaults[DefaultsKey.keyboardDebounceEnabled] as? Bool == false,
                "keyboard debounce is opt-in")
         suite.expect(registeredDefaults[DefaultsKey.keyboardDebounceWindowMs] as? Int == 5,

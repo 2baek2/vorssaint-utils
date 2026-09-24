@@ -254,6 +254,7 @@ enum DefaultsKey {
     static let urlCleanerSiteParameters = "urlCleanerSiteParameters"       // host|name pairs added to one site
     static let urlCleanerDisabledParameters = "urlCleanerDisabledParameters" // built-in host|name pairs switched off
     static let windowMaximizeEnabled = "windowMaximizeEnabled"
+    static let windowMaximizeExcludedApps = "windowMaximizeExcludedApps" // [bundle id] whose green button stays native
     static let keyboardDebounceEnabled = "keyboardDebounceEnabled"
     static let keyboardDebounceWindowMs = "keyboardDebounceWindowMs"
     static let keyboardDebounceKeyWindows = "keyboardDebounceKeyWindows" // comma-separated keyCode:ms
@@ -1277,6 +1278,7 @@ enum Defaults {
         DefaultsKey.radialMenuMouseButton: RadialMenuMouseTrigger.off.rawValue,
         DefaultsKey.radialMenuActivationMode: RadialMenuActivationMode.pressOrHold.rawValue,
         DefaultsKey.windowMaximizeEnabled: false,
+        DefaultsKey.windowMaximizeExcludedApps: [String](),
         DefaultsKey.keyboardDebounceEnabled: false,
         DefaultsKey.keyboardDebounceWindowMs: defaultKeyboardDebounceWindowMs,
         DefaultsKey.keyboardDebounceKeyWindows: "",

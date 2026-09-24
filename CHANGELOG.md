@@ -19,6 +19,7 @@ Clipboard History images open in the Screenshot Editor, the capture preview can 
 - The menu bar Disk Usage reading can show available space or used space instead of the used percentage, chosen under Disk display in Monitor settings. Thanks to @maodijim.
 - App Switcher's icon row separates apps with open windows from apps without any. Thanks to @samanyudas.
 - Homebrew's Installed list shows the packages you installed by name, with an arrow that expands each one's installed dependencies. A dependency with an update, or one nothing needs any more, keeps its own row. Thanks to @PathGao.
+- Maximize windows has an exception list in Window Layout settings. In the listed apps, such as games, emulators and video players, the green button keeps entering macOS full screen.
 - Port Manager marks listeners bound to every network interface with an orange globe, so ports other devices on the network may reach stand out from the ones only this Mac can use. Thanks to @shlok1806.
 
 ### Changed
