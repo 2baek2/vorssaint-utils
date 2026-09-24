@@ -1030,7 +1030,7 @@ extension Strings {
         focusFollowsMouseName: "El foco sigue al ratón",
         focusFollowsMouseCaption: "Enfoca y trae al frente la ventana bajo el puntero tras una breve pausa.",
         focusFollowsMouseDelay: "Retraso al pasar",
-        switcherMinimizedPlacementLabel: "Ventanas minimizadas",
+        switcherMinimizedPlacementLabel: "Ventanas minimizadas y apps ocultas",
         switcherMinimizedPlacementNormal: "Orden normal",
         switcherMinimizedPlacementEnd: "Colocar al final",
         switcherMinimizedPlacementHidden: "Ocultar",

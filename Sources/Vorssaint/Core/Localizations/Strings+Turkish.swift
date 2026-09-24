@@ -1030,7 +1030,7 @@ extension Strings {
         focusFollowsMouseName: "Odak fareyi takip etsin",
         focusFollowsMouseCaption: "Kısa bir beklemeden sonra işaretçinin altındaki pencereye odaklanır ve öne getirir.",
         focusFollowsMouseDelay: "Üzerinde bekleme gecikmesi",
-        switcherMinimizedPlacementLabel: "Küçültülmüş pencereler",
+        switcherMinimizedPlacementLabel: "Küçültülmüş pencereler ve gizli uygulamalar",
         switcherMinimizedPlacementNormal: "Normal sıralama",
         switcherMinimizedPlacementEnd: "Sona yerleştir",
         switcherMinimizedPlacementHidden: "Gizle",

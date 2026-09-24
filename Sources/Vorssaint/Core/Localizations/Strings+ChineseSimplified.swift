@@ -1030,7 +1030,7 @@ extension Strings {
         focusFollowsMouseName: "悬停聚焦",
         focusFollowsMouseCaption: "鼠标短暂停留后，聚焦并置前指针下方的窗口。",
         focusFollowsMouseDelay: "悬停延迟",
-        switcherMinimizedPlacementLabel: "最小化的窗口",
+        switcherMinimizedPlacementLabel: "最小化的窗口和隐藏的 App",
         switcherMinimizedPlacementNormal: "正常顺序",
         switcherMinimizedPlacementEnd: "放到末尾",
         switcherMinimizedPlacementHidden: "隐藏",

@@ -1030,7 +1030,7 @@ extension Strings {
         focusFollowsMouseName: "Il focus segue il mouse",
         focusFollowsMouseCaption: "Mette a fuoco e porta in primo piano la finestra sotto il puntatore dopo una breve pausa.",
         focusFollowsMouseDelay: "Ritardo al passaggio",
-        switcherMinimizedPlacementLabel: "Finestre ridotte a icona",
+        switcherMinimizedPlacementLabel: "Finestre ridotte a icona e app nascoste",
         switcherMinimizedPlacementNormal: "Ordine normale",
         switcherMinimizedPlacementEnd: "Sposta alla fine",
         switcherMinimizedPlacementHidden: "Nascondi",

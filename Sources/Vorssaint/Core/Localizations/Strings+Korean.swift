@@ -1031,7 +1031,7 @@ extension Strings {
         focusFollowsMouseName: "마우스를 따라 포커스",
         focusFollowsMouseCaption: "잠시 멈춘 뒤 포인터 아래의 윈도우에 포커스를 주고 앞으로 가져옵니다.",
         focusFollowsMouseDelay: "호버 지연",
-        switcherMinimizedPlacementLabel: "최소화된 윈도우",
+        switcherMinimizedPlacementLabel: "최소화된 윈도우와 숨겨진 앱",
         switcherMinimizedPlacementNormal: "일반 순서",
         switcherMinimizedPlacementEnd: "끝으로 보내기",
         switcherMinimizedPlacementHidden: "숨기기",

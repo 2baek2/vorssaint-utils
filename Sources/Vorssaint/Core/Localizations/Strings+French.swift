@@ -1030,7 +1030,7 @@ extension Strings {
         focusFollowsMouseName: "Le focus suit la souris",
         focusFollowsMouseCaption: "Active et place au premier plan la fenêtre sous le pointeur après une courte pause.",
         focusFollowsMouseDelay: "Délai de survol",
-        switcherMinimizedPlacementLabel: "Fenêtres réduites",
+        switcherMinimizedPlacementLabel: "Fenêtres réduites et apps masquées",
         switcherMinimizedPlacementNormal: "Ordre normal",
         switcherMinimizedPlacementEnd: "Placer à la fin",
         switcherMinimizedPlacementHidden: "Masquer",

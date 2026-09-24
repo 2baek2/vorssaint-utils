@@ -1031,7 +1031,7 @@ extension Strings {
         focusFollowsMouseName: "Фокус следует за мышью",
         focusFollowsMouseCaption: "Фокусирует и поднимает окно под указателем после короткой паузы.",
         focusFollowsMouseDelay: "Задержка наведения",
-        switcherMinimizedPlacementLabel: "Свёрнутые окна",
+        switcherMinimizedPlacementLabel: "Свёрнутые окна и скрытые приложения",
         switcherMinimizedPlacementNormal: "Обычный порядок",
         switcherMinimizedPlacementEnd: "В конец списка",
         switcherMinimizedPlacementHidden: "Скрывать",

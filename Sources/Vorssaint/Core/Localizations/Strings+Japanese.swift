@@ -1030,7 +1030,7 @@ extension Strings {
         focusFollowsMouseName: "マウス追従フォーカス",
         focusFollowsMouseCaption: "短い停止後、ポインタの下にあるウインドウをフォーカスして手前に表示します。",
         focusFollowsMouseDelay: "ホバー遅延",
-        switcherMinimizedPlacementLabel: "最小化されたウインドウ",
+        switcherMinimizedPlacementLabel: "最小化されたウインドウと非表示のアプリ",
         switcherMinimizedPlacementNormal: "通常の順序",
         switcherMinimizedPlacementEnd: "最後に配置",
         switcherMinimizedPlacementHidden: "非表示",

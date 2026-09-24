@@ -1030,7 +1030,7 @@ extension Strings {
         focusFollowsMouseName: "Fokus folgt Maus",
         focusFollowsMouseCaption: "Fokussiert das Fenster unter dem Zeiger und bringt es nach kurzer Pause nach vorn.",
         focusFollowsMouseDelay: "Verzögerung",
-        switcherMinimizedPlacementLabel: "Minimierte Fenster",
+        switcherMinimizedPlacementLabel: "Minimierte Fenster und ausgeblendete Apps",
         switcherMinimizedPlacementNormal: "Normale Reihenfolge",
         switcherMinimizedPlacementEnd: "Ans Ende stellen",
         switcherMinimizedPlacementHidden: "Ausblenden",
