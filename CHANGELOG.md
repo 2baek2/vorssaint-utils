@@ -11,6 +11,7 @@ Clipboard History images open in the Screenshot Editor, the capture preview can 
 
 ### Added
 - Clipboard History images, including older ones, open in the Screenshot Editor from a pencil beside Copy in the history window, Dynamic Island and menu panel, without replacing the current clipboard. Thanks to @samanyudas.
+- Clipboard History shows a small color swatch before an entry that is a color value, such as #00BC7D, rgb(0, 188, 125) or hsl(160, 100%, 37%), in the history window, Dynamic Island and menu panel.
 - The screenshot preview can pin a capture above other windows without opening the editor. Thanks to @samanyudas.
 - Settings shows Back and Forward buttons in its toolbar. Thanks to @samanyudas.
 - Window Layout splits the screen into four full-width rows for tall displays or four full-height columns for wide ones, and adds top, middle and bottom thirds with top and bottom two-thirds. New placements start without a shortcut. Thanks to @DocEmmetBrown and @samueljim.

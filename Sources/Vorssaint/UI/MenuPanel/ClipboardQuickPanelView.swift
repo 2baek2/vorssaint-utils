@@ -364,11 +364,16 @@ private struct QuickEntryRow: View, Equatable {
     private func entryContent(_ entry: ClipboardHistoryEntry) -> some View {
         switch entry.kind {
         case .text:
-            Text(entry.preview)
-                .font(.system(size: 12))
-                .lineLimit(2)
-                .truncationMode(.tail)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            HStack(alignment: .center, spacing: 8) {
+                if let color = entry.color {
+                    ClipboardColorSwatch(color: color, size: 14)
+                }
+                Text(entry.preview)
+                    .font(.system(size: 12))
+                    .lineLimit(2)
+                    .truncationMode(.tail)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         case .image:
             HStack(alignment: .center, spacing: 8) {
                 if let name = entry.imageFile,

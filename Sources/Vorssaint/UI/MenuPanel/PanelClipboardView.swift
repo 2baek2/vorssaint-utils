@@ -142,11 +142,16 @@ struct PanelClipboardView: View {
             // the selection renderer, which lays the whole preview out and
             // ignores the line limit, so a long entry paints over the rows
             // below it. The history window shows the full, selectable text.
-            Text(entry.preview)
-                .font(.system(size: 10.5))
-                .lineLimit(3)
-                .truncationMode(.tail)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            HStack(alignment: .center, spacing: 7) {
+                if let color = entry.color {
+                    ClipboardColorSwatch(color: color, size: 12)
+                }
+                Text(entry.preview)
+                    .font(.system(size: 10.5))
+                    .lineLimit(3)
+                    .truncationMode(.tail)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         case .image:
             HStack(alignment: .center, spacing: 7) {
                 if let name = entry.imageFile,
