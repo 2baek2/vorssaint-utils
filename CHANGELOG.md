@@ -46,6 +46,7 @@ Clipboard History images open in the Screenshot Editor, copied color values show
 - App Switcher and Dock Preview no longer click a button at the top-left of the window they bring forward in some apps. Thanks to @integral-llc.
 - Clear all permissions says when some permissions or the closed-lid rule could not be removed, and Uninstall Vorssaint completely stops before removing anything when the password request is refused, instead of leaving the closed-lid rule behind. Thanks to @PathGao.
 - The sound output shortcut no longer reports a failed switch when the only selected output is already playing. Thanks to @PathGao.
+- Mic Mute says when some microphones could not be muted, or stayed muted after unmuting, instead of announcing a plain mute or unmute while a microphone in use stays live. Thanks to @PathGao.
 - The radial menu asks for Accessibility based on your saved wheels, so a wheel with only apps and links no longer asks for it and a wheel bound to a mouse button is not missed. Thanks to @PathGao.
 - Bluetooth on sleep no longer queries the Bluetooth controller at every launch when no restore is owed. Thanks to @PathGao.
 - Clean URL removes Xiaohongshu's shareRedId and exSource from links, and switching them off in Settings takes effect. Thanks to @PathGao.
