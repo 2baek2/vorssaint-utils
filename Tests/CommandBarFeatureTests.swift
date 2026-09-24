@@ -1397,6 +1397,33 @@ enum CommandBarFeatureTests {
                "nothing is dropped for a script that did not match, or for a non-script link")
         suite.expect(CommandBarLinks.matchingScriptLink(in: scriptLinks, query: "a 100 usd eur") == nil,
                "a non-script link never matches, even with an argument")
+
+        // A script marked to run directly answers to its own global shortcut
+        // with nothing on screen; everything else falls back to opening the
+        // bar the way it always has.
+        suite.expect(!CommandBarLink(name: "h", kind: .script, destination: "/tmp/h").runsDirectly,
+               "a script stays a bar row unless the person marks it to run directly")
+        let directScript = CommandBarLink(name: "h", kind: .script, destination: "/tmp/h",
+                                          runsDirectly: true)
+        suite.expect(CommandBarLinks.directRunScript(
+                forStableKey: "link.\(directScript.id.uuidString)", in: [directScript]) != nil,
+               "a marked script is found by its own row's key")
+        suite.expect(CommandBarLinks.directRunScript(
+                forStableKey: "link.\(scriptLinks[1].id.uuidString)", in: scriptLinks) == nil,
+               "an unmarked script still opens the bar")
+        suite.expect(CommandBarLinks.directRunScript(forStableKey: "kill.browse",
+                                                     in: [directScript]) == nil
+                && CommandBarLinks.directRunScript(
+                    forStableKey: "link.00000000-0000-0000-0000-000000000000",
+                    in: [directScript]) == nil,
+               "a key that is not a saved link's row answers nil, whichever shape it has")
+        let saved = try? JSONDecoder().decode([CommandBarLink].self,
+                                              from: JSONEncoder().encode([directScript]))
+        suite.expect(saved?.first?.runsDirectly == true,
+               "the direct-run mark survives a save")
+        let legacy = try? JSONDecoder().decode(CommandBarLink.self, from: Data("{}".utf8))
+        suite.expect(legacy?.runsDirectly == false,
+               "a shortcut saved before the mark existed still loads, unmarked")
         let overlappingScripts = [
             CommandBarLink(name: "run", kind: .script, destination: "/tmp/short"),
             CommandBarLink(name: "run report", kind: .script, destination: "/tmp/specific"),
