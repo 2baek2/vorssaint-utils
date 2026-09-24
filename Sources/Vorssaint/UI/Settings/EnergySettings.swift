@@ -352,7 +352,9 @@ struct EnergySettings: View {
                         .frame(width: 52, alignment: .trailing)
                 }
             }
-                        DisplayPowerButton(display: display)
+            if !display.isVirtual {
+                DisplayPowerButton(display: display)
+            }
         }
     }
 

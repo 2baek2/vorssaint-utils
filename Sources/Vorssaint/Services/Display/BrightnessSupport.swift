@@ -72,10 +72,23 @@ enum BrightnessSupport {
         return value
     }
 
+    static func shouldApplyDisplayLinkBrightnessUpdate(isNativeRoute: Bool,
+                                                        hasPendingWrite: Bool) -> Bool {
+        isNativeRoute && !hasPendingWrite
+    }
+
     static func decodeDisplayLinkDisplays(_ raw: String) -> [DisplayLinkDisplay] {
+        decodeDisplayLinkDisplaysResult(raw) ?? []
+    }
+
+    /// Distinguishes a valid empty Manager list from a malformed or timed-out
+    /// response. Callers that own a cache must keep the last valid list for
+    /// the latter; replacing it with an empty list would erase good routes just
+    /// because one distributed notification arrived late.
+    static func decodeDisplayLinkDisplaysResult(_ raw: String) -> [DisplayLinkDisplay]? {
         guard let data = raw.data(using: .utf8),
               let payloads = try? JSONDecoder().decode([DisplayLinkPayload].self, from: data)
-        else { return [] }
+        else { return nil }
         var seenCGIDs = Set<UInt32>()
         var seenPersistentIDs = Set<String>()
         for payload in payloads {
@@ -83,7 +96,7 @@ enum BrightnessSupport {
                   !payload.persistentDisplayId.isEmpty,
                   seenCGIDs.insert(cgID).inserted,
                   seenPersistentIDs.insert(payload.persistentDisplayId).inserted
-            else { return [] }
+            else { return nil }
         }
         return payloads.compactMap { payload in
             guard let cgID = payload.CGID else { return nil }

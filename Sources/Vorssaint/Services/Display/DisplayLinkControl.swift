@@ -22,6 +22,10 @@ final class DisplayLinkControl {
     private let notificationCenter = DistributedNotificationCenter.default()
     private let stateLock = NSLock()
     private var displaysByID: [CGDirectDisplayID: BrightnessSupport.DisplayLinkDisplay] = [:]
+    /// Persistent IDs whose native write failed. They stay out of discovery
+    /// until an explicit refresh clears the failure, so a dead route cannot
+    /// consume the work queue on every slider update.
+    private var unavailablePersistentDisplayIDs = Set<String>()
     private var suppressNextDisplayListNotification = false
     private var displayListObserver: NSObjectProtocol?
     private var brightnessObserver: NSObjectProtocol?
@@ -81,12 +85,36 @@ final class DisplayLinkControl {
         active = false
         lifecycleGeneration &+= 1
         displaysByID = [:]
+        unavailablePersistentDisplayIDs = []
         suppressNextDisplayListNotification = false
         let observers = [displayListObserver, brightnessObserver].compactMap { $0 }
         displayListObserver = nil
         brightnessObserver = nil
         stateLock.unlock()
         for observer in observers { notificationCenter.removeObserver(observer) }
+    }
+
+    /// Allows the next explicit discovery pass to retry persistent IDs whose
+    /// native write previously failed. Failure handling itself does not call
+    /// this, so an automatic rebuild cannot immediately resurrect a dead route.
+    @discardableResult
+    func allowRetry() -> Bool {
+        stateLock.lock()
+        let hadFailures = !unavailablePersistentDisplayIDs.isEmpty
+        unavailablePersistentDisplayIDs = []
+        stateLock.unlock()
+        return hadFailures
+    }
+
+    /// Removes one failed native route from the cache. A later panel, wake, or
+    /// topology refresh can explicitly clear the failure and discover it again.
+    func markUnavailable(persistentDisplayID: String) {
+        stateLock.lock()
+        unavailablePersistentDisplayIDs.insert(persistentDisplayID)
+        displaysByID = displaysByID.filter {
+            $0.value.persistentDisplayID != persistentDisplayID
+        }
+        stateLock.unlock()
     }
 
     /// Refreshes the current DisplayLink display list. This is synchronous and
@@ -117,9 +145,19 @@ final class DisplayLinkControl {
             return true
         }
         guard stillActive else { return [] }
-        let displays = raw.map(BrightnessSupport.decodeDisplayLinkDisplays) ?? []
-        replaceDisplays(displays)
-        return displays
+        guard let raw,
+              let displays = BrightnessSupport.decodeDisplayLinkDisplaysResult(raw) else {
+            return cachedDisplays()
+        }
+        return replaceDisplays(displays)
+    }
+
+    private func cachedDisplays() -> [BrightnessSupport.DisplayLinkDisplay] {
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        return displaysByID.values.filter {
+            !unavailablePersistentDisplayIDs.contains($0.persistentDisplayID)
+        }
     }
 
     func display(for id: CGDirectDisplayID) -> BrightnessSupport.DisplayLinkDisplay? {
@@ -162,30 +200,19 @@ final class DisplayLinkControl {
                     userInfo: nil,
                     deliverImmediately: true)
             })
-        if let update,
-           let acknowledged = BrightnessSupport.acknowledgedDisplayLinkBrightness(
-               update, persistentDisplayID: persistentDisplayID, requested: value) {
-            _ = cacheBrightness(persistentDisplayID: persistentDisplayID,
-                                 brightness: acknowledged)
-            return true
+        guard let update,
+              let acknowledged = BrightnessSupport.acknowledgedDisplayLinkBrightness(
+                  update, persistentDisplayID: persistentDisplayID, requested: value) else {
+            return false
         }
-
-        // Some DisplayLink builds acknowledge by changing the display list
-        // instead of returning an update. Re-read once, but never turn a failed
-        // native write into an alternate write behind the caller's back.
-        let displays = refreshDisplays(timeout: min(timeout, 0.75))
-        guard let current = displays.first(where: {
-            $0.persistentDisplayID == persistentDisplayID
-        })?.brightness,
-        let requested = BrightnessSupport.normalizedDisplayLinkValue(value),
-        abs(current - requested) <= 0.011 else { return false }
-        _ = cacheBrightness(persistentDisplayID: persistentDisplayID, brightness: current)
+        guard cacheBrightness(persistentDisplayID: persistentDisplayID,
+                              brightness: acknowledged) != nil else { return false }
         return true
     }
 
     private func handleDisplayListUpdate(_ notification: Notification) {
-        guard controlIsActive(), let raw = Self.objectString(notification) else { return }
-        let displays = BrightnessSupport.decodeDisplayLinkDisplays(raw)
+        guard controlIsActive(), let raw = Self.objectString(notification),
+              let displays = BrightnessSupport.decodeDisplayLinkDisplaysResult(raw) else { return }
         let shouldNotify: Bool = stateLock.withLock {
             let suppress = suppressNextDisplayListNotification
             suppressNextDisplayListNotification = false
@@ -231,12 +258,17 @@ final class DisplayLinkControl {
         return entry.key
     }
 
-    private func replaceDisplays(_ displays: [BrightnessSupport.DisplayLinkDisplay]) {
+    @discardableResult
+    private func replaceDisplays(_ displays: [BrightnessSupport.DisplayLinkDisplay]) -> [BrightnessSupport.DisplayLinkDisplay] {
         stateLock.lock()
-        displaysByID = Dictionary(displays.map {
+        let available = displays.filter {
+            !unavailablePersistentDisplayIDs.contains($0.persistentDisplayID)
+        }
+        displaysByID = Dictionary(available.map {
             (CGDirectDisplayID($0.cgID), $0)
         }, uniquingKeysWith: { first, _ in first })
         stateLock.unlock()
+        return available
     }
 
     private func waitForNotification(

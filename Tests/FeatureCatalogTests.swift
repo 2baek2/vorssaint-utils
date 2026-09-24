@@ -1404,6 +1404,17 @@ enum FeatureCatalogTests {
         suite.expect(BrightnessSupport.decodeDisplayLinkDisplays(
                    "[{\"persistentDisplayId\":\"\",\"CGID\":20}]").isEmpty,
                "an empty persistent DisplayLink identity is rejected")
+        suite.expect(BrightnessSupport.decodeDisplayLinkDisplaysResult(
+                   "[{\"persistentDisplayId\":\"\",\"CGID\":20}]") == nil
+                && BrightnessSupport.decodeDisplayLinkDisplaysResult("[]")?.isEmpty == true,
+               "a malformed DisplayListUpdated payload is distinct from a valid empty list")
+        suite.expect(BrightnessSupport.shouldApplyDisplayLinkBrightnessUpdate(
+                   isNativeRoute: true, hasPendingWrite: false)
+               && !BrightnessSupport.shouldApplyDisplayLinkBrightnessUpdate(
+                   isNativeRoute: true, hasPendingWrite: true)
+               && !BrightnessSupport.shouldApplyDisplayLinkBrightnessUpdate(
+                   isNativeRoute: false, hasPendingWrite: false),
+               "an older native acknowledgement cannot move a pending or non-native route")
         suite.expect(BrightnessSupport.decodeDisplayLinkBrightnessUpdate(
                    "{\"persistentDisplayId\":\"LG FULL HD (16843009#)\",\"brightness\":0.5}")
                 == BrightnessSupport.DisplayLinkBrightnessUpdate(

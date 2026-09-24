@@ -128,7 +128,9 @@ struct BrightnessSection: View {
                         .font(.system(size: 10.5, weight: .medium))
                         .foregroundStyle(.secondary)
                 }
-                DisplayPowerButton(display: display, compact: true)
+                if !display.isVirtual {
+                    DisplayPowerButton(display: display, compact: true)
+                }
             }
             if display.isActive, display.method != nil {
                 Slider(value: brightnessBinding(display), in: 0...1)

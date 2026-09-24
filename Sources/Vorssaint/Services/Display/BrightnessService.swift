@@ -29,6 +29,9 @@ struct BrightnessDisplay: Identifiable, Equatable {
     var isActive: Bool
     /// 0...1 for the UI slider.
     var brightness: Double
+    /// Virtual outputs are excluded from display power control even when a
+    /// native brightness route is available.
+    var isVirtual = false
 }
 
 /// Brightness sliders for every display, built-in and external. The built-in
@@ -144,6 +147,9 @@ final class BrightnessService: ObservableObject {
         let sequence: UInt64
     }
     private var pendingLevels: [CGDirectDisplayID: PendingWrite] = [:]
+    /// Native acknowledgements that arrive while their blocking Manager write
+    /// is still in flight must not move the slider back to an older value.
+    private var displayLinkWritesInFlight = Set<CGDirectDisplayID>()
     private var writeSequence: UInt64 = 0
     /// Keeps fast system-key repeats based on the newest requested value while
     /// DisplayServices is still applying the previous asynchronous write.
@@ -393,7 +399,7 @@ final class BrightnessService: ObservableObject {
         displayLinkObserver = NotificationCenter.default.addObserver(
             forName: DisplayLinkControl.displayListDidChangeNotification,
             object: nil, queue: .main) { [weak self] _ in
-            self?.refresh(force: true)
+            self?.refresh(force: true, retryDisplayLink: false)
         }
         displayLinkBrightnessObserver = NotificationCenter.default.addObserver(
             forName: DisplayLinkControl.brightnessDidChangeNotification,
@@ -433,6 +439,7 @@ final class BrightnessService: ObservableObject {
         rebuildingTopology = nil
         routes = [:]
         pendingLevels = [:]
+        displayLinkWritesInFlight = []
         writeSequence = 0
         systemWritesInFlight = []
         lastApplied = [:]
@@ -465,14 +472,16 @@ final class BrightnessService: ObservableObject {
     /// Re-reads every display. Called when the panel section or the Settings
     /// page appears, so the sliders match changes made elsewhere (brightness
     /// keys, System Settings, the monitor's own buttons).
-    func refresh(force: Bool = false) {
+    func refresh(force: Bool = false, retryDisplayLink: Bool = true) {
         guard running else { return }
         let topology = Self.currentTopology()
         let previousDisplays = displays
+        let retryingDisplayLink = retryDisplayLink && DisplayLinkControl.shared.allowRetry()
+        let rebuildForce = force || retryingDisplayLink
         stateLock.lock()
         guard BrightnessSupport.shouldQueueRebuild(topology: topology,
                                                    pending: rebuildingTopology,
-                                                   force: force) else {
+                                                   force: rebuildForce) else {
             stateLock.unlock()
             return
         }
@@ -544,7 +553,9 @@ final class BrightnessService: ObservableObject {
     }
 
     func canToggleDisplay(_ display: BrightnessDisplay) -> Bool {
-        guard displaySwitchingAvailable, !isDisplayPending(display.id) else { return false }
+        guard !display.isVirtual,
+              displaySwitchingAvailable,
+              !isDisplayPending(display.id) else { return false }
         guard display.isActive else { return true }
         return BrightnessSupport.canDisableDisplay(drawableDisplayIDs: drawableDisplays,
                                                   target: display.id)
@@ -554,7 +565,7 @@ final class BrightnessService: ObservableObject {
     /// system arrangement. The transaction is app-only and never overwrites
     /// the user's saved display configuration.
     func toggleDisplay(_ display: BrightnessDisplay) {
-        guard !isDisplayPending(display.id) else { return }
+        guard !display.isVirtual, !isDisplayPending(display.id) else { return }
         guard displaySwitchingAvailable else {
             displayControlFailure = .unavailable
             return
@@ -1279,16 +1290,22 @@ final class BrightnessService: ObservableObject {
               let rawBrightness = notification.userInfo?[DisplayLinkControl.brightnessUserInfoKey],
               let brightness = (rawBrightness as? NSNumber)?.doubleValue,
               brightness.isFinite, (0...1).contains(brightness) else { return }
-        if let index = displays.firstIndex(where: { $0.id == displayID }) {
-            displays[index].brightness = brightness
-        }
         stateLock.lock()
-        if routes[displayID]?.method == .displayLink, pendingLevels[displayID] == nil {
+        let isCurrentNativeRoute = routes[displayID]?.method == .displayLink
+        let hasPendingWrite = pendingLevels[displayID] != nil
+            || displayLinkWritesInFlight.contains(displayID)
+        let shouldApply = BrightnessSupport.shouldApplyDisplayLinkBrightnessUpdate(
+            isNativeRoute: isCurrentNativeRoute, hasPendingWrite: hasPendingWrite)
+        if shouldApply {
             lastApplied[displayID] = RememberedLevel(
                 value: brightness, fingerprint: Self.displayFingerprint(displayID))
             levelKnownAt[displayID] = Date()
         }
         stateLock.unlock()
+        guard shouldApply else { return }
+        if let index = displays.firstIndex(where: { $0.id == displayID }) {
+            displays[index].brightness = brightness
+        }
     }
 
     private func commitStep(from current: Double,
@@ -1597,7 +1614,7 @@ final class BrightnessService: ObservableObject {
                 stateLock.unlock()
                 built.append(BrightnessDisplay(id: id, name: name, isBuiltIn: isBuiltIn,
                                                method: nil, isActive: false,
-                                               brightness: level))
+                                               brightness: level, isVirtual: isVirtual))
                 continue
             case .displayLink:
                 guard let displayLink, let brightness = displayLink.brightness else { continue }
@@ -1605,7 +1622,7 @@ final class BrightnessService: ObservableObject {
                                       displayLinkPersistentID: displayLink.persistentDisplayID)
                 built.append(BrightnessDisplay(id: id, name: name, isBuiltIn: false,
                                                method: .displayLink, isActive: true,
-                                               brightness: brightness))
+                                               brightness: brightness, isVirtual: isVirtual))
                 continue
             case .hardwareOrDDC:
                 break
@@ -1631,7 +1648,7 @@ final class BrightnessService: ObservableObject {
                 let trusted = asleep ? (remembered ?? Double(level)) : Double(level)
                 built.append(BrightnessDisplay(id: id, name: name, isBuiltIn: isBuiltIn,
                                                method: .system, isActive: true,
-                                               brightness: trusted))
+                                               brightness: trusted, isVirtual: isVirtual))
                 newRoutes[id] = Route(method: .system, service: nil, maximum: 100)
                 if !asleep {
                     stateLock.lock()
@@ -1645,7 +1662,7 @@ final class BrightnessService: ObservableObject {
             // Placeholder; the DDC pass below fills brightness and route.
             built.append(BrightnessDisplay(id: id, name: name, isBuiltIn: false,
                                            method: .ddc, isActive: true,
-                                           brightness: 0.5))
+                                           brightness: 0.5, isVirtual: false))
         }
 
         let drawableIDs = BrightnessSupport.drawableDisplayIDs(
@@ -1682,7 +1699,8 @@ final class BrightnessService: ObservableObject {
                 return BrightnessDisplay(id: display.id, name: display.name,
                                          isBuiltIn: display.isBuiltIn,
                                          method: previous.method, isActive: true,
-                                         brightness: previous.brightness)
+                                         brightness: previous.brightness,
+                                         isVirtual: previous.isVirtual)
             }
             DispatchQueue.main.async { [weak self] in
                 guard let self, self.running, generation == self.rebuildGeneration else { return }
@@ -1742,7 +1760,8 @@ final class BrightnessService: ObservableObject {
                         id: id, name: built[candidate.index].name, isBuiltIn: false,
                         method: .ddc, isActive: true,
                         brightness: BrightnessSupport.normalized(current: current,
-                                                                 maximum: ceiling))
+                                                                 maximum: ceiling),
+                        isVirtual: false)
                     newRoutes[id] = Route(method: .ddc, service: matched.service,
                                           maximum: ceiling, ddcReadable: true,
                                           ddcPathKey: pathKey)
@@ -1752,13 +1771,16 @@ final class BrightnessService: ObservableObject {
                 case .writeOnly:
                     rememberWriteOnlyDDCPath(pathKey)
                     // Reads fail on some monitors whose writes still work:
-                    // keep the slider, seeded from this session's last value.
+                    // keep the DDC slider, seeded from this session's last value.
+                    // A converter can accept and swallow the same writes, so this
+                    // route is not proof that the physical panel changed.
                     stateLock.lock()
                     let seed = rememberedLevel(for: id) ?? 0.5
                     stateLock.unlock()
                     built[candidate.index] = BrightnessDisplay(
                         id: id, name: built[candidate.index].name, isBuiltIn: false,
-                        method: .ddc, isActive: true, brightness: seed)
+                        method: .ddc, isActive: true, brightness: seed,
+                        isVirtual: false)
                     newRoutes[id] = Route(method: .ddc, service: matched.service,
                                           maximum: 100, ddcPathKey: pathKey)
                 case .dead:
@@ -1855,6 +1877,12 @@ final class BrightnessService: ObservableObject {
             stateLock.unlock()
             guard let route else { continue }
             var writeSucceeded = false
+            let nativeWriteInFlight = route.method == .displayLink
+            if nativeWriteInFlight {
+                stateLock.lock()
+                displayLinkWritesInFlight.insert(id)
+                stateLock.unlock()
+            }
             switch route.method {
             case .system:
                 writeSucceeded = BrightnessBridge.setBrightness?(id, Float(value)) == 0
@@ -1867,9 +1895,15 @@ final class BrightnessService: ObservableObject {
                     value: deviceValue)
                 writeSucceeded = ddcSend(to: id, service: service, packet: packet)
             case .displayLink:
-                guard let persistentDisplayID = route.displayLinkPersistentID else { continue }
-                writeSucceeded = DisplayLinkControl.shared.setBrightness(
-                    for: id, persistentDisplayID: persistentDisplayID, value: value)
+                if let persistentDisplayID = route.displayLinkPersistentID {
+                    writeSucceeded = DisplayLinkControl.shared.setBrightness(
+                        for: id, persistentDisplayID: persistentDisplayID, value: value)
+                }
+            }
+            if nativeWriteInFlight {
+                stateLock.lock()
+                displayLinkWritesInFlight.remove(id)
+                stateLock.unlock()
             }
             Self.log.log("wrote display \(id) route \(String(describing: route.method), privacy: .public) level \(value) ok \(writeSucceeded)")
             if route.method == .ddc, !writeSucceeded, route.ddcReadable == false,
@@ -1881,9 +1915,8 @@ final class BrightnessService: ObservableObject {
             }
             if route.method == .displayLink, !writeSucceeded {
                 Self.log.error("DisplayLink brightness write failed for display \(id); removing native route")
-                DispatchQueue.main.async { [weak self] in
-                    self?.refresh(force: true)
-                }
+                invalidateDisplayLinkRoute(id: id,
+                                           persistentDisplayID: route.displayLinkPersistentID)
             }
             if route.method == .displayLink, writeSucceeded, running {
                 stateLock.lock()
@@ -1912,6 +1945,48 @@ final class BrightnessService: ObservableObject {
                     BrightnessOSD.show(displayID: id,
                                        brightness: osdLevel)
                 }
+            }
+        }
+    }
+
+    private func invalidateDisplayLinkRoute(id: CGDirectDisplayID,
+                                            persistentDisplayID: String?) {
+        guard let persistentDisplayID else { return }
+        DisplayLinkControl.shared.markUnavailable(persistentDisplayID: persistentDisplayID)
+        stateLock.lock()
+        guard self.routes[id]?.method == .displayLink,
+              self.routes[id]?.displayLinkPersistentID == persistentDisplayID else {
+            stateLock.unlock()
+            return
+        }
+        routes.removeValue(forKey: id)
+        pendingLevels.removeValue(forKey: id)
+        lastApplied.removeValue(forKey: id)
+        levelKnownAt.removeValue(forKey: id)
+        rebuildGeneration += 1
+        rebuildingTopology = nil
+        stateLock.unlock()
+        DispatchQueue.main.async { [weak self] in
+            guard let self, self.running else { return }
+            self.stateLock.lock()
+            let routeWasRestored = self.routes[id] != nil
+            self.stateLock.unlock()
+            guard !routeWasRestored else { return }
+            if let index = self.displays.firstIndex(where: { $0.id == id }) {
+                self.displays[index].method = nil
+            }
+            self.updateBrightnessOSDSupport()
+        }
+    }
+
+    private func updateBrightnessOSDSupport() {
+        brightnessOSDSupported = displays.contains { display in
+            guard display.isActive, let method = display.method else { return false }
+            switch method {
+            case .system:
+                return BrightnessBridge.setBrightness != nil
+            case .ddc, .displayLink:
+                return true
             }
         }
     }
