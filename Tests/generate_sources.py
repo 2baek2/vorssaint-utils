@@ -110,6 +110,20 @@ def main():
                         "    func syncWithPreferences(", "    private func start(", "    func stop(",
                         "    private func handleLaunch(", "    private func handleMediaKeyEvent("])
           + "}\n}\n")
+    fan_control = "Sources/Vorssaint/Services/FanControl/FanControlService.swift"
+    write("FanControlResume.swift", "import Foundation\n"
+          + "extension FanControlResumeContract {\nfinal class Service: Fixture {\n"
+          + "".join(declaration(fan_control, prefix)
+                    .replace("@objc private func", "func", 1)
+                    .replace("private static var", "static var", 1)
+                    .replace("private func", "func", 1) for prefix in [
+                        "    static func recoverIfNeeded(", "    func syncWithPreferences(",
+                        "    func returnToSystem(", "    func resumePreferenceDidChange(",
+                        "    private static var resumableConfiguration:", "    private func resume(",
+                        "    private static var helperAwaitsRegistration:",
+                        "    private func rememberForResume(", "    private func stopIdleWorkIfPossible(",
+                        "    @objc private func workspaceDidWake("])
+          + "}\n}\n")
     write("NotchAudioLevelLifecycle.swift", "import Combine\nimport Foundation\n"
           + "extension NotchAudioLevelLifecycleContract {\n"
           + declaration("Sources/Vorssaint/Services/Notch/NotchAudioLevelService.swift",

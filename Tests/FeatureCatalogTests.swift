@@ -858,6 +858,25 @@ enum FeatureCatalogTests {
                     FanControlConfiguration.encodeCurves([defaultCurve]) ?? "") == [defaultCurve]
                 && FanControlConfiguration.decodeCurves("not json") == nil,
                "stored curves reject duplicate sensors, unsafe slopes and malformed data")
+        let resumedManual = FanControlConfiguration.manual(level: 100)
+        let resumedCurves = FanControlConfiguration.curve([defaultCurve, cpuCurve])
+        suite.expect(FanControlConfiguration.decodeResume(
+                    FanControlConfiguration.encodeResume(resumedManual) ?? "") == resumedManual
+                && FanControlConfiguration.decodeResume(
+                    FanControlConfiguration.encodeResume(resumedCurves) ?? "") == resumedCurves,
+               "a resumed manual speed or curve comes back exactly as the user applied it")
+        suite.expect(FanControlConfiguration.encodeResume(
+                    FanControlConfiguration(mode: .system, manualLevel: 100, curves: [])) == nil
+                && FanControlConfiguration.encodeResume(.manual(level: 37)) == nil
+                && FanControlConfiguration.encodeResume(.curve([descendingCurve])) == nil
+                && FanControlConfiguration.decodeResume(
+                    #"{"curves":[],"manualLevel":100,"mode":"system"}"#) == nil
+                && FanControlConfiguration.decodeResume(
+                    #"{"curves":[],"manualLevel":37,"mode":"manual"}"#) == nil
+                && FanControlConfiguration.decodeResume("") == nil
+                && FanControlConfiguration.decodeResume("not json") == nil,
+               "only a valid manual speed or curve is ever kept or brought back after a restart")
+        FanControlResumeContract.run(suite)
         let addedPoints = FanControlPolicy.addingCurvePoint(to: defaultCurve.points)
         suite.expect(FanControlPolicy.nextCurvePoint(for: defaultCurve.points) == FanControlCurvePoint(temperature: 60, coolingLevel: 50)
                 && addedPoints == [
@@ -2459,13 +2478,18 @@ enum MusicLaunchBlockerContract {
         var observers: [NSObjectProtocol] = []
         var mediaKeyTap: Tap?
         var lastMediaKeyAt: TimeInterval?
+        var lastMediaKeyCode: UInt16?
         var judgedLaunchPID: pid_t?
         var replacementCalls = 0
+        var replacementPlays: [Bool] = []
         func installMediaKeyTap() {
             if mediaKeyTap == nil, Environment.createsTap { mediaKeyTap = Tap() }
         }
         func removeMediaKeyTap() { mediaKeyTap?.enabled = false; mediaKeyTap = nil }
-        func openReplacementIfConfigured() { replacementCalls += 1 }
+        func openReplacementIfConfigured(startingPlayback: Bool) {
+            replacementCalls += 1
+            replacementPlays.append(startingPlayback)
+        }
     }
 
     static func run(_ suite: TestSuite) {
@@ -2474,6 +2498,7 @@ enum MusicLaunchBlockerContract {
         func reset() {
             service.stop()
             service.replacementCalls = 0
+            service.replacementPlays = []
             Environment.enabled = true
             Environment.available = true
             Environment.trusted = true
@@ -2518,6 +2543,10 @@ enum MusicLaunchBlockerContract {
         launch(automatic, did: true)
         suite.expect(automatic.forceCalls == 1 && automatic.terminateCalls == 0 && service.replacementCalls == 1,
                      "a detected key blocks one launch and its did-launch cannot repeat termination or replacement")
+        key(code: MusicLaunchSupport.nextTrackKeyCode)
+        launch(NSRunningApplication(50))
+        suite.expect(service.replacementPlays == [true, false],
+                     "only Play/Pause asks the replacement to play; the other media keys only open it")
         let second = NSRunningApplication(3)
         launch(second)
         suite.expect(second.forceCalls == 0 && service.lastMediaKeyAt == nil,

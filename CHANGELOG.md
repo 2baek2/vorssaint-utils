@@ -24,9 +24,11 @@ Clipboard History images open in the Screenshot Editor, the capture preview can 
 - Blur strength goes from 1 to 5 for the Screenshot Editor's pixelate areas and for each blur in the Screen Recorder editor. Level 3 keeps the current strength, and each area keeps its own level.
 - Maximize windows has an exception list in Window Layout settings. In the listed apps, such as games, emulators and video players, the green button keeps entering macOS full screen.
 - Port Manager marks listeners bound to every network interface with an orange globe, so ports other devices on the network may reach stand out from the ones only this Mac can use. Thanks to @shlok1806.
+- Fan Control can bring back your manual speed or curve whenever Vorssaint opens again, such as after a restart, and when the Mac wakes, with Resume after restart or sleep in the Fan Control card. It is off by default, and returning to System stops it from coming back until you apply control again. Thanks to Mower for the feedback.
 
 ### Changed
 - The menu panel opens and closes with the native macOS popover animation. Thanks to @archieamas11.
+- The app chosen under Open instead for Stop Music from opening on its own also starts playing when Play/Pause opened it, once you allow Vorssaint to control that app. Other media keys still only open it. Thanks to Mower for the feedback.
 - Screenshot Editor tool shortcuts show on every tool in the rail, not only on the selected or hovered one.
 - Dynamic Island's playing music fits its cover and bars into narrower wings beside the camera, with the cover's corners following the island's own. Thanks to Pinea for the feedback.
 - Dynamic Island's connection notices show the status beside the device icon and the whole name on the other side, and pick the icon from the kind of device even after it is renamed. Text notices keep an even margin at both ends. Thanks to Pinea for the feedback.

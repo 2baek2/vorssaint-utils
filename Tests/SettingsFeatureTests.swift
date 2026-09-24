@@ -195,9 +195,13 @@ enum SettingsFeatureTests {
                 && backupKeys.contains(DefaultsKey.fanControlCoolingLevel)
                 && backupKeys.contains(DefaultsKey.fanControlCurves)
                 && backupKeys.contains(DefaultsKey.menuBarFanSpeed)
+                && backupKeys.contains(DefaultsKey.fanControlResume)
                 && !backupKeys.contains(DefaultsKey.fanControlRecoveryNeeded)
-                && !backupKeys.contains(DefaultsKey.fanControlHelperVersion),
+                && !backupKeys.contains(DefaultsKey.fanControlHelperVersion)
+                && !backupKeys.contains(DefaultsKey.fanControlResumeConfiguration),
                "fan display and cooling preferences travel while helper recovery state stays on one Mac")
+        suite.expect(Defaults.registeredDefaults[DefaultsKey.fanControlResume] as? Bool == false,
+               "resuming fan control after a restart or sleep is opt-in")
         suite.expect(backupKeys.contains(DefaultsKey.screenshotSharingEnabled),
                "the temporary screenshot links preference travels with settings backup")
         suite.expect(!backupKeys.contains(DefaultsKey.clipboardHistoryEntries)
