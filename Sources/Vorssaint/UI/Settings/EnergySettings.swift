@@ -352,8 +352,7 @@ struct EnergySettings: View {
                         .frame(width: 52, alignment: .trailing)
                 }
             }
-            SoftwareDimmingButton(display: display)
-            DisplayPowerButton(display: display)
+                        DisplayPowerButton(display: display)
         }
     }
 
