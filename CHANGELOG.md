@@ -20,11 +20,14 @@ Clipboard History images open in the Screenshot Editor, the capture preview can 
 - The menu bar Disk Usage reading can show available space or used space instead of the used percentage, chosen under Disk display in Monitor settings. Thanks to @maodijim.
 - App Switcher's icon row separates apps with open windows from apps without any. Thanks to @samanyudas.
 - Homebrew's Installed list shows the packages you installed by name, with an arrow that expands each one's installed dependencies. A dependency with an update, or one nothing needs any more, keeps its own row. Thanks to @PathGao.
+- The Screenshot Editor gives text its own font size, from 10 to 96 points, with smaller and larger buttons and a size menu. Line thickness now applies only to shapes, arrows and drawings.
+- Blur strength goes from 1 to 5 for the Screenshot Editor's pixelate areas and for each blur in the Screen Recorder editor. Level 3 keeps the current strength, and each area keeps its own level.
 - Maximize windows has an exception list in Window Layout settings. In the listed apps, such as games, emulators and video players, the green button keeps entering macOS full screen.
 - Port Manager marks listeners bound to every network interface with an orange globe, so ports other devices on the network may reach stand out from the ones only this Mac can use. Thanks to @shlok1806.
 
 ### Changed
 - The menu panel opens and closes with the native macOS popover animation. Thanks to @archieamas11.
+- Screenshot Editor tool shortcuts show on every tool in the rail, not only on the selected or hovered one.
 - Dynamic Island's playing music fits its cover and bars into narrower wings beside the camera, with the cover's corners following the island's own. Thanks to Pinea for the feedback.
 - Dynamic Island's connection notices show the status beside the device icon and the whole name on the other side, and pick the icon from the kind of device even after it is renamed. Text notices keep an even margin at both ends. Thanks to Pinea for the feedback.
 - Dock Preview and Dock clicks have their own Dock page in Settings, right after Switcher, instead of sitting under Switcher. App Switcher and Dock Preview each keep their own preview size, and both start at the size you had. Thanks to @PathGao.
