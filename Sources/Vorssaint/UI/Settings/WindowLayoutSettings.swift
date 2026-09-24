@@ -136,7 +136,6 @@ struct WindowLayoutSettings: View {
                             .font(.caption)
                             .foregroundStyle(.orange)
                     }
-                    Divider()
                     Toggle(WindowDirectionalStrings.localized(l10n.language).title,
                            isOn: $directionalEnabled)
                         .onChange(of: directionalEnabled) { _, _ in service.syncWithPreferences() }
