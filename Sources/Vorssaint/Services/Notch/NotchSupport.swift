@@ -779,6 +779,15 @@ enum NotchSupport {
         peeking || (expanded && openedByHover)
     }
 
+    /// Another app becoming active closes the open island like a click away.
+    /// One opened by hover stays while the pointer rests on it unclicked:
+    /// reaching the island can itself make the app beneath it active, such as
+    /// a full-screen app on a display without focus, and leaving closes it
+    /// anyway. A click inside may be what brought the other app forward.
+    static func closesOnActivation(openedByHover: Bool, clicked: Bool, pointerInside: Bool) -> Bool {
+        !openedByHover || clicked || !pointerInside
+    }
+
     static func routes(_ event: NotchEvent, in defaults: UserDefaults = .standard) -> Bool {
         guard isEnabled(in: defaults), defaults.bool(forKey: event.preferenceKey) else { return false }
         switch event {

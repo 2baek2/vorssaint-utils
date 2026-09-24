@@ -39,6 +39,7 @@ Clipboard History images open in the Screenshot Editor, the capture preview can 
 - The sound output shortcut no longer reports a failed switch when the only selected output is already playing. Thanks to @PathGao.
 - The radial menu asks for Accessibility based on your saved wheels, so a wheel with only apps and links no longer asks for it and a wheel bound to a mouse button is not missed. Thanks to @PathGao.
 - Bluetooth on sleep no longer queries the Bluetooth controller at every launch when no restore is owed. Thanks to @PathGao.
+- Dynamic Island stays open when you hover it from a full-screen app on a display without focus, instead of closing as soon as that app becomes active.
 - Clean URL removes Xiaohongshu's shareRedId and exSource from links, and switching them off in Settings takes effect. Thanks to @PathGao.
 - VoiceOver names the menu panel switches, including the Keep Awake switch, instead of reading an unnamed switch. Thanks to @PathGao.
 - Command Bar answers say Couldn’t copy when the clipboard refuses the value, instead of showing it as copied. Thanks to @PathGao.

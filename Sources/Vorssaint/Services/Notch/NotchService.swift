@@ -109,6 +109,8 @@ final class NotchService: ObservableObject {
     private var inside = false
     private var hoverState = NotchHoverState()
     private var openedByHover = false
+    /// A click inside the open island, which may be what brings another app forward.
+    private var clickedSinceOpening = false
     private var trackingMenu = false
     private var fileInteractionActive = false
     private var keepsWorkingSurface: Bool {
@@ -1668,7 +1670,11 @@ final class NotchService: ObservableObject {
         guard identifier != Bundle.main.bundleIdentifier, identifier != AssistiveKeyboard.bundleID else { return }
         panel?.resignKey()
         if expanded, modules.contains(.clipboard) { ClipboardHistoryService.shared.rememberPasteTarget() }
-        if expanded, !pinned, !keepsWorkingSurface, captureControls == nil { collapse() }
+        if expanded, !pinned, !keepsWorkingSurface, captureControls == nil,
+           NotchSupport.closesOnActivation(openedByHover: openedByHover, clicked: clickedSinceOpening,
+                                           pointerInside: windowHost?.containsHover(NSEvent.mouseLocation) == true) {
+            collapse()
+        }
     }
 
     private func observe(_ center: NotificationCenter, _ name: Notification.Name,
@@ -1707,6 +1713,7 @@ final class NotchService: ObservableObject {
 
     private func installEventMonitors() {
         guard eventMonitors.isEmpty else { return }
+        clickedSinceOpening = false
         let clicks: NSEvent.EventTypeMask = [.leftMouseDown, .rightMouseDown, .otherMouseDown]
         if let token = NSEvent.addGlobalMonitorForEvents(matching: clicks, handler: { [weak self] _ in
             guard let self, !self.keepsWorkingSurface,
@@ -1758,8 +1765,9 @@ final class NotchService: ObservableObject {
                 self.collapse()
                 return nil
             }
-            if clicks.contains(NSEvent.EventTypeMask(rawValue: 1 << event.type.rawValue)),
-               event.window !== self.panel, !self.keepsWorkingSurface,
+            let click = clicks.contains(NSEvent.EventTypeMask(rawValue: 1 << event.type.rawValue))
+            if click, event.window === self.panel { self.clickedSinceOpening = true }
+            if click, event.window !== self.panel, !self.keepsWorkingSurface,
                self.windowHost?.contains(NSEvent.mouseLocation) != true,
                (NSApp.delegate as? AppDelegate)?.isOverStatusItem(NSEvent.mouseLocation) != true,
                !AssistiveKeyboard.ownsCocoaPoint(NSEvent.mouseLocation) { self.collapse() }
